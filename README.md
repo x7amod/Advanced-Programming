@@ -17,16 +17,20 @@ Section 5 - Group 3
 1. Install SQL Server Management Studio 22 (SSMS):  
    https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms
 
-2. Open SSMS
-
-3. Connect using:
+3. Open SSMS
+   
+4. Connect using:
    - **Server name:** `(localdb)\MSSQLLocalDB`  
-   - **Authentication:** Windows Authentication  
-
-4. Open `SQL/01_schema.sql` in SSMS and execute it
-
-5. Change selected database (top-left dropdown) from `master` to `TrainingInstituteDB`
-
-6. Open and execute `SQL/02_seed.sql`
-
-7. Open `TrainingInstitute.sln` file to open the project in Visual Studio (make sure you are using Visual Studio 22)
+   - **Authentication:** Windows Authentication
+     
+5. Open `SQL/01_schema.sql` in SSMS.
+   
+6.  Edit Line 5 and 13; set the file location to anywhere you want (both of them must be in the same folder).
+   
+7.  then execute the file (Alt + x).
+   
+8. Change selected database (top-left dropdown) from `master` to `TrainingInstituteDB`
+    
+9. Open and execute `SQL/02_seed.sql`
+   
+10. Open `TrainingInstitute.sln` file to open the project in Visual Studio (make sure you are using Visual Studio 22)
