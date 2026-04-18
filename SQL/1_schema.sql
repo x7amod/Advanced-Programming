@@ -1,18 +1,8 @@
-CREATE DATABASE TrainingInstituteDB
-ON PRIMARY 
-(
-    NAME = TrainingInstituteDB_Data,
-    SIZE = 10MB,
-    MAXSIZE = UNLIMITED,
-    FILEGROWTH = 10%
-)
-LOG ON 
-(
-    NAME = TrainingInstituteDB_Log,
-    SIZE = 5MB,
-    MAXSIZE = 50MB,
-    FILEGROWTH = 5MB
-);
+IF DB_ID(N'TrainingInstituteDB') IS NULL
+    CREATE DATABASE TrainingInstituteDB;
+GO
+
+USE TrainingInstituteDB;
 GO
 CREATE TABLE Enrollment_Status (
                 enrollmentStatusID INT IDENTITY NOT NULL,
