@@ -12,9 +12,9 @@ Section 5 - Group 3
 
 ---
 
-## Database Setup
+## First Time Setup
 
-1. Install SQL Server Management Studio (SSMS) 22:  
+1. Install SQL Server Management Studio 22 (SSMS):  
    https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms
 
 2. Open SSMS
@@ -28,3 +28,5 @@ Section 5 - Group 3
 5. Change selected database (top-left dropdown) from `master` to `TrainingInstituteDB`
 
 6. Open and execute `SQL/02_seed.sql`
+
+7. Open `TrainingInstitute.sln` file to open the project in Visual Studio (make sure you are using Visual Studio 22)
