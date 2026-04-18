@@ -1,0 +1,488 @@
+================================================================================
+                    TRAINING & CERTIFICATION PLATFORM
+                    ENTITIES AND THEIR RELATIONSHIPS
+================================================================================
+
+================================================================================
+PART 1: ENTITIES AND THEIR PROPERTIES
+================================================================================
+
+1. USER (Base Entity)
+   - userId (PK)
+   - firstName
+   - lastName
+   - email
+   - password
+   - phone
+   - role (Trainee | Instructor | TrainingCoordinator)
+   - createdAt
+   - updatedAt
+   - isActive
+
+2. TRAINEE (extends User)
+   - traineeId (PK)
+   - userId (FK)
+   - dateOfBirth
+   - address
+   - emergencyContact
+   - outstandingBalance
+
+3. INSTRUCTOR (extends User)
+   - instructorId (PK)
+   - userId (FK)
+   - bio
+   - hireDate
+
+4. TRAINING_COORDINATOR (extends User)
+   - coordinatorId (PK)
+   - userId (FK)
+   - department
+
+5. CATEGORY
+   - categoryId (PK)
+   - name
+   - description
+   - parentCategoryId (FK, self-reference for subcategories)
+
+6. SUBJECT_AREA
+   - subjectAreaId (PK)
+   - name
+   - description
+
+7. INSTRUCTOR_EXPERTISE
+   - expertiseId (PK)
+   - instructorId (FK)
+   - subjectAreaId (FK)
+   - proficiencyLevel
+
+8. INSTRUCTOR_AVAILABILITY
+   - availabilityId (PK)
+   - instructorId (FK)
+   - dayOfWeek
+   - startTime
+   - endTime
+   - effectiveFrom
+   - effectiveTo
+   - isRecurring
+
+9. COURSE
+   - courseId (PK)
+   - courseCode
+   - title
+   - description
+   - categoryId (FK)
+   - subjectAreaId (FK)
+   - durationHours
+   - maxCapacity
+   - enrollmentFee
+   - prerequisiteCourseId (FK, self-reference)
+   - equipmentRequirements
+   - isActive
+   - createdAt
+   - updatedAt
+
+10. CLASSROOM
+    - classroomId (PK)
+    - name
+    - location
+    - building
+    - floor
+    - capacity
+    - isActive
+
+11. CLASSROOM_EQUIPMENT
+    - equipmentId (PK)
+    - classroomId (FK)
+    - equipmentType (Projector | LabComputers | Whiteboard | VideoConference | etc.)
+    - quantity
+    - description
+
+12. COURSE_SESSION (Scheduled Instance of a Course)
+    - sessionId (PK)
+    - courseId (FK)
+    - instructorId (FK)
+    - classroomId (FK)
+    - coordinatorId (FK) - who scheduled it
+    - sessionDate
+    - startTime
+    - endTime
+    - currentEnrollment
+    - maxCapacity
+    - status (Scheduled | InProgress | Completed | Cancelled)
+    - createdAt
+    - updatedAt
+
+13. ENROLLMENT
+    - enrollmentId (PK)
+    - traineeId (FK)
+    - sessionId (FK)
+    - enrollmentDate
+    - status (Enrolled | Confirmed | Attending | Completed | Dropped)
+    - statusChangedAt
+    - dropReason
+    - createdAt
+    - updatedAt
+
+14. ASSESSMENT
+    - assessmentId (PK)
+    - enrollmentId (FK)
+    - instructorId (FK) - instructor who recorded it
+    - result (Pass | Fail)
+    - remarks
+    - assessmentDate
+    - createdAt
+
+15. CERTIFICATION_TRACK
+    - certificationId (PK)
+    - name
+    - description
+    - validityPeriod (in months, if certificate expires)
+    - isActive
+    - createdAt
+    - updatedAt
+
+16. CERTIFICATION_REQUIRED_COURSE
+    - certReqCourseId (PK)
+    - certificationId (FK)
+    - courseId (FK)
+    - sequenceOrder (optional ordering)
+    - isMandatory
+
+17. TRAINEE_CERTIFICATION
+    - traineeCertId (PK)
+    - traineeId (FK)
+    - certificationId (FK)
+    - status (InProgress | Eligible | Certified)
+    - progressPercentage
+    - eligibleDate
+    - certificateIssuedDate
+    - certificateNumber
+    - expiryDate
+
+18. TRAINEE_COURSE_COMPLETION
+    - completionId (PK)
+    - traineeId (FK)
+    - courseId (FK)
+    - sessionId (FK)
+    - completionDate
+    - result (Pass | Fail)
+
+19. PAYMENT_RECORD
+    - paymentRecordId (PK)
+    - traineeId (FK)
+    - enrollmentId (FK)
+    - coordinatorId (FK) - who recorded it
+    - totalAmount (enrollment fee)
+    - paidAmount (cumulative total paid)
+    - balanceDue (calculated: totalAmount - paidAmount)
+    - dueDate
+    - status (Pending | PartiallyPaid | Paid | Overdue)
+    - issuedDate
+    - createdAt
+    - updatedAt
+
+20. PAYMENT_TRANSACTION
+    - transactionId (PK)
+    - paymentRecordId (FK)
+    - amount
+    - paymentMethod (Cash | Card | BankTransfer | etc.)
+    - paymentDate
+    - receiptNumber
+    - recordedBy (coordinatorId FK)
+    - notes
+    - createdAt
+
+21. WAITLIST
+    - waitlistId (PK)
+    - traineeId (FK)
+    - sessionId (FK)
+    - position
+    - addedAt
+    - status (Waiting | Offered | Accepted | Expired)
+    - expiresAt
+
+22. NOTIFICATION
+    - notificationId (PK)
+    - recipientUserId (FK)
+    - title
+    - message
+    - type (Enrollment | Schedule | Payment | Assessment | Certification | Reminder | General)
+    - relatedEntityType
+    - relatedEntityId
+    - isRead
+    - createdAt
+    - readAt
+
+
+
+
+================================================================================
+PART 2: ENTITY RELATIONSHIPS WITH MULTIPLICITY AND DIRECTION
+================================================================================
+
+Note: Arrow direction shows navigation/dependency direction
+      (1) = exactly one, (0..1) = zero or one, (*) = many, (1..*) = one or more
+
+
+================================================================================
+DESIGN DECISIONS - WHY CERTAIN ENTITIES EXIST
+================================================================================
+
+📋 WHY SEPARATE ASSESSMENT ENTITY?
+────────────────────────────────────────────────────────────────────────────
+Instead of storing pass/fail directly on the Enrollment entity, we use a 
+separate Assessment entity for these reasons:
+
+1. TEMPORAL DECOUPLING: Enrollment happens at registration time, but 
+   assessment occurs after the course session ends. They are different 
+   business events occurring at different times.
+
+2. AUDIT TRAIL: Assessment records WHO (instructor) evaluated WHEN and with 
+   what result. This provides accountability and traceability for academic 
+   records.
+
+3. NULLABLE vs REQUIRED: Not all enrollments have assessments (student may 
+   drop before completion). A separate entity makes this optional relationship 
+   explicit rather than having nullable fields on Enrollment.
+
+4. HISTORICAL DATA: If assessment methods change or re-evaluation is needed, 
+   separate records preserve the history without complicating the enrollment 
+   lifecycle.
+
+5. INSTRUCTOR ACCOUNTABILITY: Links assessment directly to the instructor who 
+   evaluated the trainee, important for quality control and dispute resolution.
+
+6. EXTENSIBILITY: Future enhancements (graded assessments, multiple assessment 
+   types, rubrics, score breakdowns) are easier with a dedicated entity.
+
+
+⏳ WHY WAITLIST SUPPORT?
+────────────────────────────────────────────────────────────────────────────
+Waitlist is essential for managing course demand and maximizing revenue:
+
+1. CAPACITY MANAGEMENT: When a session reaches maxCapacity, interested trainees 
+   can join a waitlist rather than being turned away completely.
+
+2. AUTOMATIC BACKFILL: If an enrolled trainee drops or cancels, the system can 
+   automatically offer the spot to the next person on the waitlist (by position).
+
+3. BUSINESS CONTINUITY: Prevents lost revenue from cancellations. Instead of 
+   empty seats, waitlisted trainees can be promoted.
+
+4. DEMAND FORECASTING: Waitlist size indicates demand, helping coordinators 
+   decide whether to schedule additional sessions for popular courses.
+
+5. FAIR ALLOCATION: Position-based ordering ensures first-come, first-served 
+   fairness. Status tracking (Waiting → Offered → Accepted/Expired) manages 
+   the promotion workflow.
+
+6. TIME-BOUND OFFERS: expiresAt allows offering a spot with a deadline. If not 
+   accepted in time, the offer moves to the next person automatically.
+
+7. TRAINEE EXPERIENCE: Better UX than "sorry, course is full" - trainees have 
+   hope and get notified when spots open up.
+
+
+💰 WHY UNIFIED PAYMENT TRACKING?
+────────────────────────────────────────────────────────────────────────────
+We use PaymentRecord (master) + PaymentTransaction (detail) pattern:
+
+1. PAYMENT_RECORD: One per enrollment, tracks overall billing status (total due, 
+   total paid, balance, status). This is the "account" view.
+
+2. PAYMENT_TRANSACTION: Multiple transactions per record, captures each individual 
+   payment event (partial payments over time, different payment methods).
+
+3. FLEXIBILITY: Trainees can pay in installments. Each payment is logged as a 
+   transaction, and paidAmount is updated cumulatively on the record.
+
+4. AUDIT TRAIL: Every payment transaction includes date, method, receipt number, 
+   and who recorded it (coordinator).
+
+5. OVERDUE TRACKING: The PaymentRecord status automatically reflects whether 
+   payment is overdue based on dueDate and balanceDue.
+
+
+================================================================================
+
+--------------------------------------------------------------------------------
+USER RELATIONSHIPS
+--------------------------------------------------------------------------------
+1.  User (1) ──────────────────────────► Trainee (0..1)
+    "A User may be a Trainee"
+
+2.  User (1) ──────────────────────────► Instructor (0..1)
+    "A User may be an Instructor"
+
+3.  User (1) ──────────────────────────► TrainingCoordinator (0..1)
+    "A User may be a Training Coordinator"
+
+4.  User (1) ◄────────────────────────── Notification (*)
+    "A User receives many Notifications"
+
+--------------------------------------------------------------------------------
+INSTRUCTOR RELATIONSHIPS
+--------------------------------------------------------------------------------
+5.  Instructor (1) ◄──────────────────── InstructorExpertise (*)
+    "An Instructor has many Expertise areas"
+
+6.  Instructor (1) ◄──────────────────── InstructorAvailability (*)
+    "An Instructor has many Availability slots"
+
+7.  Instructor (1) ◄──────────────────── CourseSession (*)
+    "An Instructor teaches many Course Sessions"
+
+8.  Instructor (1) ◄──────────────────── Assessment (*)
+    "An Instructor records many Assessments"
+
+--------------------------------------------------------------------------------
+CATEGORY & SUBJECT RELATIONSHIPS
+--------------------------------------------------------------------------------
+9.  Category (0..1) ◄─────────────────── Category (*)
+    "A Category may have many Subcategories (self-reference)"
+
+10. Category (1) ◄────────────────────── Course (*)
+    "A Category contains many Courses"
+
+11. SubjectArea (1) ◄─────────────────── Course (*)
+    "A Subject Area covers many Courses"
+
+12. SubjectArea (1) ◄─────────────────── InstructorExpertise (*)
+    "A Subject Area has many Instructor Expertises"
+
+--------------------------------------------------------------------------------
+COURSE RELATIONSHIPS
+--------------------------------------------------------------------------------
+13. Course (0..1) ◄───────────────────── Course (*)
+    "A Course may be a Prerequisite for many other Courses (self-reference)"
+
+14. Course (1) ◄──────────────────────── CourseSession (*)
+    "A Course has many scheduled Sessions"
+
+15. Course (1) ◄──────────────────────── CertificationRequiredCourse (*)
+    "A Course belongs to many Certification Tracks"
+
+16. Course (1) ◄──────────────────────── TraineeCourseCompletion (*)
+    "A Course has many Completion records"
+
+--------------------------------------------------------------------------------
+CLASSROOM RELATIONSHIPS
+--------------------------------------------------------------------------------
+17. Classroom (1) ◄───────────────────── ClassroomEquipment (*)
+    "A Classroom has many Equipment items"
+
+18. Classroom (1) ◄───────────────────── CourseSession (*)
+    "A Classroom hosts many Course Sessions"
+
+--------------------------------------------------------------------------------
+COURSE SESSION RELATIONSHIPS
+--------------------------------------------------------------------------------
+19. CourseSession (1) ◄───────────────── Enrollment (*)
+    "A Course Session has many Enrollments"
+
+20. CourseSession (1) ◄───────────────── Waitlist (*)
+    "A Course Session has many Waitlist entries"
+
+21. TrainingCoordinator (1) ◄─────────── CourseSession (*)
+    "A Training Coordinator schedules many Sessions"
+
+--------------------------------------------------------------------------------
+TRAINEE & ENROLLMENT RELATIONSHIPS
+--------------------------------------------------------------------------------
+22. Trainee (1) ◄─────────────────────── Enrollment (*)
+    "A Trainee has many Enrollments"
+
+23. Trainee (1) ◄─────────────────────── PaymentRecord (*)
+    "A Trainee has many Payment Records"
+
+24. Trainee (1) ◄─────────────────────── TraineeCertification (*)
+    "A Trainee pursues many Certifications"
+
+25. Trainee (1) ◄─────────────────────── TraineeCourseCompletion (*)
+    "A Trainee has many Course Completions"
+
+26. Trainee (1) ◄─────────────────────── Waitlist (*)
+    "A Trainee may be on many Waitlists"
+
+--------------------------------------------------------------------------------
+ENROLLMENT RELATIONSHIPS
+--------------------------------------------------------------------------------
+27. Enrollment (1) ◄──────────────────── Assessment (0..1)
+    "An Enrollment has one Assessment result"
+
+28. Enrollment (1) ◄──────────────────── PaymentRecord (1)
+    "An Enrollment has one Payment Record"
+
+--------------------------------------------------------------------------------
+CERTIFICATION RELATIONSHIPS
+--------------------------------------------------------------------------------
+29. CertificationTrack (1) ◄──────────── CertificationRequiredCourse (*)
+    "A Certification Track requires many Courses"
+
+30. CertificationTrack (1) ◄──────────── TraineeCertification (*)
+    "A Certification Track is pursued by many Trainees"
+
+--------------------------------------------------------------------------------
+PAYMENT RELATIONSHIPS
+--------------------------------------------------------------------------------
+31. PaymentRecord (1) ◄───────────────── PaymentTransaction (*)
+    "A Payment Record has many Payment Transactions"
+
+32. TrainingCoordinator (1) ◄─────────── PaymentTransaction (*)
+    "A Training Coordinator records many Payment Transactions"
+
+33. TrainingCoordinator (1) ◄─────────── PaymentRecord (*)
+    "A Training Coordinator manages many Payment Records"
+
+
+================================================================================
+RELATIONSHIP SUMMARY DIAGRAM (Text-Based ERD)
+================================================================================
+
+                            ┌─────────────┐
+                            │    USER     │
+                            └──────┬──────┘
+                     ┌─────────────┼─────────────┐
+                     ▼             ▼             ▼
+              ┌──────────┐  ┌───────────┐  ┌─────────────────┐
+              │ TRAINEE  │  │INSTRUCTOR │  │TRAINING_COORD   │
+              └────┬─────┘  └─────┬─────┘  └────────┬────────┘
+                   │              │                 │
+         ┌─────────┼──────┐      │                 │
+         ▼         ▼      ▼      │                 ▼
+    ┌────────┐ ┌───────┐ ┌────────────┐      ┌───────────┐
+    │PAYMENT │ │INVOICE│ │ENROLLMENT  │◄─────│  SESSION  │
+    └────────┘ └───────┘ └─────┬──────┘      └─────┬─────┘
+                               │                   │
+                               ▼             ┌─────┴─────┐
+                         ┌──────────┐        ▼           ▼
+                         │ASSESSMENT│   ┌────────┐  ┌─────────┐
+                         └──────────┘   │ COURSE │  │CLASSROOM│
+                                        └───┬────┘  └────┬────┘
+                   ┌────────────────────────┤            │
+                   ▼                        ▼            ▼
+            ┌─────────────┐           ┌──────────┐ ┌───────────┐
+            │CERTIFICATION│           │ CATEGORY │ │ EQUIPMENT │
+            │   TRACK     │           └──────────┘ └───────────┘
+            └──────┬──────┘
+                   │
+                   ▼
+         ┌─────────────────┐
+         │TRAINEE_CERTIFIC │
+         └─────────────────┘
+
+
+================================================================================
+MULTIPLICITY LEGEND
+================================================================================
+    1       = Exactly one (mandatory)
+    0..1    = Zero or one (optional)
+    *       = Zero or many
+    1..*    = One or many (at least one)
+    
+    ────►   = Direction of relationship/navigation
+    ◄────   = "Has many" or "belongs to" direction
+
+================================================================================
+END OF DOCUMENT
+================================================================================
