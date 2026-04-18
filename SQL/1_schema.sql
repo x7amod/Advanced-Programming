@@ -2,7 +2,7 @@ CREATE DATABASE TrainingInstituteDB
 ON PRIMARY 
 (
     NAME = TrainingInstituteDB_Data,
-    FILENAME = 'C:\Users\Ahmad\TrainingInstituteDB.mdf', 
+    FILENAME = 'C:\Users\Ahmad\TrainingInstituteDB.mdf', /* CHANGE THIS LOCATION */
     SIZE = 10MB,
     MAXSIZE = UNLIMITED,
     FILEGROWTH = 10%
@@ -10,7 +10,7 @@ ON PRIMARY
 LOG ON 
 (
     NAME = TrainingInstituteDB_Log,
-    FILENAME = 'C:\Users\Ahmad\TrainingInstituteDB_log.ldf', 
+    FILENAME = 'C:\Users\Ahmad\TrainingInstituteDB_log.ldf', /* CHANGE THIS LOCATION */
     SIZE = 5MB,
     MAXSIZE = 50MB,
     FILEGROWTH = 5MB
