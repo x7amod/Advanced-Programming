@@ -23,14 +23,10 @@ Section 5 - Group 3
    - **Server name:** `(localdb)\MSSQLLocalDB`  
    - **Authentication:** Windows Authentication
      
-5. Open `SQL/01_schema.sql` in SSMS.
+5. Open `SQL/01_schema.sql` in SSMS, then execute the file (Alt + x).
    
-6.  Edit Line 5 and 13; set the file location to anywhere you want (both of them must be in the same folder).
-   
-7.  then execute the file (Alt + x).
-   
-8. Change selected database (top-left dropdown) from `master` to `TrainingInstituteDB`
+6. Change selected database (top-left dropdown) from `master` to `TrainingInstituteDB`
     
-9. Open and execute `SQL/02_seed.sql`
+7. Open and execute `SQL/02_seed.sql`
    
-10. Open `TrainingInstitute.sln` file to open the project in Visual Studio (make sure you are using Visual Studio 22)
+8. Open `TrainingInstitute.sln` file to open the project in Visual Studio (make sure you are using Visual Studio 22)
