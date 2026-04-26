@@ -803,7 +803,7 @@
   <table id="TAB234" populated="true" UUID="e796fca8-aeb0-4b54-a522-82765058f497" name="Course_Session_Status" objectType="TABLE" physicalName="Course_Session_Status" >
    <remarks></remarks>
    <folder id="FOLTAB2341" populated="true" name="Columns" physicalName="Columns" type="1">
-    <column id="COL235" populated="true" UUID="42a4c961-05e1-4910-b956-e47dfbc1bb98" autoIncrement="true" autoIncrementSequenceName="Course_Session_Status_StatusID_seq" defaultValue="" name="StatusID" nullable="0" physicalName="StatusID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL235" populated="true" UUID="42a4c961-05e1-4910-b956-e47dfbc1bb98" autoIncrement="true" autoIncrementSequenceName="Course_Session_Status_StatusID_seq_1" defaultValue="" name="StatusID" nullable="0" physicalName="StatusID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
     <column id="COL236" populated="true" UUID="f3176843-20dd-4261-8702-87d9ba6bac76" autoIncrement="false" autoIncrementSequenceName="Course_Session_Status_status_seq" defaultValue="" name="status" nullable="0" physicalName="status" precision="20" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="-9" userDefinedTypeUUID="087a20b8-b387-474a-b9c8-55eb87aff017" >
@@ -823,7 +823,7 @@
   <table id="TAB239" populated="true" UUID="ad12aaa7-1bef-4f1a-aeb7-8a845c492efe" name="Certification_Status" objectType="TABLE" physicalName="Certification_Status" >
    <remarks></remarks>
    <folder id="FOLTAB2391" populated="true" name="Columns" physicalName="Columns" type="1">
-    <column id="COL240" populated="true" UUID="091cf879-3de7-4ed8-8fa4-bbcff353bfc1" autoIncrement="true" autoIncrementSequenceName="Certification_Status_statusID_seq" defaultValue="" name="statusID" nullable="0" physicalName="statusID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL240" populated="true" UUID="091cf879-3de7-4ed8-8fa4-bbcff353bfc1" autoIncrement="true" autoIncrementSequenceName="Certification_Status_statusID_seq_1" defaultValue="" name="statusID" nullable="0" physicalName="statusID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
     <column id="COL241" populated="true" UUID="622bbe0f-4e89-4351-9887-30b0c272cca7" autoIncrement="false" autoIncrementSequenceName="Certification_Status_status_seq" defaultValue="" name="status" nullable="0" physicalName="status" precision="20" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="-9" userDefinedTypeUUID="087a20b8-b387-474a-b9c8-55eb87aff017" >
@@ -843,7 +843,7 @@
   <table id="TAB244" populated="true" UUID="686fa52e-e23e-4ffe-b991-bc5a087f7d7a" name="Waitlist_Status" objectType="TABLE" physicalName="Waitlist_Status" >
    <remarks></remarks>
    <folder id="FOLTAB2441" populated="true" name="Columns" physicalName="Columns" type="1">
-    <column id="COL245" populated="true" UUID="977b49c4-0a1f-4f2c-9b99-1e0071fed313" autoIncrement="true" autoIncrementSequenceName="Waitlist_Status_statusID_seq" defaultValue="" name="statusID" nullable="0" physicalName="statusID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL245" populated="true" UUID="977b49c4-0a1f-4f2c-9b99-1e0071fed313" autoIncrement="true" autoIncrementSequenceName="Waitlist_Status_statusID_seq_1" defaultValue="" name="statusID" nullable="0" physicalName="statusID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
     <column id="COL246" populated="true" UUID="8b1fea74-20b8-4282-acd0-cbe8db75d1e0" autoIncrement="false" autoIncrementSequenceName="Waitlist_Status_status_seq" defaultValue="" name="status" nullable="0" physicalName="status" precision="30" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="-9" userDefinedTypeUUID="087a20b8-b387-474a-b9c8-55eb87aff017" >
@@ -962,10 +962,10 @@
    </relationship>
   </relationships>
  </target-database>
- <ddl-generator type="ca.sqlpower.architect.ddl.SQLServer2005DDLGenerator" allow-connection="true" target-catalog="trainingInsDB"> </ddl-generator>
+ <ddl-generator type="ca.sqlpower.architect.ddl.SQLServer2005DDLGenerator" allow-connection="false" target-catalog="trainingInsDB"> </ddl-generator>
  <liquibase-settings useSeparateChangeSets="false" generateId="false" idStart="1"/>
  <create-kettle-job-settings filePath="" jobName="" schemaName="" kettleJoinType="0" savingToFile="true" />
- <play-pen zoom="0.9532630660946259" viewportX="52" viewportY="0" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
+ <play-pen zoom="0.9532630660946259" viewportX="54" viewportY="0" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
   <table-pane table-ref="TAB1" x="1215" y="422" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
   <table-pane table-ref="TAB9" x="651" y="1088" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
   <table-pane table-ref="TAB16" x="571" y="332" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>

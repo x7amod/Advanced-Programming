@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-public partial class TrainingInstituteDBContext : DbContext
+public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser>
 {
     public TrainingInstituteDBContext()
     {
@@ -72,6 +74,7 @@ public partial class TrainingInstituteDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Assessment>(entity =>
         {
             entity.HasKey(e => e.AssessmentId).HasName("assessmentID");
