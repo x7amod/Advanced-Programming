@@ -1,29 +1,32 @@
-CREATE DATABASE TrainingInstituteDB
-ON PRIMARY 
-(
-    NAME = TrainingInstituteDB_Data,
-    SIZE = 10MB,
-    MAXSIZE = UNLIMITED,
-    FILEGROWTH = 10%
-)
-LOG ON 
-(
-    NAME = TrainingInstituteDB_Log,
-    SIZE = 5MB,
-    MAXSIZE = 50MB,
-    FILEGROWTH = 5MB
-);
+IF DB_ID(N'TrainingInstituteDB') IS NULL
+    CREATE DATABASE TrainingInstituteDB;
 GO
+
+USE TrainingInstituteDB;
+GO
+
+CREATE TABLE Waitlist_Status (
+                statusID INT IDENTITY NOT NULL,
+                status NVARCHAR(30) NOT NULL,
+                CONSTRAINT Waitlist_Status_pk PRIMARY KEY (statusID)
+)
+
+CREATE TABLE Certification_Status (
+                statusID INT IDENTITY NOT NULL,
+                status NVARCHAR(20) NOT NULL,
+                CONSTRAINT Certification_Status_pk PRIMARY KEY (statusID)
+)
+
+CREATE TABLE Course_Session_Status (
+                StatusID INT IDENTITY NOT NULL,
+                status NVARCHAR(20) NOT NULL,
+                CONSTRAINT Course_Session_Status_pk PRIMARY KEY (StatusID)
+)
+
 CREATE TABLE Enrollment_Status (
                 enrollmentStatusID INT IDENTITY NOT NULL,
                 status NVARCHAR(30) NOT NULL,
                 CONSTRAINT Enrollment_Status_pk PRIMARY KEY (enrollmentStatusID)
-)
-
-CREATE TABLE User_Role (
-                roleID INT IDENTITY NOT NULL,
-                roleName NVARCHAR(20) NOT NULL,
-                CONSTRAINT User_Role_pk PRIMARY KEY (roleID)
 )
 
 CREATE TABLE Payment_Status (
@@ -32,15 +35,28 @@ CREATE TABLE Payment_Status (
                 CONSTRAINT Payment_Status_pk PRIMARY KEY (statusID)
 )
 
+CREATE TABLE Notification (
+                notificationID INT IDENTITY NOT NULL,
+                userID NVARCHAR(450) NOT NULL,
+                title NVARCHAR(150) NOT NULL,
+                message NVARCHAR(1000) NOT NULL,
+                type NVARCHAR(50) NOT NULL,
+                relatedEntityType NVARCHAR(50),
+                isRead BIT DEFAULT 0 NOT NULL,
+                createdAt DATETIME DEFAULT GETDATE() NOT NULL,
+                readAt DATETIME,
+                CONSTRAINT notificationID PRIMARY KEY (notificationID)
+)
+
 CREATE TABLE Certification_Track (
-                certificationID INT IDENTITY NOT NULL,
+                certificationTrackID INT IDENTITY NOT NULL,
                 name NVARCHAR(150) NOT NULL,
                 description NVARCHAR(1000),
                 validityPeriod INT,
                 isActive BIT DEFAULT 1 NOT NULL,
                 createdAt DATETIME DEFAULT GETDATE() NOT NULL,
                 updatedAt DATETIME NOT NULL,
-                CONSTRAINT certificationID PRIMARY KEY (certificationID)
+                CONSTRAINT certificationID PRIMARY KEY (certificationTrackID)
 )
 
 CREATE TABLE Classroom (
@@ -99,53 +115,26 @@ CREATE TABLE Course (
 CREATE TABLE Certification_Required_Course (
                 ID INT IDENTITY NOT NULL,
                 courseID INT NOT NULL,
-                certificationID INT NOT NULL,
+                certificationTrackID INT NOT NULL,
                 sequenceOrder INT,
                 isMandatory BIT DEFAULT 1 NOT NULL,
                 CONSTRAINT certReqCourseID PRIMARY KEY (ID)
 )
 CREATE UNIQUE  NONCLUSTERED INDEX Certification_Required_Course_unique_comb
  ON Certification_Required_Course
- ( courseID, certificationID )
+ ( courseID, certificationTrackID )
 
-
-CREATE TABLE AppUser (
-                userID INT IDENTITY NOT NULL,
-                roleID INT NOT NULL,
-                firstName NVARCHAR(25) NOT NULL,
-                lastName NVARCHAR(25) NOT NULL,
-                email NVARCHAR(100) NOT NULL,
-                password NVARCHAR(60),
-                phone NVARCHAR(15) NOT NULL,
-                createdAt DATETIME DEFAULT GETDATE() NOT NULL,
-                updatedAt DATETIME NOT NULL,
-                isActive BIT DEFAULT 1 NOT NULL,
-                CONSTRAINT userID PRIMARY KEY (userID)
-)
-
-CREATE TABLE Notification (
-                notificationID INT IDENTITY NOT NULL,
-                userID INT NOT NULL,
-                title NVARCHAR(150) NOT NULL,
-                message NVARCHAR(1000) NOT NULL,
-                type NVARCHAR(50) NOT NULL,
-                relatedEntityType NVARCHAR(50),
-                isRead BIT DEFAULT 0 NOT NULL,
-                createdAt DATETIME DEFAULT GETDATE() NOT NULL,
-                readAt DATETIME,
-                CONSTRAINT notificationID PRIMARY KEY (notificationID)
-)
 
 CREATE TABLE Coordinator (
                 coordinatorID INT IDENTITY NOT NULL,
-                userID INT NOT NULL,
+                userID NVARCHAR(450) NOT NULL,
                 department NVARCHAR(100) NOT NULL,
                 CONSTRAINT coordinatorID PRIMARY KEY (coordinatorID)
 )
 
 CREATE TABLE Instructor (
                 instructorID INT IDENTITY NOT NULL,
-                userID INT NOT NULL,
+                userID NVARCHAR(450) NOT NULL,
                 hireDate DATETIME NOT NULL,
                 bio NVARCHAR(500),
                 CONSTRAINT instructorID PRIMARY KEY (instructorID)
@@ -157,12 +146,12 @@ CREATE TABLE Course_Session (
                 classroomID INT NOT NULL,
                 courseID INT NOT NULL,
                 instructorID INT NOT NULL,
+                StatusID INT NOT NULL,
                 sessionDate DATETIME NOT NULL,
                 startTime DATETIME NOT NULL,
                 endTime DATETIME NOT NULL,
                 currentEnrollment INT DEFAULT 0 NOT NULL,
                 maxCapacity INT NOT NULL,
-                status NVARCHAR(20) NOT NULL,
                 createdAt DATETIME DEFAULT GETDATE() NOT NULL,
                 updatedAt DATETIME NOT NULL,
                 CONSTRAINT sessionID PRIMARY KEY (sessionID)
@@ -184,11 +173,11 @@ CREATE TABLE Instructor_Availability (
 )
 
 CREATE TABLE Instructor_Expertise (
-                ID INT IDENTITY NOT NULL,
+                expertiseID INT IDENTITY NOT NULL,
                 instructorID INT NOT NULL,
                 subjectAreaID INT NOT NULL,
                 proficiencyLevel NVARCHAR(20) NOT NULL,
-                CONSTRAINT ID PRIMARY KEY (ID)
+                CONSTRAINT ID PRIMARY KEY (expertiseID)
 )
 CREATE UNIQUE  NONCLUSTERED INDEX Instructor_Expertise_unique_comb
  ON Instructor_Expertise
@@ -197,7 +186,7 @@ CREATE UNIQUE  NONCLUSTERED INDEX Instructor_Expertise_unique_comb
 
 CREATE TABLE Trainee (
                 traineeID INT IDENTITY NOT NULL,
-                userID INT NOT NULL,
+                userID NVARCHAR(450) NOT NULL,
                 dateOfBirth DATETIME NOT NULL,
                 address NVARCHAR(50) NOT NULL,
                 emergencyContact NVARCHAR(50) NOT NULL,
@@ -208,6 +197,7 @@ CREATE TABLE Waitlist (
                 waitlistID INT IDENTITY NOT NULL,
                 sessionID INT NOT NULL,
                 traineeID INT NOT NULL,
+                statusID INT NOT NULL,
                 position INT NOT NULL,
                 addedAt DATETIME DEFAULT GETDATE() NOT NULL,
                 status NVARCHAR(20) NOT NULL,
@@ -235,8 +225,8 @@ CREATE TABLE Trainee_Course_Completion (
 CREATE TABLE Trainee_Certification (
                 traineeCertID INT IDENTITY NOT NULL,
                 traineeID INT NOT NULL,
-                certificationID INT NOT NULL,
-                status NVARCHAR(20) NOT NULL,
+                certificationTrackID INT NOT NULL,
+                statusID INT NOT NULL,
                 eligibleDate DATETIME,
                 certificateIssuedDate DATETIME,
                 certificateNumber NVARCHAR(50),
@@ -245,7 +235,7 @@ CREATE TABLE Trainee_Certification (
 )
 CREATE UNIQUE  NONCLUSTERED INDEX Trainee_Certification_unique_comb
  ON Trainee_Certification
- ( traineeID, certificationID )
+ ( traineeID, certificationTrackID )
 
 
 CREATE TABLE Enrollment (
@@ -297,15 +287,27 @@ CREATE TABLE Assessment (
                 CONSTRAINT assessmentID PRIMARY KEY (assessmentID)
 )
 
-ALTER TABLE Enrollment ADD CONSTRAINT Enrollment_Status_Enrollment_fk
-FOREIGN KEY (enrollmentStatusID)
-REFERENCES Enrollment_Status (enrollmentStatusID)
+ALTER TABLE Waitlist ADD CONSTRAINT Waitlist_Status_Waitlist_fk
+FOREIGN KEY (statusID)
+REFERENCES Waitlist_Status (statusID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE AppUser ADD CONSTRAINT User_Role_AppUser_fk
-FOREIGN KEY (roleID)
-REFERENCES User_Role (roleID)
+ALTER TABLE Trainee_Certification ADD CONSTRAINT Certification_Status_Trainee_Certification_fk
+FOREIGN KEY (statusID)
+REFERENCES Certification_Status (statusID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+
+ALTER TABLE Course_Session ADD CONSTRAINT Course_Session_Status_Course_Session_fk
+FOREIGN KEY (StatusID)
+REFERENCES Course_Session_Status (StatusID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+
+ALTER TABLE Enrollment ADD CONSTRAINT Enrollment_Status_Enrollment_fk
+FOREIGN KEY (enrollmentStatusID)
+REFERENCES Enrollment_Status (enrollmentStatusID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
@@ -316,14 +318,14 @@ ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
 ALTER TABLE Certification_Required_Course ADD CONSTRAINT Certification_Track_Certification_Required_Course_fk
-FOREIGN KEY (certificationID)
-REFERENCES Certification_Track (certificationID)
+FOREIGN KEY (certificationTrackID)
+REFERENCES Certification_Track (certificationTrackID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
 ALTER TABLE Trainee_Certification ADD CONSTRAINT Certification_Track_Trainee_Certification_fk
-FOREIGN KEY (certificationID)
-REFERENCES Certification_Track (certificationID)
+FOREIGN KEY (certificationTrackID)
+REFERENCES Certification_Track (certificationTrackID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
@@ -384,30 +386,6 @@ ON UPDATE NO ACTION
 ALTER TABLE Course ADD CONSTRAINT Course_Course_fk
 FOREIGN KEY (prerequisiteCourseID)
 REFERENCES Course (courseID)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-
-ALTER TABLE Trainee ADD CONSTRAINT User_Trainee_fk
-FOREIGN KEY (userID)
-REFERENCES AppUser (userID)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-
-ALTER TABLE Instructor ADD CONSTRAINT User_Instructor_fk
-FOREIGN KEY (userID)
-REFERENCES AppUser (userID)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-
-ALTER TABLE Coordinator ADD CONSTRAINT User_Coordinator_fk
-FOREIGN KEY (userID)
-REFERENCES AppUser (userID)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-
-ALTER TABLE Notification ADD CONSTRAINT User_Notification_fk
-FOREIGN KEY (userID)
-REFERENCES AppUser (userID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
