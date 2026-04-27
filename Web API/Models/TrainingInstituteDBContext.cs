@@ -146,6 +146,19 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
         modelBuilder.Entity<Coordinator>(entity =>
         {
             entity.HasKey(e => e.CoordinatorId).HasName("coordinatorID");
+
+            entity.Property(e => e.UserId)
+                .IsRequired()
+                .HasMaxLength(450)
+                .HasColumnType("nvarchar(450)");
+
+            entity.HasIndex(e => e.UserId)
+                .IsUnique();
+
+            entity.HasOne<IdentityUser>()
+                .WithOne()
+                .HasForeignKey<Coordinator>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Course>(entity =>
@@ -227,6 +240,19 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
         modelBuilder.Entity<Instructor>(entity =>
         {
             entity.HasKey(e => e.InstructorId).HasName("instructorID");
+
+            entity.Property(e => e.UserId)
+                .IsRequired()
+                .HasMaxLength(450)
+                .HasColumnType("nvarchar(450)");
+
+            entity.HasIndex(e => e.UserId)
+                .IsUnique();
+
+            entity.HasOne<IdentityUser>()
+                .WithOne()
+                .HasForeignKey<Instructor>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<InstructorAvailability>(entity =>
@@ -259,6 +285,16 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
             entity.HasKey(e => e.NotificationId).HasName("notificationID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.Property(e => e.UserId)
+                .IsRequired()
+                .HasMaxLength(450)
+                .HasColumnType("nvarchar(450)");
+
+            entity.HasOne<IdentityUser>()
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PaymentRecord>(entity =>
@@ -311,6 +347,19 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
         modelBuilder.Entity<Trainee>(entity =>
         {
             entity.HasKey(e => e.TraineeId).HasName("traineeID");
+
+            entity.Property(e => e.UserId)
+                .IsRequired()
+                .HasMaxLength(450)
+                .HasColumnType("nvarchar(450)");
+
+            entity.HasIndex(e => e.UserId)
+                .IsUnique();
+
+            entity.HasOne<IdentityUser>()
+                .WithOne()
+                .HasForeignKey<Trainee>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TraineeCertification>(entity =>
