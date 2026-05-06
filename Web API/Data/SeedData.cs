@@ -100,10 +100,10 @@ public static class SeedData
 
         var paymentStatuses = new List<PaymentStatus>
         {
-            new() { StatusId = 1, Status = "Unpaid" },
-            new() { StatusId = 2, Status = "Partial" },
-            new() { StatusId = 3, Status = "Paid" },
-            new() { StatusId = 4, Status = "Overdue" }
+            new() { Status = "Unpaid" },
+            new() { Status = "Partial" },
+            new() { Status = "Paid" },
+            new() { Status = "Overdue" }
         };
         context.PaymentStatuses.AddRange(paymentStatuses);
         await context.SaveChangesAsync();
@@ -316,182 +316,208 @@ public static class SeedData
         await context.SaveChangesAsync();
         var classroomIds = classrooms.ToDictionary(x => x.Name, x => x.ClassroomId);
 
+        var courseCsharpFundamentals = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Information Technology"],
+            CategoryId = categoryIds["Software Development"],
+            CourseCode = "ITC101",
+            Title = "C# Fundamentals",
+            Description = "Core C# syntax, object-oriented design, and clean coding fundamentals.",
+            DurationHours = 24.00m,
+            MaxCapacity = 24,
+            EnrollmentFee = 180.00m,
+            EquipmentRequirements = "Lab Computer, Projector",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 1, 9, 0, 0),
+            UpdatedAt = Dt(2025, 11, 5, 9, 0, 0)
+        };
+
+        var courseNetworkEssentials = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Cybersecurity"],
+            CategoryId = categoryIds["Networking"],
+            CourseCode = "CYB120",
+            Title = "Network Essentials",
+            Description = "Practical networking fundamentals for secure enterprise operations.",
+            DurationHours = 16.00m,
+            MaxCapacity = 20,
+            EnrollmentFee = 150.00m,
+            EquipmentRequirements = "Lab Computer, Smart Board",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 1, 9, 20, 0),
+            UpdatedAt = Dt(2025, 11, 6, 9, 20, 0)
+        };
+
+        var courseProjectManagement = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Business Management"],
+            CategoryId = categoryIds["Leadership"],
+            CourseCode = "BMG110",
+            Title = "Project Management Basics",
+            Description = "Planning, tracking, and communication practices for project delivery.",
+            DurationHours = 16.00m,
+            MaxCapacity = 22,
+            EnrollmentFee = 120.00m,
+            EquipmentRequirements = null,
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 2, 10, 0, 0),
+            UpdatedAt = Dt(2025, 11, 8, 10, 0, 0)
+        };
+
+        var courseExcelAnalysis = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Data & Analytics"],
+            CategoryId = categoryIds["Data Science"],
+            CourseCode = "DAT130",
+            Title = "Data Analysis with Excel",
+            Description = "Data cleaning, dashboarding, and reporting workflows in Excel.",
+            DurationHours = 16.00m,
+            MaxCapacity = 20,
+            EnrollmentFee = 140.00m,
+            EquipmentRequirements = "Lab Computer, Projector",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 2, 10, 30, 0),
+            UpdatedAt = Dt(2025, 11, 8, 10, 30, 0)
+        };
+
+        var courseCyberFoundations = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Cybersecurity"],
+            CategoryId = categoryIds["Networking"],
+            CourseCode = "CYB140",
+            Title = "Cybersecurity Foundations",
+            Description = "Threat landscape, defensive controls, and incident lifecycle fundamentals.",
+            DurationHours = 24.00m,
+            MaxCapacity = 25,
+            EnrollmentFee = 210.00m,
+            EquipmentRequirements = "Lab Computer, Video Conferencing System",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 3, 11, 0, 0),
+            UpdatedAt = Dt(2025, 11, 10, 11, 0, 0)
+        };
+
         var baseCourses = new List<Course>
         {
-            new()
-            {
-                CourseId = 1,
-                SubjectAreaId = subjectAreaIds["Information Technology"],
-                CategoryId = categoryIds["Software Development"],
-                CourseCode = "ITC101",
-                Title = "C# Fundamentals",
-                Description = "Core C# syntax, object-oriented design, and clean coding fundamentals.",
-                DurationHours = 24.00m,
-                MaxCapacity = 24,
-                EnrollmentFee = 180.00m,
-                EquipmentRequirements = "Lab Computer, Projector",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 1, 9, 0, 0),
-                UpdatedAt = Dt(2025, 11, 5, 9, 0, 0)
-            },
-            new()
-            {
-                CourseId = 2,
-                SubjectAreaId = subjectAreaIds["Cybersecurity"],
-                CategoryId = categoryIds["Networking"],
-                CourseCode = "CYB120",
-                Title = "Network Essentials",
-                Description = "Practical networking fundamentals for secure enterprise operations.",
-                DurationHours = 16.00m,
-                MaxCapacity = 20,
-                EnrollmentFee = 150.00m,
-                EquipmentRequirements = "Lab Computer, Smart Board",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 1, 9, 20, 0),
-                UpdatedAt = Dt(2025, 11, 6, 9, 20, 0)
-            },
-            new()
-            {
-                CourseId = 3,
-                SubjectAreaId = subjectAreaIds["Business Management"],
-                CategoryId = categoryIds["Leadership"],
-                CourseCode = "BMG110",
-                Title = "Project Management Basics",
-                Description = "Planning, tracking, and communication practices for project delivery.",
-                DurationHours = 16.00m,
-                MaxCapacity = 22,
-                EnrollmentFee = 120.00m,
-                EquipmentRequirements = null,
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 2, 10, 0, 0),
-                UpdatedAt = Dt(2025, 11, 8, 10, 0, 0)
-            },
-            new()
-            {
-                CourseId = 4,
-                SubjectAreaId = subjectAreaIds["Data & Analytics"],
-                CategoryId = categoryIds["Data Science"],
-                CourseCode = "DAT130",
-                Title = "Data Analysis with Excel",
-                Description = "Data cleaning, dashboarding, and reporting workflows in Excel.",
-                DurationHours = 16.00m,
-                MaxCapacity = 20,
-                EnrollmentFee = 140.00m,
-                EquipmentRequirements = "Lab Computer, Projector",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 2, 10, 30, 0),
-                UpdatedAt = Dt(2025, 11, 8, 10, 30, 0)
-            },
-            new()
-            {
-                CourseId = 5,
-                SubjectAreaId = subjectAreaIds["Cybersecurity"],
-                CategoryId = categoryIds["Networking"],
-                CourseCode = "CYB140",
-                Title = "Cybersecurity Foundations",
-                Description = "Threat landscape, defensive controls, and incident lifecycle fundamentals.",
-                DurationHours = 24.00m,
-                MaxCapacity = 25,
-                EnrollmentFee = 210.00m,
-                EquipmentRequirements = "Lab Computer, Video Conferencing System",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 3, 11, 0, 0),
-                UpdatedAt = Dt(2025, 11, 10, 11, 0, 0)
-            }
+            courseCsharpFundamentals,
+            courseNetworkEssentials,
+            courseProjectManagement,
+            courseExcelAnalysis,
+            courseCyberFoundations
+        };
+
+        var courseAdvancedCsharp = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Information Technology"],
+            CategoryId = categoryIds["Software Development"],
+            PrerequisiteCourse = courseCsharpFundamentals,
+            CourseCode = "ITC220",
+            Title = "Advanced C# Development",
+            Description = "Intermediate to advanced C# architecture, patterns, and maintainability practices.",
+            DurationHours = 24.00m,
+            MaxCapacity = 18,
+            EnrollmentFee = 260.00m,
+            EquipmentRequirements = "Lab Computer, Smart Board",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 5, 12, 0, 0),
+            UpdatedAt = Dt(2025, 11, 12, 12, 0, 0)
+        };
+
+        var courseSecureNetworkOps = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Cybersecurity"],
+            CategoryId = categoryIds["Networking"],
+            PrerequisiteCourse = courseNetworkEssentials,
+            CourseCode = "CYB240",
+            Title = "Secure Network Operations",
+            Description = "Hardening, monitoring, and secure operations for enterprise networks.",
+            DurationHours = 24.00m,
+            MaxCapacity = 18,
+            EnrollmentFee = 280.00m,
+            EquipmentRequirements = "Lab Computer, Projector",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 5, 12, 30, 0),
+            UpdatedAt = Dt(2025, 11, 13, 12, 30, 0)
+        };
+
+        var courseLeadershipTeams = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Business Management"],
+            CategoryId = categoryIds["Leadership"],
+            PrerequisiteCourse = courseProjectManagement,
+            CourseCode = "BMG230",
+            Title = "Leadership for Technical Teams",
+            Description = "People leadership, decision making, and team alignment for technical units.",
+            DurationHours = 12.00m,
+            MaxCapacity = 20,
+            EnrollmentFee = 170.00m,
+            EquipmentRequirements = null,
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 6, 13, 0, 0),
+            UpdatedAt = Dt(2025, 11, 13, 13, 0, 0)
+        };
+
+        var courseAppliedMachineLearning = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Data & Analytics"],
+            CategoryId = categoryIds["Machine Learning"],
+            PrerequisiteCourse = courseExcelAnalysis,
+            CourseCode = "DAT260",
+            Title = "Applied Machine Learning",
+            Description = "Model training, evaluation, and deployment-ready ML workflows.",
+            DurationHours = 30.00m,
+            MaxCapacity = 16,
+            EnrollmentFee = 320.00m,
+            EquipmentRequirements = "Lab Computer, Smart Board",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 6, 13, 30, 0),
+            UpdatedAt = Dt(2025, 11, 14, 13, 30, 0)
+        };
+
+        var courseSiemIncident = new Course
+        {
+            SubjectAreaId = subjectAreaIds["Cybersecurity"],
+            CategoryId = categoryIds["Networking"],
+            PrerequisiteCourse = courseCyberFoundations,
+            CourseCode = "CYB280",
+            Title = "SIEM and Incident Response",
+            Description = "Security monitoring, triage, and coordinated incident handling practices.",
+            DurationHours = 20.00m,
+            MaxCapacity = 18,
+            EnrollmentFee = 300.00m,
+            EquipmentRequirements = "Lab Computer, Video Conferencing System",
+            IsActive = true,
+            CreatedAt = Dt(2025, 11, 7, 14, 0, 0),
+            UpdatedAt = Dt(2025, 11, 14, 14, 0, 0)
         };
 
         var advancedCourses = new List<Course>
         {
-            new()
-            {
-                CourseId = 6,
-                SubjectAreaId = subjectAreaIds["Information Technology"],
-                CategoryId = categoryIds["Software Development"],
-                PrerequisiteCourseId = 1,
-                CourseCode = "ITC220",
-                Title = "Advanced C# Development",
-                Description = "Intermediate to advanced C# architecture, patterns, and maintainability practices.",
-                DurationHours = 24.00m,
-                MaxCapacity = 18,
-                EnrollmentFee = 260.00m,
-                EquipmentRequirements = "Lab Computer, Smart Board",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 5, 12, 0, 0),
-                UpdatedAt = Dt(2025, 11, 12, 12, 0, 0)
-            },
-            new()
-            {
-                CourseId = 7,
-                SubjectAreaId = subjectAreaIds["Cybersecurity"],
-                CategoryId = categoryIds["Networking"],
-                PrerequisiteCourseId = 2,
-                CourseCode = "CYB240",
-                Title = "Secure Network Operations",
-                Description = "Hardening, monitoring, and secure operations for enterprise networks.",
-                DurationHours = 24.00m,
-                MaxCapacity = 18,
-                EnrollmentFee = 280.00m,
-                EquipmentRequirements = "Lab Computer, Projector",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 5, 12, 30, 0),
-                UpdatedAt = Dt(2025, 11, 13, 12, 30, 0)
-            },
-            new()
-            {
-                CourseId = 8,
-                SubjectAreaId = subjectAreaIds["Business Management"],
-                CategoryId = categoryIds["Leadership"],
-                PrerequisiteCourseId = 3,
-                CourseCode = "BMG230",
-                Title = "Leadership for Technical Teams",
-                Description = "People leadership, decision making, and team alignment for technical units.",
-                DurationHours = 12.00m,
-                MaxCapacity = 20,
-                EnrollmentFee = 170.00m,
-                EquipmentRequirements = null,
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 6, 13, 0, 0),
-                UpdatedAt = Dt(2025, 11, 13, 13, 0, 0)
-            },
-            new()
-            {
-                CourseId = 9,
-                SubjectAreaId = subjectAreaIds["Data & Analytics"],
-                CategoryId = categoryIds["Machine Learning"],
-                PrerequisiteCourseId = 4,
-                CourseCode = "DAT260",
-                Title = "Applied Machine Learning",
-                Description = "Model training, evaluation, and deployment-ready ML workflows.",
-                DurationHours = 30.00m,
-                MaxCapacity = 16,
-                EnrollmentFee = 320.00m,
-                EquipmentRequirements = "Lab Computer, Smart Board",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 6, 13, 30, 0),
-                UpdatedAt = Dt(2025, 11, 14, 13, 30, 0)
-            },
-            new()
-            {
-                CourseId = 10,
-                SubjectAreaId = subjectAreaIds["Cybersecurity"],
-                CategoryId = categoryIds["Networking"],
-                PrerequisiteCourseId = 5,
-                CourseCode = "CYB280",
-                Title = "SIEM and Incident Response",
-                Description = "Security monitoring, triage, and coordinated incident handling practices.",
-                DurationHours = 20.00m,
-                MaxCapacity = 18,
-                EnrollmentFee = 300.00m,
-                EquipmentRequirements = "Lab Computer, Video Conferencing System",
-                IsActive = true,
-                CreatedAt = Dt(2025, 11, 7, 14, 0, 0),
-                UpdatedAt = Dt(2025, 11, 14, 14, 0, 0)
-            }
+            courseAdvancedCsharp,
+            courseSecureNetworkOps,
+            courseLeadershipTeams,
+            courseAppliedMachineLearning,
+            courseSiemIncident
         };
 
         context.Courses.AddRange(baseCourses);
         context.Courses.AddRange(advancedCourses);
         await context.SaveChangesAsync();
+
+        var courseIdMap = new Dictionary<int, int>
+        {
+            [1] = courseCsharpFundamentals.CourseId,
+            [2] = courseNetworkEssentials.CourseId,
+            [3] = courseProjectManagement.CourseId,
+            [4] = courseExcelAnalysis.CourseId,
+            [5] = courseCyberFoundations.CourseId,
+            [6] = courseAdvancedCsharp.CourseId,
+            [7] = courseSecureNetworkOps.CourseId,
+            [8] = courseLeadershipTeams.CourseId,
+            [9] = courseAppliedMachineLearning.CourseId,
+            [10] = courseSiemIncident.CourseId
+        };
+
+        var courseLegacyIdById = courseIdMap.ToDictionary(x => x.Value, x => x.Key);
         var allCourses = baseCourses.Concat(advancedCourses).ToDictionary(x => x.CourseId, x => x);
 
         var classroomEquipments = new List<ClassroomEquipment>
@@ -589,63 +615,63 @@ public static class SeedData
             new()
             {
                 CertificationTrackId = certificationTrackIds["Software Engineering Professional"],
-                CourseId = 1,
+                CourseId = courseIdMap[1],
                 SequenceOrder = 1,
                 IsMandatory = true
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Software Engineering Professional"],
-                CourseId = 3,
+                CourseId = courseIdMap[3],
                 SequenceOrder = 2,
                 IsMandatory = true
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Software Engineering Professional"],
-                CourseId = 6,
+                CourseId = courseIdMap[6],
                 SequenceOrder = 3,
                 IsMandatory = false
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Cyber Defense Specialist"],
-                CourseId = 2,
+                CourseId = courseIdMap[2],
                 SequenceOrder = 1,
                 IsMandatory = true
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Cyber Defense Specialist"],
-                CourseId = 5,
+                CourseId = courseIdMap[5],
                 SequenceOrder = 2,
                 IsMandatory = true
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Cyber Defense Specialist"],
-                CourseId = 7,
+                CourseId = courseIdMap[7],
                 SequenceOrder = 3,
                 IsMandatory = false
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Data Analytics Practitioner"],
-                CourseId = 4,
+                CourseId = courseIdMap[4],
                 SequenceOrder = 1,
                 IsMandatory = true
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Data Analytics Practitioner"],
-                CourseId = 1,
+                CourseId = courseIdMap[1],
                 SequenceOrder = 2,
                 IsMandatory = true
             },
             new()
             {
                 CertificationTrackId = certificationTrackIds["Data Analytics Practitioner"],
-                CourseId = 9,
+                CourseId = courseIdMap[9],
                 SequenceOrder = 3,
                 IsMandatory = false
             }
@@ -1018,7 +1044,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["noura"],
                 ClassroomId = classroomIds["Seef Training Room"],
-                CourseId = 1,
+                CourseId = courseIdMap[1],
                 InstructorId = instructorIds["mohammed"],
                 StatusId = courseSessionStatusIds["Completed"],
                 SessionDate = Dt(2026, 1, 12),
@@ -1033,7 +1059,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["yousif"],
                 ClassroomId = classroomIds["Pearl Lab 1"],
-                CourseId = 2,
+                CourseId = courseIdMap[2],
                 InstructorId = instructorIds["fatima"],
                 StatusId = courseSessionStatusIds["Completed"],
                 SessionDate = Dt(2026, 1, 20),
@@ -1048,7 +1074,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["noura"],
                 ClassroomId = classroomIds["Riffa Seminar Hall"],
-                CourseId = 3,
+                CourseId = courseIdMap[3],
                 InstructorId = instructorIds["ahmed"],
                 StatusId = courseSessionStatusIds["Completed"],
                 SessionDate = Dt(2026, 2, 5),
@@ -1063,7 +1089,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["yousif"],
                 ClassroomId = classroomIds["Seef Training Room"],
-                CourseId = 4,
+                CourseId = courseIdMap[4],
                 InstructorId = instructorIds["mohammed"],
                 StatusId = courseSessionStatusIds["Completed"],
                 SessionDate = Dt(2026, 2, 18),
@@ -1078,7 +1104,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["noura"],
                 ClassroomId = classroomIds["Muharraq Innovation Lab"],
-                CourseId = 5,
+                CourseId = courseIdMap[5],
                 InstructorId = instructorIds["sara"],
                 StatusId = courseSessionStatusIds["Completed"],
                 SessionDate = Dt(2026, 3, 2),
@@ -1093,7 +1119,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["yousif"],
                 ClassroomId = classroomIds["Riffa Seminar Hall"],
-                CourseId = 6,
+                CourseId = courseIdMap[6],
                 InstructorId = instructorIds["mohammed"],
                 StatusId = courseSessionStatusIds["Scheduled"],
                 SessionDate = Dt(2026, 6, 10),
@@ -1108,7 +1134,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["noura"],
                 ClassroomId = classroomIds["Pearl Lab 1"],
-                CourseId = 7,
+                CourseId = courseIdMap[7],
                 InstructorId = instructorIds["fatima"],
                 StatusId = courseSessionStatusIds["Scheduled"],
                 SessionDate = Dt(2026, 6, 16),
@@ -1123,7 +1149,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["yousif"],
                 ClassroomId = classroomIds["Isa Town Auditorium"],
-                CourseId = 8,
+                CourseId = courseIdMap[8],
                 InstructorId = instructorIds["ahmed"],
                 StatusId = courseSessionStatusIds["Scheduled"],
                 SessionDate = Dt(2026, 7, 3),
@@ -1138,7 +1164,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["noura"],
                 ClassroomId = classroomIds["Muharraq Innovation Lab"],
-                CourseId = 9,
+                CourseId = courseIdMap[9],
                 InstructorId = instructorIds["mohammed"],
                 StatusId = courseSessionStatusIds["Ongoing"],
                 SessionDate = Dt(2026, 4, 27),
@@ -1153,7 +1179,7 @@ public static class SeedData
             {
                 CoordinatorId = coordinatorIds["yousif"],
                 ClassroomId = classroomIds["Seef Training Room"],
-                CourseId = 10,
+                CourseId = courseIdMap[10],
                 InstructorId = instructorIds["sara"],
                 StatusId = courseSessionStatusIds["Cancelled"],
                 SessionDate = Dt(2026, 5, 15),
@@ -1168,7 +1194,7 @@ public static class SeedData
         context.CourseSessions.AddRange(courseSessions);
         await context.SaveChangesAsync();
 
-        var sessionIdByCourseId = courseSessions.ToDictionary(x => x.CourseId, x => x.SessionId);
+        var sessionIdByCourseId = courseSessions.ToDictionary(x => courseLegacyIdById[x.CourseId], x => x.SessionId);
         var sessionById = courseSessions.ToDictionary(x => x.SessionId, x => x);
 
         var completedStatusId = enrollmentStatusIds["Completed"];
@@ -1557,7 +1583,15 @@ public static class SeedData
         context.PaymentRecords.AddRange(paymentRecords);
         await context.SaveChangesAsync();
 
-        var paymentMethods = new[] { "Cash", "Bank Transfer", "Credit Card", "Cheque" };
+        var paymentMethodNames = new[] { "Cash", "Bank Transfer", "Card", "Cheque" };
+        var paymentMethodEntities = paymentMethodNames
+            .Select(name => new PaymentMethod { PaymentMethod1 = name })
+            .ToList();
+
+        context.PaymentMethods.AddRange(paymentMethodEntities);
+        await context.SaveChangesAsync();
+
+        var paymentMethodIds = paymentMethodEntities.ToDictionary(x => x.PaymentMethod1, x => x.PaymentMethodId);
         var paymentTransactions = new List<PaymentTransaction>();
 
         for (var i = 0; i < paymentRecords.Count; i++)
@@ -1568,12 +1602,14 @@ public static class SeedData
             {
                 if (i % 2 == 0)
                 {
+                    var paymentMethodName = paymentMethodNames[i % paymentMethodNames.Length];
                     paymentTransactions.Add(new PaymentTransaction
                     {
                         PaymentRecordId = paymentRecord.PaymentRecordId,
                         CoordinatorId = paymentRecord.CoordinatorId,
                         Amount = paymentRecord.TotalAmount,
-                        PaymentMethod = paymentMethods[i % paymentMethods.Length],
+                        PaymentMethodId = paymentMethodIds[paymentMethodName],
+                        PaymentMethod = paymentMethodName,
                         PaymentDate = paymentRecord.IssuedDate.AddDays(2),
                         Notes = "Full settlement",
                         CreatedAt = paymentRecord.IssuedDate.AddDays(2)
@@ -1584,23 +1620,27 @@ public static class SeedData
                     var firstAmount = decimal.Round(paymentRecord.TotalAmount * 0.60m, 2, MidpointRounding.AwayFromZero);
                     var secondAmount = paymentRecord.TotalAmount - firstAmount;
 
+                    var firstPaymentMethodName = paymentMethodNames[i % paymentMethodNames.Length];
                     paymentTransactions.Add(new PaymentTransaction
                     {
                         PaymentRecordId = paymentRecord.PaymentRecordId,
                         CoordinatorId = paymentRecord.CoordinatorId,
                         Amount = firstAmount,
-                        PaymentMethod = paymentMethods[i % paymentMethods.Length],
+                        PaymentMethodId = paymentMethodIds[firstPaymentMethodName],
+                        PaymentMethod = firstPaymentMethodName,
                         PaymentDate = paymentRecord.IssuedDate.AddDays(2),
                         Notes = "Installment 1",
                         CreatedAt = paymentRecord.IssuedDate.AddDays(2)
                     });
 
+                    var secondPaymentMethodName = paymentMethodNames[(i + 1) % paymentMethodNames.Length];
                     paymentTransactions.Add(new PaymentTransaction
                     {
                         PaymentRecordId = paymentRecord.PaymentRecordId,
                         CoordinatorId = paymentRecord.CoordinatorId,
                         Amount = secondAmount,
-                        PaymentMethod = paymentMethods[(i + 1) % paymentMethods.Length],
+                        PaymentMethodId = paymentMethodIds[secondPaymentMethodName],
+                        PaymentMethod = secondPaymentMethodName,
                         PaymentDate = paymentRecord.IssuedDate.AddDays(4),
                         Notes = "Installment 2",
                         CreatedAt = paymentRecord.IssuedDate.AddDays(4)
@@ -1610,12 +1650,14 @@ public static class SeedData
             else if (paymentRecord.StatusId == paymentStatusIds["Partial"])
             {
                 var partialAmount = decimal.Round(paymentRecord.TotalAmount * 0.50m, 2, MidpointRounding.AwayFromZero);
+                var partialPaymentMethodName = paymentMethodNames[(i + 2) % paymentMethodNames.Length];
                 paymentTransactions.Add(new PaymentTransaction
                 {
                     PaymentRecordId = paymentRecord.PaymentRecordId,
                     CoordinatorId = paymentRecord.CoordinatorId,
                     Amount = partialAmount,
-                    PaymentMethod = paymentMethods[(i + 2) % paymentMethods.Length],
+                    PaymentMethodId = paymentMethodIds[partialPaymentMethodName],
+                    PaymentMethod = partialPaymentMethodName,
                     PaymentDate = paymentRecord.IssuedDate.AddDays(3),
                     Notes = "Partial payment",
                     CreatedAt = paymentRecord.IssuedDate.AddDays(3)
@@ -1720,7 +1762,7 @@ public static class SeedData
                 Title = "Certification Issued",
                 Message = "Congratulations! Your Software Engineering Professional certification has been issued.",
                 Type = "Certification",
-                RelatedEntityType = "Trainee_Certification",
+                RelatedEntityType = "TraineeCertification",
                 IsRead = true,
                 CreatedAt = Dt(2026, 2, 20, 12, 0, 0),
                 ReadAt = Dt(2026, 2, 20, 15, 0, 0)
@@ -1731,7 +1773,7 @@ public static class SeedData
                 Title = "Certification Issued",
                 Message = "Congratulations! Your Cyber Defense Specialist certification has been issued.",
                 Type = "Certification",
-                RelatedEntityType = "Trainee_Certification",
+                RelatedEntityType = "TraineeCertification",
                 IsRead = false,
                 CreatedAt = Dt(2026, 3, 20, 12, 0, 0),
                 ReadAt = null
@@ -1742,7 +1784,7 @@ public static class SeedData
                 Title = "Certification Eligible",
                 Message = "Congratulations! You are now eligible for Data Analytics Practitioner.",
                 Type = "Certification",
-                RelatedEntityType = "Trainee_Certification",
+                RelatedEntityType = "TraineeCertification",
                 IsRead = false,
                 CreatedAt = Dt(2026, 2, 25, 12, 0, 0),
                 ReadAt = null
@@ -1753,7 +1795,7 @@ public static class SeedData
                 Title = "Payment Received",
                 Message = "Payment of BHD 180.00 received for C# Fundamentals.",
                 Type = "Payment",
-                RelatedEntityType = "Payment_Record",
+                RelatedEntityType = "PaymentRecord",
                 IsRead = true,
                 CreatedAt = Dt(2025, 12, 23, 12, 0, 0),
                 ReadAt = Dt(2025, 12, 23, 14, 0, 0)
@@ -1764,7 +1806,7 @@ public static class SeedData
                 Title = "Payment Received",
                 Message = "Payment of BHD 210.00 received for Cybersecurity Foundations.",
                 Type = "Payment",
-                RelatedEntityType = "Payment_Record",
+                RelatedEntityType = "PaymentRecord",
                 IsRead = true,
                 CreatedAt = Dt(2026, 2, 15, 12, 0, 0),
                 ReadAt = Dt(2026, 2, 15, 16, 0, 0)

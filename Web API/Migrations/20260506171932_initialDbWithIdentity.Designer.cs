@@ -12,15 +12,15 @@ using Web_API.Models;
 namespace Web_API.Migrations
 {
     [DbContext(typeof(TrainingInstituteDBContext))]
-    [Migration("20260427125551_cleanSetupNoSeed")]
-    partial class cleanSetupNoSeed
+    [Migration("20260506171932_initialDbWithIdentity")]
+    partial class initialDbWithIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.26")
+                .HasAnnotation("ProductVersion", "9.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -338,7 +338,7 @@ namespace Web_API.Migrations
                     b.HasIndex(new[] { "CourseId", "CertificationTrackId" }, "Certification_Required_Course_unique_comb")
                         .IsUnique();
 
-                    b.ToTable("Certification_Required_Course");
+                    b.ToTable("CertificationRequiredCourse");
                 });
 
             modelBuilder.Entity("Web_API.Models.CertificationStatus", b =>
@@ -357,9 +357,9 @@ namespace Web_API.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("StatusId")
-                        .HasName("Certification_Status_pk");
+                        .HasName("CertificationStatus_pk");
 
-                    b.ToTable("Certification_Status");
+                    b.ToTable("CertificationStatus");
                 });
 
             modelBuilder.Entity("Web_API.Models.CertificationTrack", b =>
@@ -405,7 +405,7 @@ namespace Web_API.Migrations
                     b.HasKey("CertificationTrackId")
                         .HasName("certificationID");
 
-                    b.ToTable("Certification_Track");
+                    b.ToTable("CertificationTrack");
                 });
 
             modelBuilder.Entity("Web_API.Models.Classroom", b =>
@@ -490,7 +490,7 @@ namespace Web_API.Migrations
 
                     b.HasIndex("ClassroomId");
 
-                    b.ToTable("Classroom_Equipment");
+                    b.ToTable("ClassroomEquipment");
                 });
 
             modelBuilder.Entity("Web_API.Models.Coordinator", b =>
@@ -517,17 +517,17 @@ namespace Web_API.Migrations
                     b.HasKey("CoordinatorId")
                         .HasName("coordinatorID");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
                     b.ToTable("Coordinator");
                 });
 
             modelBuilder.Entity("Web_API.Models.Course", b =>
                 {
                     b.Property<int>("CourseId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("courseID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CourseId"));
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int")
@@ -675,7 +675,7 @@ namespace Web_API.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Course_Session");
+                    b.ToTable("CourseSession");
                 });
 
             modelBuilder.Entity("Web_API.Models.CourseSessionStatus", b =>
@@ -694,9 +694,9 @@ namespace Web_API.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("StatusId")
-                        .HasName("Course_Session_Status_pk");
+                        .HasName("CourseSessionStatus_pk");
 
-                    b.ToTable("Course_Session_Status");
+                    b.ToTable("CourseSessionStatus");
                 });
 
             modelBuilder.Entity("Web_API.Models.Enrollment", b =>
@@ -773,9 +773,9 @@ namespace Web_API.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("EnrollmentStatusId")
-                        .HasName("Enrollment_Status_pk");
+                        .HasName("EnrollmentStatus_pk");
 
-                    b.ToTable("Enrollment_Status");
+                    b.ToTable("EnrollmentStatus");
                 });
 
             modelBuilder.Entity("Web_API.Models.Instructor", b =>
@@ -804,9 +804,6 @@ namespace Web_API.Migrations
 
                     b.HasKey("InstructorId")
                         .HasName("instructorID");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Instructor");
                 });
@@ -855,7 +852,7 @@ namespace Web_API.Migrations
 
                     b.HasIndex("InstructorId");
 
-                    b.ToTable("Instructor_Availability");
+                    b.ToTable("InstructorAvailability");
                 });
 
             modelBuilder.Entity("Web_API.Models.InstructorExpertise", b =>
@@ -889,7 +886,7 @@ namespace Web_API.Migrations
                     b.HasIndex(new[] { "InstructorId", "SubjectAreaId" }, "Instructor_Expertise_unique_comb")
                         .IsUnique();
 
-                    b.ToTable("Instructor_Expertise");
+                    b.ToTable("InstructorExpertise");
                 });
 
             modelBuilder.Entity("Web_API.Models.Notification", b =>
@@ -947,9 +944,28 @@ namespace Web_API.Migrations
                     b.HasKey("NotificationId")
                         .HasName("notificationID");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Notification");
+                });
+
+            modelBuilder.Entity("Web_API.Models.PaymentMethod", b =>
+                {
+                    b.Property<int>("PaymentMethodId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("paymentMethodID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentMethodId"));
+
+                    b.Property<string>("PaymentMethod1")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)")
+                        .HasColumnName("PaymentMethod");
+
+                    b.HasKey("PaymentMethodId")
+                        .HasName("PaymentMethod_pk");
+
+                    b.ToTable("PaymentMethod");
                 });
 
             modelBuilder.Entity("Web_API.Models.PaymentRecord", b =>
@@ -1004,14 +1020,17 @@ namespace Web_API.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Payment_Record");
+                    b.ToTable("PaymentRecord");
                 });
 
             modelBuilder.Entity("Web_API.Models.PaymentStatus", b =>
                 {
                     b.Property<int>("StatusId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("statusID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StatusId"));
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1020,9 +1039,9 @@ namespace Web_API.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("StatusId")
-                        .HasName("Payment_Status_pk");
+                        .HasName("PaymentStatus_pk");
 
-                    b.ToTable("Payment_Status");
+                    b.ToTable("PaymentStatus");
                 });
 
             modelBuilder.Entity("Web_API.Models.PaymentTransaction", b =>
@@ -1065,6 +1084,10 @@ namespace Web_API.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("paymentMethod");
 
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("int")
+                        .HasColumnName("paymentMethodID");
+
                     b.Property<int>("PaymentRecordId")
                         .HasColumnType("int")
                         .HasColumnName("paymentRecordID");
@@ -1074,9 +1097,11 @@ namespace Web_API.Migrations
 
                     b.HasIndex("CoordinatorId");
 
+                    b.HasIndex("PaymentMethodId");
+
                     b.HasIndex("PaymentRecordId");
 
-                    b.ToTable("Payment_Transaction");
+                    b.ToTable("PaymentTransaction");
                 });
 
             modelBuilder.Entity("Web_API.Models.SubjectArea", b =>
@@ -1102,7 +1127,7 @@ namespace Web_API.Migrations
                     b.HasKey("SubjectAreaId")
                         .HasName("subjectAreaID");
 
-                    b.ToTable("Subject_Area");
+                    b.ToTable("SubjectArea");
                 });
 
             modelBuilder.Entity("Web_API.Models.Trainee", b =>
@@ -1138,9 +1163,6 @@ namespace Web_API.Migrations
 
                     b.HasKey("TraineeId")
                         .HasName("traineeID");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Trainee");
                 });
@@ -1193,7 +1215,7 @@ namespace Web_API.Migrations
                     b.HasIndex(new[] { "TraineeId", "CertificationTrackId" }, "Trainee_Certification_unique_comb")
                         .IsUnique();
 
-                    b.ToTable("Trainee_Certification");
+                    b.ToTable("TraineeCertification");
                 });
 
             modelBuilder.Entity("Web_API.Models.TraineeCourseCompletion", b =>
@@ -1234,7 +1256,7 @@ namespace Web_API.Migrations
 
                     b.HasIndex("TraineeId");
 
-                    b.ToTable("Trainee_Course_Completion");
+                    b.ToTable("TraineeCourseCompletion");
                 });
 
             modelBuilder.Entity("Web_API.Models.Waitlist", b =>
@@ -1307,9 +1329,9 @@ namespace Web_API.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("StatusId")
-                        .HasName("Waitlist_Status_pk");
+                        .HasName("WaitlistStatus_pk");
 
-                    b.ToTable("Waitlist_Status");
+                    b.ToTable("WaitlistStatus");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1422,15 +1444,6 @@ namespace Web_API.Migrations
                     b.Navigation("Classroom");
                 });
 
-            modelBuilder.Entity("Web_API.Models.Coordinator", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
-                        .WithOne()
-                        .HasForeignKey("Web_API.Models.Coordinator", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Web_API.Models.Course", b =>
                 {
                     b.HasOne("Web_API.Models.Category", "Category")
@@ -1527,15 +1540,6 @@ namespace Web_API.Migrations
                     b.Navigation("Trainee");
                 });
 
-            modelBuilder.Entity("Web_API.Models.Instructor", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
-                        .WithOne()
-                        .HasForeignKey("Web_API.Models.Instructor", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Web_API.Models.InstructorAvailability", b =>
                 {
                     b.HasOne("Web_API.Models.Instructor", "Instructor")
@@ -1564,15 +1568,6 @@ namespace Web_API.Migrations
                     b.Navigation("Instructor");
 
                     b.Navigation("SubjectArea");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Notification", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Web_API.Models.PaymentRecord", b =>
@@ -1610,6 +1605,12 @@ namespace Web_API.Migrations
                         .IsRequired()
                         .HasConstraintName("Coordinator_Payment_Transaction_fk");
 
+                    b.HasOne("Web_API.Models.PaymentMethod", "PaymentMethodNavigation")
+                        .WithMany("PaymentTransactions")
+                        .HasForeignKey("PaymentMethodId")
+                        .IsRequired()
+                        .HasConstraintName("PaymentMethod_PaymentTransaction_fk");
+
                     b.HasOne("Web_API.Models.PaymentRecord", "PaymentRecord")
                         .WithMany("PaymentTransactions")
                         .HasForeignKey("PaymentRecordId")
@@ -1618,16 +1619,9 @@ namespace Web_API.Migrations
 
                     b.Navigation("Coordinator");
 
-                    b.Navigation("PaymentRecord");
-                });
+                    b.Navigation("PaymentMethodNavigation");
 
-            modelBuilder.Entity("Web_API.Models.Trainee", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
-                        .WithOne()
-                        .HasForeignKey("Web_API.Models.Trainee", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("PaymentRecord");
                 });
 
             modelBuilder.Entity("Web_API.Models.TraineeCertification", b =>
@@ -1782,6 +1776,11 @@ namespace Web_API.Migrations
                     b.Navigation("InstructorAvailabilities");
 
                     b.Navigation("InstructorExpertises");
+                });
+
+            modelBuilder.Entity("Web_API.Models.PaymentMethod", b =>
+                {
+                    b.Navigation("PaymentTransactions");
                 });
 
             modelBuilder.Entity("Web_API.Models.PaymentRecord", b =>

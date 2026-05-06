@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-[Table("Waitlist_Status")]
+[Table("WaitlistStatus")]
 public partial class WaitlistStatus
 {
     [Key]

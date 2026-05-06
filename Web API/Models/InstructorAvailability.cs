@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Web_API.Models;
 
 [PrimaryKey("AvailabilityId", "InstructorId")]
-[Table("Instructor_Availability")]
+[Table("InstructorAvailability")]
 public partial class InstructorAvailability
 {
     [Key]

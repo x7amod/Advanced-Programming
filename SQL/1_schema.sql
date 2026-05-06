@@ -5,34 +5,40 @@ GO
 USE TrainingInstituteDB;
 GO
 
-CREATE TABLE Waitlist_Status (
+CREATE TABLE PaymentMethod (
+                paymentMethodID INT IDENTITY NOT NULL,
+                PaymentMethod NVARCHAR(15) NOT NULL,
+                CONSTRAINT PaymentMethod_pk PRIMARY KEY (paymentMethodID)
+)
+
+CREATE TABLE WaitlistStatus (
                 statusID INT IDENTITY NOT NULL,
                 status NVARCHAR(30) NOT NULL,
-                CONSTRAINT Waitlist_Status_pk PRIMARY KEY (statusID)
+                CONSTRAINT WaitlistStatus_pk PRIMARY KEY (statusID)
 )
 
-CREATE TABLE Certification_Status (
+CREATE TABLE CertificationStatus (
                 statusID INT IDENTITY NOT NULL,
                 status NVARCHAR(20) NOT NULL,
-                CONSTRAINT Certification_Status_pk PRIMARY KEY (statusID)
+                CONSTRAINT CertificationStatus_pk PRIMARY KEY (statusID)
 )
 
-CREATE TABLE Course_Session_Status (
+CREATE TABLE CourseSessionStatus (
                 StatusID INT IDENTITY NOT NULL,
                 status NVARCHAR(20) NOT NULL,
-                CONSTRAINT Course_Session_Status_pk PRIMARY KEY (StatusID)
+                CONSTRAINT CourseSessionStatus_pk PRIMARY KEY (StatusID)
 )
 
-CREATE TABLE Enrollment_Status (
+CREATE TABLE EnrollmentStatus (
                 enrollmentStatusID INT IDENTITY NOT NULL,
                 status NVARCHAR(30) NOT NULL,
-                CONSTRAINT Enrollment_Status_pk PRIMARY KEY (enrollmentStatusID)
+                CONSTRAINT EnrollmentStatus_pk PRIMARY KEY (enrollmentStatusID)
 )
 
-CREATE TABLE Payment_Status (
-                statusID INT NOT NULL,
+CREATE TABLE PaymentStatus (
+                statusID INT IDENTITY NOT NULL,
                 status NVARCHAR(30) NOT NULL,
-                CONSTRAINT Payment_Status_pk PRIMARY KEY (statusID)
+                CONSTRAINT PaymentStatus_pk PRIMARY KEY (statusID)
 )
 
 CREATE TABLE Notification (
@@ -48,7 +54,7 @@ CREATE TABLE Notification (
                 CONSTRAINT notificationID PRIMARY KEY (notificationID)
 )
 
-CREATE TABLE Certification_Track (
+CREATE TABLE CertificationTrack (
                 certificationTrackID INT IDENTITY NOT NULL,
                 name NVARCHAR(150) NOT NULL,
                 description NVARCHAR(1000),
@@ -70,7 +76,7 @@ CREATE TABLE Classroom (
                 CONSTRAINT classroomID PRIMARY KEY (classroomID)
 )
 
-CREATE TABLE Classroom_Equipment (
+CREATE TABLE ClassroomEquipment (
                 equipmentID INT IDENTITY NOT NULL,
                 classroomID INT NOT NULL,
                 equipmentType NVARCHAR(50) NOT NULL,
@@ -79,7 +85,7 @@ CREATE TABLE Classroom_Equipment (
                 CONSTRAINT equipmentID PRIMARY KEY (equipmentID, classroomID)
 )
 
-CREATE TABLE Subject_Area (
+CREATE TABLE SubjectArea (
                 subjectAreaID INT IDENTITY NOT NULL,
                 name NVARCHAR(100) NOT NULL,
                 description NVARCHAR(500),
@@ -95,7 +101,7 @@ CREATE TABLE Category (
 )
 
 CREATE TABLE Course (
-                courseID INT NOT NULL,
+                courseID INT IDENTITY NOT NULL,
                 subjectAreaID INT NOT NULL,
                 categoryID INT NOT NULL,
                 prerequisiteCourseID INT,
@@ -112,7 +118,7 @@ CREATE TABLE Course (
                 CONSTRAINT courseID PRIMARY KEY (courseID)
 )
 
-CREATE TABLE Certification_Required_Course (
+CREATE TABLE CertificationRequiredCourse (
                 ID INT IDENTITY NOT NULL,
                 courseID INT NOT NULL,
                 certificationTrackID INT NOT NULL,
@@ -121,7 +127,7 @@ CREATE TABLE Certification_Required_Course (
                 CONSTRAINT certReqCourseID PRIMARY KEY (ID)
 )
 CREATE UNIQUE  NONCLUSTERED INDEX Certification_Required_Course_unique_comb
- ON Certification_Required_Course
+ ON CertificationRequiredCourse
  ( courseID, certificationTrackID )
 
 
@@ -140,7 +146,7 @@ CREATE TABLE Instructor (
                 CONSTRAINT instructorID PRIMARY KEY (instructorID)
 )
 
-CREATE TABLE Course_Session (
+CREATE TABLE CourseSession (
                 sessionID INT IDENTITY NOT NULL,
                 coordinatorID INT NOT NULL,
                 classroomID INT NOT NULL,
@@ -157,10 +163,10 @@ CREATE TABLE Course_Session (
                 CONSTRAINT sessionID PRIMARY KEY (sessionID)
 )
 
--- Comment for table [Course_Session]: Scheduled Instance of a Course
+-- Comment for table [CourseSession]: Scheduled Instance of a Course
 
 
-CREATE TABLE Instructor_Availability (
+CREATE TABLE InstructorAvailability (
                 availabilityID INT IDENTITY NOT NULL,
                 instructorID INT NOT NULL,
                 dayOfWeek INT NOT NULL,
@@ -172,7 +178,7 @@ CREATE TABLE Instructor_Availability (
                 CONSTRAINT availabilityID PRIMARY KEY (availabilityID, instructorID)
 )
 
-CREATE TABLE Instructor_Expertise (
+CREATE TABLE InstructorExpertise (
                 expertiseID INT IDENTITY NOT NULL,
                 instructorID INT NOT NULL,
                 subjectAreaID INT NOT NULL,
@@ -180,7 +186,7 @@ CREATE TABLE Instructor_Expertise (
                 CONSTRAINT ID PRIMARY KEY (expertiseID)
 )
 CREATE UNIQUE  NONCLUSTERED INDEX Instructor_Expertise_unique_comb
- ON Instructor_Expertise
+ ON InstructorExpertise
  ( instructorID, subjectAreaID )
 
 
@@ -212,7 +218,7 @@ CREATE UNIQUE  NONCLUSTERED INDEX Waitlist_unique_comb
  ( sessionID, traineeID )
 
 
-CREATE TABLE Trainee_Course_Completion (
+CREATE TABLE TraineeCourseCompletion (
                 completionID INT IDENTITY NOT NULL,
                 traineeID INT NOT NULL,
                 courseID INT NOT NULL,
@@ -222,7 +228,7 @@ CREATE TABLE Trainee_Course_Completion (
                 CONSTRAINT completionID PRIMARY KEY (completionID)
 )
 
-CREATE TABLE Trainee_Certification (
+CREATE TABLE TraineeCertification (
                 traineeCertID INT IDENTITY NOT NULL,
                 traineeID INT NOT NULL,
                 certificationTrackID INT NOT NULL,
@@ -234,7 +240,7 @@ CREATE TABLE Trainee_Certification (
                 CONSTRAINT traineeCertID PRIMARY KEY (traineeCertID)
 )
 CREATE UNIQUE  NONCLUSTERED INDEX Trainee_Certification_unique_comb
- ON Trainee_Certification
+ ON TraineeCertification
  ( traineeID, certificationTrackID )
 
 
@@ -251,7 +257,7 @@ CREATE TABLE Enrollment (
                 CONSTRAINT enrollmentID PRIMARY KEY (enrollmentID)
 )
 
-CREATE TABLE Payment_Record (
+CREATE TABLE PaymentRecord (
                 paymentRecordID INT IDENTITY NOT NULL,
                 enrollmentID INT NOT NULL,
                 coordinatorID INT NOT NULL,
@@ -264,10 +270,11 @@ CREATE TABLE Payment_Record (
                 CONSTRAINT paymentRecordID PRIMARY KEY (paymentRecordID)
 )
 
-CREATE TABLE Payment_Transaction (
+CREATE TABLE PaymentTransaction (
                 transactionID INT IDENTITY NOT NULL,
                 paymentRecordID INT NOT NULL,
                 coordinatorID INT NOT NULL,
+                paymentMethodID INT NOT NULL,
                 amount DECIMAL(10,2) NOT NULL,
                 paymentMethod NVARCHAR(20) NOT NULL,
                 paymentDate DATETIME DEFAULT GETDATE() NOT NULL,
@@ -287,55 +294,61 @@ CREATE TABLE Assessment (
                 CONSTRAINT assessmentID PRIMARY KEY (assessmentID)
 )
 
+ALTER TABLE PaymentTransaction ADD CONSTRAINT PaymentMethod_PaymentTransaction_fk
+FOREIGN KEY (paymentMethodID)
+REFERENCES PaymentMethod (paymentMethodID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+
 ALTER TABLE Waitlist ADD CONSTRAINT Waitlist_Status_Waitlist_fk
 FOREIGN KEY (statusID)
-REFERENCES Waitlist_Status (statusID)
+REFERENCES WaitlistStatus (statusID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Trainee_Certification ADD CONSTRAINT Certification_Status_Trainee_Certification_fk
+ALTER TABLE TraineeCertification ADD CONSTRAINT Certification_Status_Trainee_Certification_fk
 FOREIGN KEY (statusID)
-REFERENCES Certification_Status (statusID)
+REFERENCES CertificationStatus (statusID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Course_Session ADD CONSTRAINT Course_Session_Status_Course_Session_fk
+ALTER TABLE CourseSession ADD CONSTRAINT Course_Session_Status_Course_Session_fk
 FOREIGN KEY (StatusID)
-REFERENCES Course_Session_Status (StatusID)
+REFERENCES CourseSessionStatus (StatusID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
 ALTER TABLE Enrollment ADD CONSTRAINT Enrollment_Status_Enrollment_fk
 FOREIGN KEY (enrollmentStatusID)
-REFERENCES Enrollment_Status (enrollmentStatusID)
+REFERENCES EnrollmentStatus (enrollmentStatusID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Payment_Record ADD CONSTRAINT Payment_Status_Payment_Record_fk
+ALTER TABLE PaymentRecord ADD CONSTRAINT Payment_Status_Payment_Record_fk
 FOREIGN KEY (statusID)
-REFERENCES Payment_Status (statusID)
+REFERENCES PaymentStatus (statusID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Certification_Required_Course ADD CONSTRAINT Certification_Track_Certification_Required_Course_fk
+ALTER TABLE CertificationRequiredCourse ADD CONSTRAINT Certification_Track_Certification_Required_Course_fk
 FOREIGN KEY (certificationTrackID)
-REFERENCES Certification_Track (certificationTrackID)
+REFERENCES CertificationTrack (certificationTrackID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Trainee_Certification ADD CONSTRAINT Certification_Track_Trainee_Certification_fk
+ALTER TABLE TraineeCertification ADD CONSTRAINT Certification_Track_Trainee_Certification_fk
 FOREIGN KEY (certificationTrackID)
-REFERENCES Certification_Track (certificationTrackID)
+REFERENCES CertificationTrack (certificationTrackID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Classroom_Equipment ADD CONSTRAINT Classroom_Classroom_Equipment_fk
+ALTER TABLE ClassroomEquipment ADD CONSTRAINT Classroom_Classroom_Equipment_fk
 FOREIGN KEY (classroomID)
 REFERENCES Classroom (classroomID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Course_Session ADD CONSTRAINT Classroom_Course_Session_fk
+ALTER TABLE CourseSession ADD CONSTRAINT Classroom_Course_Session_fk
 FOREIGN KEY (classroomID)
 REFERENCES Classroom (classroomID)
 ON DELETE NO ACTION
@@ -343,13 +356,13 @@ ON UPDATE NO ACTION
 
 ALTER TABLE Course ADD CONSTRAINT Course_Subject_Area_fk
 FOREIGN KEY (subjectAreaID)
-REFERENCES Subject_Area (subjectAreaID)
+REFERENCES SubjectArea (subjectAreaID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Instructor_Expertise ADD CONSTRAINT Subject_Area_Instructor_Expertise_fk
+ALTER TABLE InstructorExpertise ADD CONSTRAINT Subject_Area_Instructor_Expertise_fk
 FOREIGN KEY (subjectAreaID)
-REFERENCES Subject_Area (subjectAreaID)
+REFERENCES SubjectArea (subjectAreaID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
@@ -365,19 +378,19 @@ REFERENCES Category (categoryID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Course_Session ADD CONSTRAINT Course_Course_Session_fk
+ALTER TABLE CourseSession ADD CONSTRAINT Course_Course_Session_fk
 FOREIGN KEY (courseID)
 REFERENCES Course (courseID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Certification_Required_Course ADD CONSTRAINT Course_Certification_Required_Course_fk
+ALTER TABLE CertificationRequiredCourse ADD CONSTRAINT Course_Certification_Required_Course_fk
 FOREIGN KEY (courseID)
 REFERENCES Course (courseID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Trainee_Course_Completion ADD CONSTRAINT Course_Trainee_Course_Completion_fk
+ALTER TABLE TraineeCourseCompletion ADD CONSTRAINT Course_Trainee_Course_Completion_fk
 FOREIGN KEY (courseID)
 REFERENCES Course (courseID)
 ON DELETE NO ACTION
@@ -389,37 +402,37 @@ REFERENCES Course (courseID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Course_Session ADD CONSTRAINT Coordinator_Course_Session_fk
+ALTER TABLE CourseSession ADD CONSTRAINT Coordinator_Course_Session_fk
 FOREIGN KEY (coordinatorID)
 REFERENCES Coordinator (coordinatorID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Payment_Record ADD CONSTRAINT Payment_Record_Coordinator_fk
+ALTER TABLE PaymentRecord ADD CONSTRAINT Payment_Record_Coordinator_fk
 FOREIGN KEY (coordinatorID)
 REFERENCES Coordinator (coordinatorID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Payment_Transaction ADD CONSTRAINT Coordinator_Payment_Transaction_fk
+ALTER TABLE PaymentTransaction ADD CONSTRAINT Coordinator_Payment_Transaction_fk
 FOREIGN KEY (coordinatorID)
 REFERENCES Coordinator (coordinatorID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Instructor_Expertise ADD CONSTRAINT Instructor_Instructor_Expertise_fk
+ALTER TABLE InstructorExpertise ADD CONSTRAINT Instructor_Instructor_Expertise_fk
 FOREIGN KEY (instructorID)
 REFERENCES Instructor (instructorID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Instructor_Availability ADD CONSTRAINT Instructor_Instructor_Availability_fk
+ALTER TABLE InstructorAvailability ADD CONSTRAINT Instructor_Instructor_Availability_fk
 FOREIGN KEY (instructorID)
 REFERENCES Instructor (instructorID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Course_Session ADD CONSTRAINT Instructor_Course_Session_fk
+ALTER TABLE CourseSession ADD CONSTRAINT Instructor_Course_Session_fk
 FOREIGN KEY (instructorID)
 REFERENCES Instructor (instructorID)
 ON DELETE NO ACTION
@@ -433,13 +446,13 @@ ON UPDATE NO ACTION
 
 ALTER TABLE Enrollment ADD CONSTRAINT Course_Session_Enrollment_fk
 FOREIGN KEY (sessionID)
-REFERENCES Course_Session (sessionID)
+REFERENCES CourseSession (sessionID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
 ALTER TABLE Waitlist ADD CONSTRAINT Course_Session_Waitlist_fk
 FOREIGN KEY (sessionID)
-REFERENCES Course_Session (sessionID)
+REFERENCES CourseSession (sessionID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
@@ -449,13 +462,13 @@ REFERENCES Trainee (traineeID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Trainee_Certification ADD CONSTRAINT Trainee_Trainee_Certification_fk
+ALTER TABLE TraineeCertification ADD CONSTRAINT Trainee_Trainee_Certification_fk
 FOREIGN KEY (traineeID)
 REFERENCES Trainee (traineeID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Trainee_Course_Completion ADD CONSTRAINT Trainee_Trainee_Course_Completion_fk
+ALTER TABLE TraineeCourseCompletion ADD CONSTRAINT Trainee_Trainee_Course_Completion_fk
 FOREIGN KEY (traineeID)
 REFERENCES Trainee (traineeID)
 ON DELETE NO ACTION
@@ -473,14 +486,14 @@ REFERENCES Enrollment (enrollmentID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Payment_Record ADD CONSTRAINT Enrollment_Payment_Record_fk
+ALTER TABLE PaymentRecord ADD CONSTRAINT Enrollment_Payment_Record_fk
 FOREIGN KEY (enrollmentID)
 REFERENCES Enrollment (enrollmentID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 
-ALTER TABLE Payment_Transaction ADD CONSTRAINT Payment_Record_Payment_Transaction_fk
+ALTER TABLE PaymentTransaction ADD CONSTRAINT Payment_Record_Payment_Transaction_fk
 FOREIGN KEY (paymentRecordID)
-REFERENCES Payment_Record (paymentRecordID)
+REFERENCES PaymentRecord (paymentRecordID)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION

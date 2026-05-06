@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-[Table("Payment_Transaction")]
+[Table("PaymentTransaction")]
 public partial class PaymentTransaction
 {
     [Key]
@@ -18,6 +18,9 @@ public partial class PaymentTransaction
 
     [Column("coordinatorID")]
     public int CoordinatorId { get; set; }
+
+    [Column("paymentMethodID")]
+    public int PaymentMethodId { get; set; }
 
     [Column("amount", TypeName = "decimal(10, 2)")]
     public decimal Amount { get; set; }
@@ -39,6 +42,10 @@ public partial class PaymentTransaction
     [ForeignKey("CoordinatorId")]
     [InverseProperty("PaymentTransactions")]
     public virtual Coordinator Coordinator { get; set; } = null!;
+
+    [ForeignKey("PaymentMethodId")]
+    [InverseProperty("PaymentTransactions")]
+    public virtual PaymentMethod PaymentMethodNavigation { get; set; } = null!;
 
     [ForeignKey("PaymentRecordId")]
     [InverseProperty("PaymentTransactions")]

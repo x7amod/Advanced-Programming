@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-[Table("Subject_Area")]
+[Table("SubjectArea")]
 public partial class SubjectArea
 {
     [Key]

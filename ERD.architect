@@ -778,7 +778,7 @@
     <folder id="FOLTAB2252" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
     </folder>
     <folder id="FOLTAB2254" populated="true" name="Indices" physicalName="Indices" type="4">
-    <index id="IDX228" populated="true" UUID="66b8072a-c27e-4430-bc5a-eae66fc1c6b9" clustered="false" name="PaymentStatus_pk" physicalName="Payment_Status_pk" primaryKeyIndex="true" unique="false" >
+    <index id="IDX228" populated="true" UUID="66b8072a-c27e-4430-bc5a-eae66fc1c6b9" clustered="false" name="PaymentStatus_pk" physicalName="PaymentStatus_pk" primaryKeyIndex="true" unique="false" >
      <index-column id="IDC229" populated="true" UUID="60cfd945-b83b-4cdc-8928-090279c48697" ascendingOrDescending="UNSPECIFIED" column-ref="COL226" name="statusID" physicalName="statusID" />
     </index>
    </folder>
@@ -798,7 +798,7 @@
     <folder id="FOLTAB2302" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
     </folder>
     <folder id="FOLTAB2304" populated="true" name="Indices" physicalName="Indices" type="4">
-    <index id="IDX233" populated="true" UUID="fee0b038-cca3-420b-ba0e-cf0802b857f8" clustered="false" name="EnrollmentStatus_pk" physicalName="Enrollment_Status_pk" primaryKeyIndex="true" unique="false" >
+    <index id="IDX233" populated="true" UUID="fee0b038-cca3-420b-ba0e-cf0802b857f8" clustered="false" name="EnrollmentStatus_pk" physicalName="EnrollmentStatus_pk" primaryKeyIndex="true" unique="false" >
      <index-column id="IDC234" populated="true" UUID="5ffc0f22-6a18-48f1-9bcd-9a29de30ef71" ascendingOrDescending="UNSPECIFIED" column-ref="COL231" name="enrollmentStatusID" physicalName="enrollmentStatusID" />
     </index>
    </folder>
@@ -818,7 +818,7 @@
     <folder id="FOLTAB2352" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
     </folder>
     <folder id="FOLTAB2354" populated="true" name="Indices" physicalName="Indices" type="4">
-    <index id="IDX238" populated="true" UUID="4b4d144a-6739-4ec8-b809-224786b21240" clustered="false" name="CourseSessionStatus_pk" physicalName="Course_Session_Status_pk" primaryKeyIndex="true" unique="false" >
+    <index id="IDX238" populated="true" UUID="4b4d144a-6739-4ec8-b809-224786b21240" clustered="false" name="CourseSessionStatus_pk" physicalName="CourseSessionStatus_pk" primaryKeyIndex="true" unique="false" >
      <index-column id="IDC239" populated="true" UUID="b151927d-b7a7-4d1a-896e-69c493e6039a" ascendingOrDescending="UNSPECIFIED" column-ref="COL236" name="StatusID" physicalName="StatusID" />
     </index>
    </folder>
@@ -838,7 +838,7 @@
     <folder id="FOLTAB2402" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
     </folder>
     <folder id="FOLTAB2404" populated="true" name="Indices" physicalName="Indices" type="4">
-    <index id="IDX243" populated="true" UUID="4849969d-79a3-4511-940b-3be7fec87c0e" clustered="false" name="CertificationStatus_pk" physicalName="Certification_Status_pk" primaryKeyIndex="true" unique="false" >
+    <index id="IDX243" populated="true" UUID="4849969d-79a3-4511-940b-3be7fec87c0e" clustered="false" name="CertificationStatus_pk" physicalName="CertificationStatus_pk" primaryKeyIndex="true" unique="false" >
      <index-column id="IDC244" populated="true" UUID="cea8fe58-e8d0-476a-8ef0-e41a252450a7" ascendingOrDescending="UNSPECIFIED" column-ref="COL241" name="statusID" physicalName="statusID" />
     </index>
    </folder>
@@ -858,7 +858,7 @@
     <folder id="FOLTAB2452" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
     </folder>
     <folder id="FOLTAB2454" populated="true" name="Indices" physicalName="Indices" type="4">
-    <index id="IDX248" populated="true" UUID="693df4c2-ec75-40ff-83c1-63329387cc43" clustered="false" name="WaitlistStatus_pk" physicalName="Waitlist_Status_pk" primaryKeyIndex="true" unique="false" >
+    <index id="IDX248" populated="true" UUID="693df4c2-ec75-40ff-83c1-63329387cc43" clustered="false" name="WaitlistStatus_pk" physicalName="WaitlistStatus_pk" primaryKeyIndex="true" unique="false" >
      <index-column id="IDC249" populated="true" UUID="b1e027dc-c520-455e-b649-6b899048f74a" ascendingOrDescending="UNSPECIFIED" column-ref="COL246" name="statusID" physicalName="statusID" />
     </index>
    </folder>
@@ -866,7 +866,7 @@
   <table id="TAB250" populated="true" UUID="233bf5b3-a776-4499-aa53-56c76738e713" name="PaymentMethod" objectType="TABLE" physicalName="PaymentMethod" >
    <remarks></remarks>
    <folder id="FOLTAB2501" populated="true" name="Columns" physicalName="Columns" type="1">
-    <column id="COL251" populated="true" UUID="6a3d1eda-174f-40d1-aaf1-c419df9e8b2b" autoIncrement="true" autoIncrementSequenceName="PaymentMethod_paymentMethodID_seq" defaultValue="" name="paymentMethodID" nullable="0" physicalName="paymentMethodID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL251" populated="true" UUID="6a3d1eda-174f-40d1-aaf1-c419df9e8b2b" autoIncrement="true" autoIncrementSequenceName="PaymentMethod_paymentMethodID_seq_1" defaultValue="" name="paymentMethodID" nullable="0" physicalName="paymentMethodID" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
     <column id="COL252" populated="true" UUID="a2027924-032a-417b-964b-c488b06301f8" autoIncrement="false" autoIncrementSequenceName="PaymentMethod_PaymentMethod_seq" defaultValue="" name="PaymentMethod" nullable="0" physicalName="PaymentMethod" precision="15" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="-9" userDefinedTypeUUID="087a20b8-b387-474a-b9c8-55eb87aff017" >
@@ -988,10 +988,10 @@
    </relationship>
   </relationships>
  </target-database>
- <ddl-generator type="ca.sqlpower.architect.ddl.SQLServer2005DDLGenerator" allow-connection="true" target-catalog="trainingInsDB"> </ddl-generator>
+ <ddl-generator type="ca.sqlpower.architect.ddl.SQLServer2005DDLGenerator" allow-connection="false" target-catalog="trainingInsDB"> </ddl-generator>
  <liquibase-settings useSeparateChangeSets="false" generateId="false" idStart="1"/>
  <create-kettle-job-settings filePath="" jobName="" schemaName="" kettleJoinType="0" savingToFile="true" />
- <play-pen zoom="0.9532630660946259" viewportX="54" viewportY="390" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
+ <play-pen zoom="0.9532630660946259" viewportX="0" viewportY="0" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
   <table-pane table-ref="TAB1" x="1215" y="422" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
   <table-pane table-ref="TAB9" x="651" y="1088" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
   <table-pane table-ref="TAB16" x="571" y="332" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
