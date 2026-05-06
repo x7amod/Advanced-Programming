@@ -1,12 +1,22 @@
-
-
 name: build
 
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "MVC Frontend/**"
+      - "Reporting App/**"
+      - "Web API/**"
+      - "*.sln"
+      - ".github/workflows/dotnet.yml"
   pull_request:
     branches: [ "master" ]
+    paths:
+      - "MVC Frontend/**"
+      - "Reporting App/**"
+      - "Web API/**"
+      - "*.sln"
+      - ".github/workflows/dotnet.yml"
 
 jobs:
   build:
