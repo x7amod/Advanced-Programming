@@ -1,0 +1,52 @@
+@model Course
+@{
+    ViewData["Title"] = "Deactivate Course";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Courses</a></li>
+        <li class="breadcrumb-item">
+            <a asp-action="Details" asp-route-id="@Model.CourseId">@Model.CourseCode</a>
+        </li>
+        <li class="breadcrumb-item active">Deactivate</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Confirm Deactivation</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Are you sure you want to deactivate the following course?</p>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Code</dt>
+                    <dd class="col-sm-8">@Model.CourseCode</dd>
+
+                    <dt class="col-sm-4">Title</dt>
+                    <dd class="col-sm-8">@Model.Title</dd>
+
+                    <dt class="col-sm-4">Subject Area</dt>
+                    <dd class="col-sm-8">@Model.SubjectArea?.Name</dd>
+
+                    <dt class="col-sm-4">Category</dt>
+                    <dd class="col-sm-8">@Model.Category?.Name</dd>
+                </dl>
+
+                <div class="alert alert-warning mb-0">
+                    <strong>Note:</strong> Deactivating a course hides it from the catalog and prevents new enrollments.
+                    Existing enrolled sessions are not affected.
+                </div>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <form asp-action="Deactivate" asp-route-id="@Model.CourseId" method="post">
+                    <button type="submit" class="btn btn-danger">Yes, Deactivate</button>
+                </form>
+                <a asp-action="Details" asp-route-id="@Model.CourseId" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>

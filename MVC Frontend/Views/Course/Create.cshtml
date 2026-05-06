@@ -1,0 +1,127 @@
+@model CourseFormViewModel
+@{
+    ViewData["Title"] = "Create Course";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Courses</a></li>
+        <li class="breadcrumb-item active">Create</li>
+    </ol>
+</nav>
+
+<h2 class="mb-4">Create Course</h2>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Basic Information</h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="CourseCode" class="form-label"></label>
+                            <input asp-for="CourseCode" class="form-control text-uppercase" placeholder="e.g. CS101" />
+                            <span asp-validation-for="CourseCode" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="Title" class="form-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Course title" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"
+                                      placeholder="Brief description of the course content..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Classification</h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="SubjectAreaId" class="form-label"></label>
+                            <select asp-for="SubjectAreaId" asp-items="Model.SubjectAreas" class="form-select">
+                                <option value="">-- Select subject area --</option>
+                            </select>
+                            <span asp-validation-for="SubjectAreaId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CategoryId" class="form-label"></label>
+                            <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                                <option value="">-- Select category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PrerequisiteCourseId" class="form-label"></label>
+                            <select asp-for="PrerequisiteCourseId" asp-items="Model.PrerequisiteCourses" class="form-select">
+                                <option value="">None</option>
+                            </select>
+                            <span asp-validation-for="PrerequisiteCourseId" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Details</h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="DurationHours" class="form-label"></label>
+                            <input asp-for="DurationHours" class="form-control" type="number"
+                                   step="0.5" min="0.5" placeholder="e.g. 24" />
+                            <span asp-validation-for="DurationHours" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="MaxCapacity" class="form-label"></label>
+                            <input asp-for="MaxCapacity" class="form-control" type="number"
+                                   min="1" placeholder="e.g. 20" />
+                            <span asp-validation-for="MaxCapacity" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="EnrollmentFee" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">BHD</span>
+                                <input asp-for="EnrollmentFee" class="form-control" type="number"
+                                       step="0.01" min="0" placeholder="0.00" />
+                            </div>
+                            <span asp-validation-for="EnrollmentFee" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="EquipmentRequirements" class="form-label"></label>
+                            <input asp-for="EquipmentRequirements" class="form-control"
+                                   placeholder="e.g. Projector, Lab computers" />
+                            <span asp-validation-for="EquipmentRequirements" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">Active (visible in catalog)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Create Course</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

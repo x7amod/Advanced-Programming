@@ -1,0 +1,127 @@
+@model IEnumerable<Course>
+@{
+    ViewData["Title"] = "Course Catalog";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Course Catalog</h2>
+    @if (User.IsInRole("Coordinator"))
+    {
+        <a asp-action="Create" class="btn btn-primary">+ Add Course</a>
+    }
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search by title or code..." value="@ViewBag.Search" />
+        </div>
+        <div class="col-md-3">
+            <select name="categoryId" class="form-select" asp-items="ViewBag.Categories">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="subjectAreaId" class="form-select" asp-items="ViewBag.SubjectAreas">
+                <option value="">All Subject Areas</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-secondary">Filter</button>
+            <a asp-action="Index" class="btn btn-link">Clear</a>
+        </div>
+    </div>
+    @if (User.IsInRole("Coordinator"))
+    {
+        <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" name="showInactive" value="true"
+                   id="showInactive" @(ViewBag.ShowInactive == true ? "checked" : "")
+                   onchange="this.form.submit()" />
+            <label class="form-check-label" for="showInactive">Show inactive courses</label>
+        </div>
+    }
+</form>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <p class="fs-5">No courses found.</p>
+        @if (User.IsInRole("Coordinator"))
+        {
+            <a asp-action="Create" class="btn btn-primary">Create the first course</a>
+        }
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var course in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm @(!course.IsActive ? "border-secondary opacity-75" : "")">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="badge bg-secondary">@course.CourseCode</span>
+                            @if (!course.IsActive)
+                            {
+                                <span class="badge bg-warning text-dark">Inactive</span>
+                            }
+                        </div>
+                        <h5 class="card-title mt-2">@course.Title</h5>
+                        <p class="card-text text-muted small mb-2">
+                            @course.SubjectArea?.Name &nbsp;/&nbsp; @course.Category?.Name
+                        </p>
+                        @if (course.Description != null)
+                        {
+                            <p class="card-text small">
+                                @(course.Description.Length > 100
+                                    ? course.Description[..100] + "…"
+                                    : course.Description)
+                            </p>
+                        }
+                        <ul class="list-unstyled small mt-2 mb-0">
+                            <li><strong>Duration:</strong> @course.DurationHours hrs</li>
+                            <li><strong>Capacity:</strong> @course.MaxCapacity</li>
+                            <li><strong>Fee:</strong> BHD @course.EnrollmentFee.ToString("F2")</li>
+                            @if (course.PrerequisiteCourse != null)
+                            {
+                                <li class="text-warning-emphasis">
+                                    <strong>Prerequisite:</strong> @course.PrerequisiteCourse.CourseCode
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex gap-2 flex-wrap">
+                        <a asp-action="Details" asp-route-id="@course.CourseId"
+                           class="btn btn-outline-primary btn-sm">Details</a>
+                        @if (User.IsInRole("Coordinator"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@course.CourseId"
+                               class="btn btn-outline-secondary btn-sm">Edit</a>
+                            @if (course.IsActive)
+                            {
+                                <a asp-action="Deactivate" asp-route-id="@course.CourseId"
+                                   class="btn btn-outline-danger btn-sm ms-auto">Deactivate</a>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
