@@ -37,6 +37,7 @@
                             <a class="nav-link" asp-controller="Course" asp-action="Index">Courses</a>
                         </li>
 
+                        @* ── Trainee nav ─────────────────────────────── *@
                         @if (User.IsInRole("Trainee"))
                         {
                             <li class="nav-item">
@@ -44,18 +45,47 @@
                             </li>
                         }
 
+                        @* ── Instructor nav ──────────────────────────── *@
+                        @if (User.IsInRole("Instructor"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Enrollment" asp-action="MySessions">My Sessions</a>
+                            </li>
+                        }
+
+                        @* ── Training Coordinator nav ────────────────── *@
                         @if (User.IsInRole("Training Coordinator"))
                         {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    Courses
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Course" asp-action="Index">
+                                            Active Courses
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Course" asp-action="Index"
+                                           asp-route-showInactive="true">
+                                            All Courses
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Course" asp-action="Create">
+                                            + Add Course
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button"
                                    data-bs-toggle="dropdown" aria-expanded="false">
                                     Manage
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Course" asp-action="Index"
-                                           asp-route-showInactive="true">All Courses</a>
-                                    </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="Category" asp-action="Index">Categories</a>
                                     </li>
@@ -77,10 +107,19 @@
                                     var initials = displayName.Length > 0
                                         ? displayName[0].ToString().ToUpper()
                                         : "U";
+
+                                    var roleBadge = User.IsInRole("Training Coordinator") ? ("TC",  "bg-warning text-dark")
+                                                  : User.IsInRole("Instructor")           ? ("INS", "bg-info text-dark")
+                                                  : User.IsInRole("Trainee")              ? ("TRN", "bg-success")
+                                                  :                                         ("",    "");
                                 }
                                 <span class="user-chip">
                                     <span class="avatar">@initials</span>
                                     @displayName
+                                    @if (!string.IsNullOrEmpty(roleBadge.Item1))
+                                    {
+                                        <span class="badge @roleBadge.Item2 ms-1" style="font-size:.65rem">@roleBadge.Item1</span>
+                                    }
                                 </span>
                             </li>
                             <li class="nav-item">
