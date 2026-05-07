@@ -1,0 +1,144 @@
+@model Course
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Courses</a></li>
+        <li class="breadcrumb-item active">@Model.CourseCode</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h2 class="mb-1">@Model.Title</h2>
+        <span class="badge bg-secondary me-1">@Model.CourseCode</span>
+        @if (!Model.IsActive)
+        {
+            <span class="badge bg-warning text-dark">Inactive</span>
+        }
+        else
+        {
+            <span class="badge bg-success">Active</span>
+        }
+    </div>
+    @if (User.IsInRole("Coordinator"))
+    {
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.CourseId" class="btn btn-outline-secondary">Edit</a>
+            @if (Model.IsActive)
+            {
+                <a asp-action="Deactivate" asp-route-id="@Model.CourseId" class="btn btn-outline-danger">Deactivate</a>
+            }
+        </div>
+    }
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Course Information</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Subject Area</dt>
+                    <dd class="col-sm-8">@Model.SubjectArea?.Name</dd>
+
+                    <dt class="col-sm-4">Category</dt>
+                    <dd class="col-sm-8">@Model.Category?.Name</dd>
+
+                    <dt class="col-sm-4">Duration</dt>
+                    <dd class="col-sm-8">@Model.DurationHours hours</dd>
+
+                    <dt class="col-sm-4">Max Capacity</dt>
+                    <dd class="col-sm-8">@Model.MaxCapacity students</dd>
+
+                    <dt class="col-sm-4">Enrollment Fee</dt>
+                    <dd class="col-sm-8">BHD @Model.EnrollmentFee.ToString("F2")</dd>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.EquipmentRequirements))
+                    {
+                        <dt class="col-sm-4">Equipment</dt>
+                        <dd class="col-sm-8">@Model.EquipmentRequirements</dd>
+                    }
+
+                    @if (Model.PrerequisiteCourse != null)
+                    {
+                        <dt class="col-sm-4">Prerequisite</dt>
+                        <dd class="col-sm-8">
+                            <a asp-action="Details" asp-route-id="@Model.PrerequisiteCourse.CourseId">
+                                @Model.PrerequisiteCourse.CourseCode – @Model.PrerequisiteCourse.Title
+                            </a>
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Description</h5>
+                    <p class="mb-0">@Model.Description</p>
+                </div>
+            </div>
+        }
+
+        @if (Model.CertificationRequiredCourses.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Part of Certification Tracks</h5>
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var crc in Model.CertificationRequiredCourses)
+                        {
+                            <li>@crc.CertificationTrack?.Name</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Upcoming Sessions</h5>
+                @{
+                    var upcoming = Model.CourseSessions
+                        .Where(s => s.SessionDate >= DateTime.Now)
+                        .OrderBy(s => s.SessionDate)
+                        .Take(5)
+                        .ToList();
+                }
+                @if (!upcoming.Any())
+                {
+                    <p class="text-muted small mb-0">No upcoming sessions scheduled.</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var session in upcoming)
+                        {
+                            <li class="list-group-item px-0">
+                                <div class="fw-semibold">@session.SessionDate.ToString("ddd, dd MMM yyyy")</div>
+                                <div class="small text-muted">
+                                    @session.StartTime.ToString("HH:mm") – @session.EndTime.ToString("HH:mm")
+                                </div>
+                                <div class="small">
+                                    Seats: @(session.MaxCapacity - session.CurrentEnrollment) / @session.MaxCapacity remaining
+                                </div>
+                                <span class="badge bg-light text-dark border">@session.Status?.ToString()</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Back to Catalog</a>
+</div>

@@ -1,0 +1,240 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Sign In";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In – Training Institute</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #fff; -webkit-font-smoothing: antialiased; }
+
+        .auth-shell {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+        }
+
+        /* ── Left panel ── */
+        .auth-left {
+            display: flex;
+            flex-direction: column;
+            padding: 32px 48px;
+            justify-content: space-between;
+        }
+        .auth-logo { height: 28px; width: auto; }
+        .auth-form-wrap {
+            max-width: 400px;
+            width: 100%;
+            align-self: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 0;
+        }
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1A1A2E;
+            letter-spacing: -0.01em;
+            margin-bottom: 8px;
+        }
+        .auth-subtitle {
+            font-size: 14px;
+            color: #6B7280;
+            margin-bottom: 28px;
+            line-height: 22px;
+        }
+        .auth-footer-text {
+            font-size: 12px;
+            color: #9CA3AF;
+            line-height: 16px;
+        }
+
+        /* ── Fields ── */
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: 12px; font-weight: 600; color: #1A1A2E; }
+        .field .hint { font-size: 12px; color: #6B7280; }
+        .field .error { font-size: 12px; color: #991B1B; font-weight: 500; }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #E5E7EB;
+            border-radius: 4px;
+            background: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #1A1A2E;
+            outline: none;
+            transition: border-color 150ms, box-shadow 150ms;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #0D9488;
+            box-shadow: 0 0 0 3px rgba(13,148,136,.18);
+        }
+        input::placeholder { color: #9CA3AF; }
+
+        /* ── Buttons ── */
+        .btn-primary-full {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 10px 16px;
+            background: #0D9488;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 150ms;
+        }
+        .btn-primary-full:hover { background: #0F766E; }
+
+        /* ── Remember + forgot ── */
+        .auth-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .auth-check-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #1A1A2E;
+            cursor: pointer;
+        }
+        input[type="checkbox"] { accent-color: #0D9488; width: 14px; height: 14px; }
+        .auth-link { font-size: 13px; font-weight: 500; color: #0D9488; text-decoration: none; }
+        .auth-link:hover { color: #0F766E; }
+
+        /* ── Bottom text ── */
+        .auth-switch {
+            text-align: center;
+            font-size: 13px;
+            color: #6B7280;
+        }
+        .auth-switch a { color: #0D9488; font-weight: 600; text-decoration: none; }
+        .auth-switch a:hover { color: #0F766E; }
+
+        /* ── Validation summary ── */
+        .validation-summary { background: #FEE2E2; color: #991B1B; border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+
+        /* ── Right panel ── */
+        .auth-right {
+            position: relative;
+            background-image: url('/assets/auth-panel.svg');
+            background-size: cover;
+            background-position: center top;
+            padding: 48px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .auth-right-eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.85;
+            margin-bottom: 12px;
+        }
+        .auth-right-headline {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 40px;
+            letter-spacing: -0.01em;
+            max-width: 380px;
+            margin-bottom: 14px;
+        }
+        .auth-right-body {
+            font-size: 15px;
+            line-height: 24px;
+            opacity: 0.88;
+            max-width: 380px;
+        }
+
+        @@media (max-width: 768px) {
+            .auth-shell { grid-template-columns: 1fr; }
+            .auth-right { display: none; }
+            .auth-left { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-shell">
+
+    <!-- Left: form -->
+    <div class="auth-left">
+        <img class="auth-logo" src="@Url.Content("~/assets/logo.svg")" alt="Training Institute" />
+
+        <div class="auth-form-wrap">
+            <div class="auth-title">Sign in to Training Institute</div>
+            <div class="auth-subtitle">Welcome back. Enter your credentials to continue.</div>
+
+            @* Abdullah wires: asp-controller="Account" asp-action="Login" method="post" *@
+            <form method="post" action="#" style="display:flex; flex-direction:column; gap:14px;">
+                @Html.AntiForgeryToken()
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="validation-summary">@ViewBag.Error</div>
+                }
+
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" name="email" placeholder="you@bticademy.bh" autocomplete="username" />
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••••" autocomplete="current-password" />
+                </div>
+
+                <div class="auth-row" style="margin-top:4px;">
+                    <label class="auth-check-label">
+                        <input type="checkbox" name="rememberMe" />
+                        Remember me
+                    </label>
+                    <a class="auth-link" href="#">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-primary-full">Sign in</button>
+
+                <div class="auth-switch">
+                    New to Training Institute?
+                    <a asp-controller="Account" asp-action="Register">Create an account</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="auth-footer-text">© @DateTime.Now.Year Training Institute · Bahrain Polytechnic</div>
+    </div>
+
+    <!-- Right: brand panel -->
+    <div class="auth-right">
+        <div class="auth-right-eyebrow">Training &amp; Certification</div>
+        <div class="auth-right-headline">Manage every step from enrollment to certification.</div>
+        <div class="auth-right-body">Bahrain's professional training platform for trainees, instructors, and coordinators.</div>
+    </div>
+
+</div>
+</body>
+</html>
