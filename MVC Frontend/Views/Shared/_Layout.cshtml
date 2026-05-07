@@ -125,11 +125,21 @@
 
     </aside>
 
+    <!-- Sidebar overlay (mobile tap-to-close backdrop) -->
+    <div class="tl-sidebar-overlay" id="tl-sidebar-overlay"></div>
+
     <!-- ══════════════ MAIN ══════════════ -->
     <div class="tl-main">
 
         <!-- ── Topbar ── -->
         <header class="tl-topbar">
+
+            <!-- Hamburger (mobile only) -->
+            <button class="tl-hamburger" id="tl-hamburger" type="button" title="Open menu" aria-label="Open menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
 
             <!-- Page title -->
             <div class="tl-topbar-title">@(ViewData["Title"] ?? "Training Institute")</div>
@@ -208,6 +218,18 @@
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
+<script>
+(function () {
+    var btn     = document.getElementById('tl-hamburger');
+    var sidebar = document.querySelector('.tl-sidebar');
+    var overlay = document.getElementById('tl-sidebar-overlay');
+    if (!btn) return;
+    function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+    function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+    btn.addEventListener('click', function () { sidebar.classList.contains('open') ? close() : open(); });
+    overlay.addEventListener('click', close);
+})();
+</script>
 </body>
 </html>
 

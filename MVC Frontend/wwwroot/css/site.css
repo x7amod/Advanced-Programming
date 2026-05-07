@@ -512,6 +512,70 @@ html, body {
 .breadcrumb-item a:hover { color: var(--tl-primary-hover); }
 .breadcrumb-item.active { color: var(--tl-text-2); }
 
+/* ── Hamburger (mobile only, hidden on desktop) ─────────────────── */
+.tl-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--tl-surface-2);
+  border-radius: var(--tl-r-sm);
+  color: var(--tl-text-2);
+  cursor: pointer;
+  flex: none;
+  transition: background 150ms;
+}
+.tl-hamburger svg { width: 18px; height: 18px; }
+.tl-hamburger:hover { background: var(--tl-border); color: var(--tl-text-1); }
+
+/* ── Sidebar overlay backdrop (mobile) ──────────────────────────── */
+.tl-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+}
+
+/* ── Responsive breakpoints ─────────────────────────────────────── */
+@media (max-width: 900px) {
+  .tl-search { width: 180px; }
+}
+
+@media (max-width: 768px) {
+  /* Sidebar slides off-screen, overlays when open */
+  .tl-sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+    transition: left 240ms cubic-bezier(.4,0,.2,1);
+  }
+  .tl-sidebar.open {
+    left: 0;
+    box-shadow: 4px 0 32px rgba(0,0,0,.14);
+  }
+  .tl-sidebar-overlay.visible { display: block; }
+
+  /* Main fills the full width */
+  .tl-main { width: 100%; }
+
+  /* Topbar: tighter padding, show hamburger, hide search */
+  .tl-topbar { padding: 0 16px; gap: 8px; }
+  .tl-topbar-title { font-size: 17px; }
+  .tl-search { display: none; }
+  .tl-hamburger { display: flex; }
+
+  /* User info text hidden on very small screens */
+  .tl-user-info { display: none; }
+
+  /* Tighter content padding */
+  .tl-content { padding: 16px; }
+}
+
 /* Page heading pattern */
 .tl-page-heading {
   margin-bottom: 24px;
