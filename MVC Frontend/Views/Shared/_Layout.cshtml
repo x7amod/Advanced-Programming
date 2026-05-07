@@ -175,8 +175,8 @@
                 else
                 {
                     @* Auth buttons — Abdullah wires asp-controller="Account" *@
-                    <a class="tl-btn-ghost" href="#">Login</a>
-                    <a class="tl-btn-primary" href="#">Sign up</a>
+                    <a class="tl-btn-ghost" asp-controller="Account" asp-action="Login">Login</a>
+                    <a class="tl-btn-primary" asp-controller="Account" asp-action="Register">Sign up</a>
                 }
             </div>
 
@@ -232,3 +232,4 @@
         );
     }
 }
+..
