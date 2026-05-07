@@ -9,171 +9,197 @@
     <link rel="stylesheet" href="~/MVC_Frontend.styles.css" asp-append-version="true" />
 </head>
 <body>
+@{
+    var ctrl   = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
 
-    <!-- ── Navbar ─────────────────────────────────────────────── -->
-    <header>
-        <nav class="navbar navbar-expand-lg site-navbar">
-            <div class="container">
+<div class="tl-shell">
 
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                    <span class="brand-icon">&#127891;</span>
-                    Training Institute
+    <!-- ── Sidebar ──────────────────────────────────────────────── -->
+    <aside class="tl-sidebar">
+
+        <!-- Logo -->
+        <div class="tl-sidebar-logo">
+            <img src="~/assets/logo-mark.svg" alt="Logo" />
+            <span class="tl-sidebar-logo-name">Training Institute</span>
+        </div>
+
+        @* ── Trainee nav ───────────────────────────────────────── *@
+        @if (User.IsInRole("Trainee"))
+        {
+            <div class="tl-sidebar-role">Trainee</div>
+            <nav class="tl-nav">
+                <a class="tl-nav-item @(ctrl=="Home" ? "active":"")"
+                   asp-controller="Home" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12 12 4l9 8"/><path d="M5 10v9h14v-9"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a class="tl-nav-item @(ctrl=="Course" ? "active":"")"
+                   asp-controller="Course" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M4 5v11"/>
+                    </svg>
+                    Browse courses
+                </a>
+                <a class="tl-nav-item @(ctrl=="Enrollment" && action=="MyEnrollments" ? "active":"")"
+                   asp-controller="Enrollment" asp-action="MyEnrollments">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>
+                    </svg>
+                    My enrollments
+                </a>
+            </nav>
+        }
+
+        @* ── Instructor nav ────────────────────────────────────── *@
+        @if (User.IsInRole("Instructor"))
+        {
+            <div class="tl-sidebar-role">Instructor</div>
+            <nav class="tl-nav">
+                <a class="tl-nav-item @(ctrl=="Home" ? "active":"")"
+                   asp-controller="Home" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12 12 4l9 8"/><path d="M5 10v9h14v-9"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a class="tl-nav-item @(ctrl=="Course" ? "active":"")"
+                   asp-controller="Course" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M4 5v11"/>
+                    </svg>
+                    Browse courses
+                </a>
+                <a class="tl-nav-item @(ctrl=="Enrollment" && action=="MySessions" ? "active":"")"
+                   asp-controller="Enrollment" asp-action="MySessions">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>
+                    </svg>
+                    My sessions
+                </a>
+            </nav>
+        }
+
+        @* ── Training Coordinator nav ──────────────────────────── *@
+        @if (User.IsInRole("Training Coordinator"))
+        {
+            <div class="tl-sidebar-role">Coordinator</div>
+            <nav class="tl-nav">
+                <a class="tl-nav-item @(ctrl=="Home" ? "active":"")"
+                   asp-controller="Home" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12 12 4l9 8"/><path d="M5 10v9h14v-9"/>
+                    </svg>
+                    Dashboard
                 </a>
 
-                <button class="navbar-toggler border-0" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#mainNav"
-                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                <div class="tl-nav-section">Courses</div>
+                <a class="tl-nav-item @(ctrl=="Course" && action!="Create" ? "active":"")"
+                   asp-controller="Course" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M4 5v11"/>
+                    </svg>
+                    Courses
+                </a>
+                <a class="tl-nav-item @(ctrl=="Course" && action=="Create" ? "active":"")"
+                   asp-controller="Course" asp-action="Create">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Add course
+                </a>
 
-                <div class="collapse navbar-collapse" id="mainNav">
+                <div class="tl-nav-section">Manage</div>
+                <a class="tl-nav-item @(ctrl=="Category" ? "active":"")"
+                   asp-controller="Category" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="9" r="3.5"/><path d="M2.5 19a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="10" r="2.8"/><path d="M21.5 18a4.5 4.5 0 0 0-6-3.4"/>
+                    </svg>
+                    Categories
+                </a>
+                <a class="tl-nav-item @(ctrl=="SubjectArea" ? "active":"")"
+                   asp-controller="SubjectArea" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+                    </svg>
+                    Subject areas
+                </a>
+                <a class="tl-nav-item @(ctrl=="Enrollment" ? "active":"")"
+                   asp-controller="Course" asp-action="Index"
+                   asp-route-showInactive="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 12l2 2 4-4"/>
+                    </svg>
+                    All courses
+                </a>
+            </nav>
+        }
 
-                    <!-- Left nav links -->
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Course" asp-action="Index">Courses</a>
-                        </li>
+        @* ── Unauthenticated: show public nav ─────────────────── *@
+        @if (!User.Identity!.IsAuthenticated)
+        {
+            <nav class="tl-nav mt-2">
+                <a class="tl-nav-item @(ctrl=="Home" ? "active":"")"
+                   asp-controller="Home" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12 12 4l9 8"/><path d="M5 10v9h14v-9"/>
+                    </svg>
+                    Home
+                </a>
+                <a class="tl-nav-item @(ctrl=="Course" ? "active":"")"
+                   asp-controller="Course" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M4 5v11"/>
+                    </svg>
+                    Browse courses
+                </a>
+            </nav>
+        }
 
-                        @* ── Trainee nav ─────────────────────────────── *@
-                        @if (User.IsInRole("Trainee"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Enrollment" asp-action="MyEnrollments">My Enrollments</a>
-                            </li>
-                        }
+        <!-- Abdullah's sign-out section goes here -->
+        <div class="tl-sidebar-bottom">
+            {{-- Abdullah: sign-out button --}}
+        </div>
 
-                        @* ── Instructor nav ──────────────────────────── *@
-                        @if (User.IsInRole("Instructor"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Enrollment" asp-action="MySessions">My Sessions</a>
-                            </li>
-                        }
+    </aside>
 
-                        @* ── Training Coordinator nav ────────────────── *@
-                        @if (User.IsInRole("Training Coordinator"))
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button"
-                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                    Courses
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Course" asp-action="Index">
-                                            Active Courses
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Course" asp-action="Index"
-                                           asp-route-showInactive="true">
-                                            All Courses
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Course" asp-action="Create">
-                                            + Add Course
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button"
-                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                    Manage
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Category" asp-action="Index">Categories</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="SubjectArea" asp-action="Index">Subject Areas</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                    </ul>
+    <!-- ── Main area ─────────────────────────────────────────────── -->
+    <div class="tl-main">
 
-                    <!-- Right: user info / auth -->
-                    <ul class="navbar-nav ms-auto align-items-center gap-1">
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                @{
-                                    var displayName = User.Identity.Name ?? "User";
-                                    var initials = displayName.Length > 0
-                                        ? displayName[0].ToString().ToUpper()
-                                        : "U";
+        <!-- Topbar -->
+        <header class="tl-topbar">
+            <div class="tl-topbar-title">@(ViewData["Title"] ?? "Training Institute")</div>
+            {{-- Abdullah: search, notifications bell, user avatar --}}
+        </header>
 
-                                    var roleBadge = User.IsInRole("Training Coordinator") ? ("TC",  "bg-warning text-dark")
-                                                  : User.IsInRole("Instructor")           ? ("INS", "bg-info text-dark")
-                                                  : User.IsInRole("Trainee")              ? ("TRN", "bg-success")
-                                                  :                                         ("",    "");
-                                }
-                                <span class="user-chip">
-                                    <span class="avatar">@initials</span>
-                                    @displayName
-                                    @if (!string.IsNullOrEmpty(roleBadge.Item1))
-                                    {
-                                        <span class="badge @roleBadge.Item2 ms-1" style="font-size:.65rem">@roleBadge.Item1</span>
-                                    }
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                        }
-                    </ul>
-
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- ── Main Content ───────────────────────────────────────── -->
-    <main role="main">
-        <div class="container page-container">
-            @if (TempData["GlobalSuccess"] != null)
+        <!-- Content -->
+        <main class="tl-content" role="main">
+            @if (TempData["Success"] != null)
             {
-                <div class="alert alert-success alert-dismissible fade show mb-3">
-                    @TempData["GlobalSuccess"]
+                <div class="alert alert-success alert-dismissible fade show mb-4">
+                    @TempData["Success"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
-            @if (TempData["GlobalError"] != null)
+            @if (TempData["Error"] != null)
             {
-                <div class="alert alert-danger alert-dismissible fade show mb-3">
-                    @TempData["GlobalError"]
+                <div class="alert alert-danger alert-dismissible fade show mb-4">
+                    @TempData["Error"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
             @RenderBody()
-        </div>
-    </main>
+        </main>
 
-    <!-- ── Footer ─────────────────────────────────────────────── -->
-    <footer class="site-footer">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 py-3">
-            <span class="footer-brand">Training Institute</span>
-            <span>&copy; @DateTime.Now.Year &nbsp;·&nbsp; All rights reserved</span>
-            <span>
-                Bahrain Polytechnic &nbsp;·&nbsp; IT8118 Advanced Programming
-            </span>
-        </div>
-    </footer>
+    </div>
+</div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
