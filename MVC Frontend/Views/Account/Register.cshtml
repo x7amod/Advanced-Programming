@@ -2,6 +2,10 @@
     Layout = null;
     ViewData["Title"] = "Create Account";
 }
+
+@model MVC_Frontend.Models.RegisterViewModel
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -201,64 +205,75 @@
             <div class="auth-subtitle">Join as a trainee. Instructors and coordinators are invited by staff.</div>
 
             @* Abdullah wires: asp-controller="Account" asp-action="Register" method="post" *@
-            <form method="post" action="#" class="form-grid">
-                @Html.AntiForgeryToken()
+                <form asp-controller="Account" asp-action="Register" method="post" class="form-grid">
+                    @Html.AntiForgeryToken()
 
-                @if (ViewBag.Error != null)
-                {
-                    <div class="validation-summary">@ViewBag.Error</div>
-                }
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="validation-summary">@ViewBag.Error</div>
+                    }
 
-                <div class="field">
-                    <label for="firstName">First name</label>
-                    <input type="text" id="firstName" name="firstName" placeholder="Ahmed" />
-                </div>
+                    <div class="field">
+                        <label asp-for="FirstName">First name</label>
+                        <input asp-for="FirstName" placeholder="Ahmed" />
+                    </div>
 
-                <div class="field">
-                    <label for="lastName">Last name</label>
-                    <input type="text" id="lastName" name="lastName" placeholder="Al-Mansoori" />
-                </div>
+                    <div class="field">
+                        <label asp-for="LastName">Last name</label>
+                        <input asp-for="LastName" placeholder="Al-Mansoori" />
+                    </div>
 
-                <div class="field col-full">
-                    <label for="email">Email address</label>
-                    <input type="email" id="email" name="email" placeholder="you@example.bh" autocomplete="email" />
-                </div>
+                    <div class="field col-full">
+                        <label asp-for="Email">Email address</label>
+                        <input asp-for="Email" placeholder="you@example.bh" autocomplete="email" />
+                    </div>
 
-                <div class="field">
-                    <label for="dob">Date of birth</label>
-                    <input type="date" id="dob" name="dateOfBirth" />
-                </div>
+                    <div class="field">
+                        <label asp-for="DateOfBirth">Date of birth</label>
+                        <input asp-for="DateOfBirth" type="date" />
+                    </div>
 
-                <div class="field">
-                    <label for="phone">Phone number</label>
-                    <input type="tel" id="phone" name="phone" placeholder="+973 3300 1234" />
-                </div>
+                    <div class="field">
+                        <label asp-for="Phone">Phone number</label>
+                        <input asp-for="Phone" placeholder="+973 3300 1234" />
+                    </div>
 
-                <div class="field col-full">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••••" autocomplete="new-password" />
-                    <span class="hint">Minimum 8 characters with one number.</span>
-                </div>
+                    <div class="field col-full">
+                        <label asp-for="Password">Password</label>
+                        <input asp-for="Password" placeholder="••••••••••" autocomplete="new-password" />
+                        <span class="hint">Minimum 8 characters with one number.</span>
+                    </div>
 
-                <div class="field col-full">
-                    <label for="confirmPassword">Confirm password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••••" autocomplete="new-password" />
-                </div>
+                    <div class="field col-full">
+                        <label asp-for="ConfirmPassword">Confirm password</label>
+                        <input asp-for="ConfirmPassword" placeholder="••••••••••" autocomplete="new-password" />
+                    </div>
 
-                <label class="auth-check-label col-full">
-                    <input type="checkbox" name="agreeTerms" />
-                    <span>
-                        I agree to the <a class="auth-link" href="#">terms of service</a>
-                        and <a class="auth-link" href="#">privacy policy</a>.
-                    </span>
-                </label>
+                <!--not final actually..-->
+                    <div class="field col-full">
+                        <label asp-for="Address">Address</label>
+                        <input asp-for="Address" placeholder="Villa 14, Road 22, Block 320, Riffa" />
+                    </div>
 
-                <div class="col-full" style="display:flex; gap:10px; margin-top:4px;">
-                    <a class="btn-secondary" asp-controller="Account" asp-action="Login">Back to sign in</a>
-                    <button type="submit" class="btn-primary">Create account</button>
-                </div>
+                    <div class="field col-full">
+                        <label asp-for="EmergencyContact">Emergency contact number</label>
+                        <input asp-for="EmergencyContact" placeholder="+973 3900 1234" />
+                    </div>
 
-            </form>
+                    <label class="auth-check-label col-full">
+                        <input type="checkbox" asp-for="AgreeTerms" />
+                        <span>
+                            I agree to the <a class="auth-link" href="#">terms of service</a>
+                            and <a class="auth-link" href="#">privacy policy</a>.
+                        </span>
+                    </label>
+
+                    <div class="col-full" style="display:flex; gap:10px; margin-top:4px;">
+                        <a class="btn-secondary" asp-controller="Account" asp-action="Login">Back to sign in</a>
+                        <button type="submit" class="btn-primary">Create account</button>
+                    </div>
+
+                </form>
         </div>
 
         <div class="auth-footer-text">© @DateTime.Now.Year Training Institute · Bahrain Polytechnic</div>
