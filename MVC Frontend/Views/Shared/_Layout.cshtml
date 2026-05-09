@@ -114,12 +114,17 @@
             @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 <!-- Abdullah wires this: asp-controller="Account" asp-action="Logout" -->
-                <a class="tl-signout" href="#">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 4h5v16h-5"/><path d="m10 8-4 4 4 4"/><path d="M6 12h11"/>
-                    </svg>
-                    Sign out
-                </a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="tl-signout" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 4h5v16h-5" />
+                                <path d="m10 8-4 4 4 4" />
+                                <path d="M6 12h11" />
+                            </svg>
+                            Sign out
+                        </button>
+                    </form>
             }
         </div>
 
@@ -254,4 +259,3 @@
         );
     }
 }
-..

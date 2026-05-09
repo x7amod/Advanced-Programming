@@ -7,7 +7,7 @@ using Web_API.Models;
 
 namespace MVC_Frontend.Controllers
 {
-    [Authorize(Roles = "Coordinator")]
+    [Authorize(Roles = AppRoles.Coordinator)]
     public class CategoryController : Controller
     {
         private readonly TrainingInstituteDBContext _context;

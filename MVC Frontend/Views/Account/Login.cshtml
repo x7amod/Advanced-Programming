@@ -2,6 +2,8 @@
     Layout = null;
     ViewData["Title"] = "Sign In";
 }
+
+@model MVC_Frontend.Models.LoginViewModel
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -190,7 +192,7 @@
             <div class="auth-subtitle">Welcome back. Enter your credentials to continue.</div>
 
             @* Abdullah wires: asp-controller="Account" asp-action="Login" method="post" *@
-            <form method="post" action="#" style="display:flex; flex-direction:column; gap:14px;">
+                <form asp-controller="Account" asp-action="Login" method="post" style="display:flex; flex-direction:column; gap:14px;">
                 @Html.AntiForgeryToken()
 
                 @if (ViewBag.Error != null)
@@ -198,23 +200,23 @@
                     <div class="validation-summary">@ViewBag.Error</div>
                 }
 
-                <div class="field">
-                    <label for="email">Email address</label>
-                    <input type="email" id="email" name="email" placeholder="you@bticademy.bh" autocomplete="username" />
-                </div>
+                    <div class="field">
+                        <label asp-for="Email">Email address</label>
+                        <input asp-for="Email" placeholder="you@bticademy.bh" autocomplete="username" />
+                    </div>
 
-                <div class="field">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••••" autocomplete="current-password" />
-                </div>
+                    <div class="field">
+                        <label asp-for="Password">Password</label>
+                        <input asp-for="Password" placeholder="••••••••••" autocomplete="current-password" />
+                    </div>
 
-                <div class="auth-row" style="margin-top:4px;">
-                    <label class="auth-check-label">
-                        <input type="checkbox" name="rememberMe" />
-                        Remember me
-                    </label>
-                    <a class="auth-link" href="#">Forgot password?</a>
-                </div>
+                    <div class="auth-row" style="margin-top:4px;">
+                        <label class="auth-check-label">
+                            <input type="checkbox" asp-for="RememberMe" />
+                            Remember me
+                        </label>
+                        <a class="auth-link" href="#">Forgot password?</a>
+                    </div>
 
                 <button type="submit" class="btn-primary-full">Sign in</button>
 
