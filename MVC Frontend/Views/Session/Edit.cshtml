@@ -1,0 +1,162 @@
+@model SessionFormViewModel
+@{
+    ViewData["Title"] = "Edit Session";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Sessions</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.SessionId">Session #@Model.SessionId</a></li>
+        <li class="breadcrumb-item active">Edit</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Edit Session #@Model.SessionId</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-9">
+        <form asp-action="Edit" method="post">
+            <input asp-for="SessionId" type="hidden" />
+            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+            <!-- Course & Instructor -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Course & Instructor</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CourseId" class="form-label"></label>
+                            <select asp-for="CourseId" asp-items="Model.Courses" class="form-select">
+                                <option value="">— Select course —</option>
+                            </select>
+                            <span asp-validation-for="CourseId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="InstructorId" class="form-label"></label>
+                            <select asp-for="InstructorId" asp-items="Model.Instructors" class="form-select">
+                                <option value="">— Select instructor —</option>
+                            </select>
+                            <span asp-validation-for="InstructorId" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Schedule</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="SessionDate" class="form-label"></label>
+                            <input asp-for="SessionDate" type="date" class="form-control" />
+                            <span asp-validation-for="SessionDate" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="StartTime" class="form-label"></label>
+                            <input asp-for="StartTime" type="time" class="form-control" />
+                            <span asp-validation-for="StartTime" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="EndTime" class="form-label"></label>
+                            <input asp-for="EndTime" type="time" class="form-control" />
+                            <span asp-validation-for="EndTime" class="text-danger small"></span>
+                            <div class="form-text small" id="durationHint"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classroom & Capacity -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Classroom & Capacity</h5>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label asp-for="ClassroomId" class="form-label"></label>
+                            <select asp-for="ClassroomId" asp-items="Model.Classrooms" class="form-select">
+                                <option value="">— Select classroom —</option>
+                            </select>
+                            <span asp-validation-for="ClassroomId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="MaxCapacity" class="form-label"></label>
+                            <input asp-for="MaxCapacity" type="number" class="form-control" min="1" max="1000" />
+                            <span asp-validation-for="MaxCapacity" class="text-danger small"></span>
+                            <div class="form-text small">Cannot be reduced below current enrollment count.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Status</h5>
+                    <div class="col-md-4">
+                        <label asp-for="StatusId" class="form-label"></label>
+                        <select asp-for="StatusId" asp-items="Model.Statuses" class="form-select"></select>
+                        <span asp-validation-for="StatusId" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="Details" asp-route-id="@Model.SessionId" class="btn btn-secondary">Cancel</a>
+                <a asp-action="Delete" asp-route-id="@Model.SessionId" class="btn btn-outline-danger ms-auto">Delete Session</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Conflict reminder panel -->
+    <div class="col-lg-3">
+        <div class="card border-info">
+            <div class="card-body">
+                <h6 class="card-title text-info">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Edit Notes
+                </h6>
+                <ul class="small text-muted mb-0">
+                    <li>Changing the instructor or time will re-validate scheduling conflicts.</li>
+                    <li>Max capacity cannot be set below the number of existing enrollments.</li>
+                    <li>Cancelled sessions with enrollments cannot be deleted; change the status instead.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+    (function () {
+        var startInput = document.querySelector('input[name="StartTime"]');
+        var endInput   = document.querySelector('input[name="EndTime"]');
+        var hint       = document.getElementById('durationHint');
+
+        function updateDuration() {
+            if (!startInput.value || !endInput.value) { hint.textContent = ''; return; }
+            var [sh, sm] = startInput.value.split(':').map(Number);
+            var [eh, em] = endInput.value.split(':').map(Number);
+            var mins = (eh * 60 + em) - (sh * 60 + sm);
+            if (mins <= 0) {
+                hint.textContent = '⚠ End time must be after start time.';
+                hint.className = 'form-text small text-danger';
+            } else {
+                var h = Math.floor(mins / 60), m = mins % 60;
+                hint.textContent = 'Duration: ' + (h > 0 ? h + 'h ' : '') + (m > 0 ? m + 'min' : '');
+                hint.className = 'form-text small text-muted';
+            }
+        }
+
+        startInput.addEventListener('change', updateDuration);
+        endInput.addEventListener('change', updateDuration);
+        updateDuration();
+    })();
+    </script>
+}

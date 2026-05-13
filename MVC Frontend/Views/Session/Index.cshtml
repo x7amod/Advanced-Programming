@@ -1,0 +1,155 @@
+@model IEnumerable<CourseSession>
+@{
+    ViewData["Title"] = User.IsInRole("Training Coordinator") ? "All Sessions" :
+                        User.IsInRole("Instructor") ? "My Sessions" : "Available Sessions";
+    bool isCoordinator = User.IsInRole("Training Coordinator");
+    var instructorNames = ViewBag.InstructorNames as Dictionary<int, string> ?? new Dictionary<int, string>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">@ViewData["Title"]</h2>
+    <div class="d-flex gap-2">
+        <a asp-action="Schedule" class="btn btn-outline-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                <rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>
+            </svg>
+            Calendar view
+        </a>
+        @if (isCoordinator)
+        {
+            <a asp-action="Create" class="btn btn-primary">+ Schedule Session</a>
+        }
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" class="card mb-4">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Course</label>
+                <select name="courseId" class="form-select form-select-sm" asp-items="ViewBag.Courses">
+                    <option value="">All courses</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Status</label>
+                <select name="statusId" class="form-select form-select-sm" asp-items="ViewBag.Statuses">
+                    <option value="">All statuses</option>
+                </select>
+            </div>
+            @if (isCoordinator)
+            {
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Instructor</label>
+                    <select name="instructorId" class="form-select form-select-sm" asp-items="ViewBag.Instructors">
+                        <option value="">All instructors</option>
+                    </select>
+                </div>
+            }
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">From</label>
+                <input type="date" name="dateFrom" class="form-control form-control-sm" value="@ViewBag.DateFrom" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">To</label>
+                <input type="date" name="dateTo" class="form-control form-control-sm" value="@ViewBag.DateTo" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+                <a asp-action="Index" class="btn btn-sm btn-link">Clear</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="mb-3 opacity-50">
+            <rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>
+        </svg>
+        <p class="fs-5 mb-1">No sessions found.</p>
+        <p class="small">Try adjusting the filters above.</p>
+        @if (isCoordinator)
+        {
+            <a asp-action="Create" class="btn btn-primary mt-2">Schedule the first session</a>
+        }
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Instructor</th>
+                        <th>Classroom</th>
+                        <th>Seats</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var session in Model)
+                    {
+                        var statusBadge = session.Status?.Status switch
+                        {
+                            "Scheduled"  => "bg-primary",
+                            "Ongoing"    => "bg-success",
+                            "Completed"  => "bg-secondary",
+                            "Cancelled"  => "bg-danger",
+                            _            => "bg-light text-dark"
+                        };
+                        var seatsLeft = session.MaxCapacity - session.CurrentEnrollment;
+                        var seatsClass = seatsLeft == 0 ? "text-danger fw-semibold"
+                                       : seatsLeft <= 3 ? "text-warning fw-semibold"
+                                       : "text-success";
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@session.Course?.Title</div>
+                                <div class="small text-muted">@session.Course?.CourseCode</div>
+                            </td>
+                            <td>
+                                <div>@session.SessionDate.ToString("ddd, dd MMM yyyy")</div>
+                            </td>
+                            <td class="text-nowrap">
+                                @session.StartTime.ToString("HH:mm") – @session.EndTime.ToString("HH:mm")
+                            </td>
+                            <td class="small">@(instructorNames.TryGetValue(session.InstructorId, out var iName) ? iName : $"Instructor {session.InstructorId}")</td>
+                            <td class="small">
+                                <div>@session.Classroom?.Name</div>
+                                <div class="text-muted">@session.Classroom?.Building</div>
+                            </td>
+                            <td>
+                                <span class="@seatsClass">@seatsLeft</span>
+                                <span class="text-muted small">/ @session.MaxCapacity</span>
+                            </td>
+                            <td>
+                                <span class="badge @statusBadge">@session.Status?.Status</span>
+                            </td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Details" asp-route-id="@session.SessionId"
+                                   class="btn btn-sm btn-outline-primary">View</a>
+                                @if (isCoordinator)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@session.SessionId"
+                                       class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@session.SessionId"
+                                       class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-muted small">
+            Showing @Model.Count() session(s)
+        </div>
+    </div>
+}
