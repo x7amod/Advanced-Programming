@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-[Table("Course_Session")]
+[Table("CourseSession")]
 public partial class CourseSession
 {
     [Key]

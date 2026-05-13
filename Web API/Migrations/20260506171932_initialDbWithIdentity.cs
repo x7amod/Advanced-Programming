@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Web_API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMerged : Migration
+    public partial class initialDbWithIdentity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -71,7 +71,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Certification_Status",
+                name: "CertificationStatus",
                 columns: table => new
                 {
                     statusID = table.Column<int>(type: "int", nullable: false)
@@ -80,11 +80,11 @@ namespace Web_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("Certification_Status_pk", x => x.statusID);
+                    table.PrimaryKey("CertificationStatus_pk", x => x.statusID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Certification_Track",
+                name: "CertificationTrack",
                 columns: table => new
                 {
                     certificationTrackID = table.Column<int>(type: "int", nullable: false)
@@ -134,7 +134,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Course_Session_Status",
+                name: "CourseSessionStatus",
                 columns: table => new
                 {
                     StatusID = table.Column<int>(type: "int", nullable: false)
@@ -143,11 +143,11 @@ namespace Web_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("Course_Session_Status_pk", x => x.StatusID);
+                    table.PrimaryKey("CourseSessionStatus_pk", x => x.StatusID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Enrollment_Status",
+                name: "EnrollmentStatus",
                 columns: table => new
                 {
                     enrollmentStatusID = table.Column<int>(type: "int", nullable: false)
@@ -156,7 +156,7 @@ namespace Web_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("Enrollment_Status_pk", x => x.enrollmentStatusID);
+                    table.PrimaryKey("EnrollmentStatus_pk", x => x.enrollmentStatusID);
                 });
 
             migrationBuilder.CreateTable(
@@ -195,19 +195,33 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Payment_Status",
+                name: "PaymentMethod",
                 columns: table => new
                 {
-                    statusID = table.Column<int>(type: "int", nullable: false),
+                    paymentMethodID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PaymentMethod_pk", x => x.paymentMethodID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentStatus",
+                columns: table => new
+                {
+                    statusID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("Payment_Status_pk", x => x.statusID);
+                    table.PrimaryKey("PaymentStatus_pk", x => x.statusID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Subject_Area",
+                name: "SubjectArea",
                 columns: table => new
                 {
                     subjectAreaID = table.Column<int>(type: "int", nullable: false)
@@ -237,7 +251,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Waitlist_Status",
+                name: "WaitlistStatus",
                 columns: table => new
                 {
                     statusID = table.Column<int>(type: "int", nullable: false)
@@ -246,7 +260,7 @@ namespace Web_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("Waitlist_Status_pk", x => x.statusID);
+                    table.PrimaryKey("WaitlistStatus_pk", x => x.statusID);
                 });
 
             migrationBuilder.CreateTable(
@@ -356,7 +370,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Classroom_Equipment",
+                name: "ClassroomEquipment",
                 columns: table => new
                 {
                     equipmentID = table.Column<int>(type: "int", nullable: false)
@@ -377,7 +391,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Instructor_Availability",
+                name: "InstructorAvailability",
                 columns: table => new
                 {
                     availabilityID = table.Column<int>(type: "int", nullable: false)
@@ -404,7 +418,8 @@ namespace Web_API.Migrations
                 name: "Course",
                 columns: table => new
                 {
-                    courseID = table.Column<int>(type: "int", nullable: false),
+                    courseID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     subjectAreaID = table.Column<int>(type: "int", nullable: false),
                     categoryID = table.Column<int>(type: "int", nullable: false),
                     prerequisiteCourseID = table.Column<int>(type: "int", nullable: true),
@@ -435,12 +450,12 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Course_Subject_Area_fk",
                         column: x => x.subjectAreaID,
-                        principalTable: "Subject_Area",
+                        principalTable: "SubjectArea",
                         principalColumn: "subjectAreaID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Instructor_Expertise",
+                name: "InstructorExpertise",
                 columns: table => new
                 {
                     expertiseID = table.Column<int>(type: "int", nullable: false)
@@ -460,12 +475,12 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Subject_Area_Instructor_Expertise_fk",
                         column: x => x.subjectAreaID,
-                        principalTable: "Subject_Area",
+                        principalTable: "SubjectArea",
                         principalColumn: "subjectAreaID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Trainee_Certification",
+                name: "TraineeCertification",
                 columns: table => new
                 {
                     traineeCertID = table.Column<int>(type: "int", nullable: false)
@@ -484,12 +499,12 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Certification_Status_Trainee_Certification_fk",
                         column: x => x.statusID,
-                        principalTable: "Certification_Status",
+                        principalTable: "CertificationStatus",
                         principalColumn: "statusID");
                     table.ForeignKey(
                         name: "Certification_Track_Trainee_Certification_fk",
                         column: x => x.certificationTrackID,
-                        principalTable: "Certification_Track",
+                        principalTable: "CertificationTrack",
                         principalColumn: "certificationTrackID");
                     table.ForeignKey(
                         name: "Trainee_Trainee_Certification_fk",
@@ -499,7 +514,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Certification_Required_Course",
+                name: "CertificationRequiredCourse",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -515,7 +530,7 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Certification_Track_Certification_Required_Course_fk",
                         column: x => x.certificationTrackID,
-                        principalTable: "Certification_Track",
+                        principalTable: "CertificationTrack",
                         principalColumn: "certificationTrackID");
                     table.ForeignKey(
                         name: "Course_Certification_Required_Course_fk",
@@ -525,7 +540,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Course_Session",
+                name: "CourseSession",
                 columns: table => new
                 {
                     sessionID = table.Column<int>(type: "int", nullable: false)
@@ -564,7 +579,7 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Course_Session_Status_Course_Session_fk",
                         column: x => x.StatusID,
-                        principalTable: "Course_Session_Status",
+                        principalTable: "CourseSessionStatus",
                         principalColumn: "StatusID");
                     table.ForeignKey(
                         name: "Instructor_Course_Session_fk",
@@ -574,7 +589,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Trainee_Course_Completion",
+                name: "TraineeCourseCompletion",
                 columns: table => new
                 {
                     completionID = table.Column<int>(type: "int", nullable: false)
@@ -621,12 +636,12 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Course_Session_Enrollment_fk",
                         column: x => x.sessionID,
-                        principalTable: "Course_Session",
+                        principalTable: "CourseSession",
                         principalColumn: "sessionID");
                     table.ForeignKey(
                         name: "Enrollment_Status_Enrollment_fk",
                         column: x => x.enrollmentStatusID,
-                        principalTable: "Enrollment_Status",
+                        principalTable: "EnrollmentStatus",
                         principalColumn: "enrollmentStatusID");
                     table.ForeignKey(
                         name: "Trainee_Enrollment_fk",
@@ -655,7 +670,7 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Course_Session_Waitlist_fk",
                         column: x => x.sessionID,
-                        principalTable: "Course_Session",
+                        principalTable: "CourseSession",
                         principalColumn: "sessionID");
                     table.ForeignKey(
                         name: "Trainee_Waitlist_fk",
@@ -665,7 +680,7 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Waitlist_Status_Waitlist_fk",
                         column: x => x.statusID,
-                        principalTable: "Waitlist_Status",
+                        principalTable: "WaitlistStatus",
                         principalColumn: "statusID");
                 });
 
@@ -698,7 +713,7 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Payment_Record",
+                name: "PaymentRecord",
                 columns: table => new
                 {
                     paymentRecordID = table.Column<int>(type: "int", nullable: false)
@@ -728,18 +743,19 @@ namespace Web_API.Migrations
                     table.ForeignKey(
                         name: "Payment_Status_Payment_Record_fk",
                         column: x => x.statusID,
-                        principalTable: "Payment_Status",
+                        principalTable: "PaymentStatus",
                         principalColumn: "statusID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Payment_Transaction",
+                name: "PaymentTransaction",
                 columns: table => new
                 {
                     transactionID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     paymentRecordID = table.Column<int>(type: "int", nullable: false),
                     coordinatorID = table.Column<int>(type: "int", nullable: false),
+                    paymentMethodID = table.Column<int>(type: "int", nullable: false),
                     amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     paymentMethod = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     paymentDate = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
@@ -755,9 +771,14 @@ namespace Web_API.Migrations
                         principalTable: "Coordinator",
                         principalColumn: "coordinatorID");
                     table.ForeignKey(
+                        name: "PaymentMethod_PaymentTransaction_fk",
+                        column: x => x.paymentMethodID,
+                        principalTable: "PaymentMethod",
+                        principalColumn: "paymentMethodID");
+                    table.ForeignKey(
                         name: "Payment_Record_Payment_Transaction_fk",
                         column: x => x.paymentRecordID,
-                        principalTable: "Payment_Record",
+                        principalTable: "PaymentRecord",
                         principalColumn: "paymentRecordID");
                 });
 
@@ -817,18 +838,18 @@ namespace Web_API.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "Certification_Required_Course_unique_comb",
-                table: "Certification_Required_Course",
+                table: "CertificationRequiredCourse",
                 columns: new[] { "courseID", "certificationTrackID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Certification_Required_Course_certificationTrackID",
-                table: "Certification_Required_Course",
+                name: "IX_CertificationRequiredCourse_certificationTrackID",
+                table: "CertificationRequiredCourse",
                 column: "certificationTrackID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Classroom_Equipment_classroomID",
-                table: "Classroom_Equipment",
+                name: "IX_ClassroomEquipment_classroomID",
+                table: "ClassroomEquipment",
                 column: "classroomID");
 
             migrationBuilder.CreateIndex(
@@ -847,28 +868,28 @@ namespace Web_API.Migrations
                 column: "subjectAreaID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Course_Session_classroomID",
-                table: "Course_Session",
+                name: "IX_CourseSession_classroomID",
+                table: "CourseSession",
                 column: "classroomID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Course_Session_coordinatorID",
-                table: "Course_Session",
+                name: "IX_CourseSession_coordinatorID",
+                table: "CourseSession",
                 column: "coordinatorID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Course_Session_courseID",
-                table: "Course_Session",
+                name: "IX_CourseSession_courseID",
+                table: "CourseSession",
                 column: "courseID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Course_Session_instructorID",
-                table: "Course_Session",
+                name: "IX_CourseSession_instructorID",
+                table: "CourseSession",
                 column: "instructorID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Course_Session_StatusID",
-                table: "Course_Session",
+                name: "IX_CourseSession_StatusID",
+                table: "CourseSession",
                 column: "StatusID");
 
             migrationBuilder.CreateIndex(
@@ -887,70 +908,75 @@ namespace Web_API.Migrations
                 column: "traineeID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Instructor_Availability_instructorID",
-                table: "Instructor_Availability",
+                name: "IX_InstructorAvailability_instructorID",
+                table: "InstructorAvailability",
                 column: "instructorID");
 
             migrationBuilder.CreateIndex(
                 name: "Instructor_Expertise_unique_comb",
-                table: "Instructor_Expertise",
+                table: "InstructorExpertise",
                 columns: new[] { "instructorID", "subjectAreaID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Instructor_Expertise_subjectAreaID",
-                table: "Instructor_Expertise",
+                name: "IX_InstructorExpertise_subjectAreaID",
+                table: "InstructorExpertise",
                 column: "subjectAreaID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_Record_coordinatorID",
-                table: "Payment_Record",
+                name: "IX_PaymentRecord_coordinatorID",
+                table: "PaymentRecord",
                 column: "coordinatorID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_Record_enrollmentID",
-                table: "Payment_Record",
+                name: "IX_PaymentRecord_enrollmentID",
+                table: "PaymentRecord",
                 column: "enrollmentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_Record_statusID",
-                table: "Payment_Record",
+                name: "IX_PaymentRecord_statusID",
+                table: "PaymentRecord",
                 column: "statusID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_Transaction_coordinatorID",
-                table: "Payment_Transaction",
+                name: "IX_PaymentTransaction_coordinatorID",
+                table: "PaymentTransaction",
                 column: "coordinatorID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_Transaction_paymentRecordID",
-                table: "Payment_Transaction",
+                name: "IX_PaymentTransaction_paymentMethodID",
+                table: "PaymentTransaction",
+                column: "paymentMethodID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentTransaction_paymentRecordID",
+                table: "PaymentTransaction",
                 column: "paymentRecordID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trainee_Certification_certificationTrackID",
-                table: "Trainee_Certification",
+                name: "IX_TraineeCertification_certificationTrackID",
+                table: "TraineeCertification",
                 column: "certificationTrackID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trainee_Certification_statusID",
-                table: "Trainee_Certification",
+                name: "IX_TraineeCertification_statusID",
+                table: "TraineeCertification",
                 column: "statusID");
 
             migrationBuilder.CreateIndex(
                 name: "Trainee_Certification_unique_comb",
-                table: "Trainee_Certification",
+                table: "TraineeCertification",
                 columns: new[] { "traineeID", "certificationTrackID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trainee_Course_Completion_courseID",
-                table: "Trainee_Course_Completion",
+                name: "IX_TraineeCourseCompletion_courseID",
+                table: "TraineeCourseCompletion",
                 column: "courseID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trainee_Course_Completion_traineeID",
-                table: "Trainee_Course_Completion",
+                name: "IX_TraineeCourseCompletion_traineeID",
+                table: "TraineeCourseCompletion",
                 column: "traineeID");
 
             migrationBuilder.CreateIndex(
@@ -992,28 +1018,28 @@ namespace Web_API.Migrations
                 name: "Assessment");
 
             migrationBuilder.DropTable(
-                name: "Certification_Required_Course");
+                name: "CertificationRequiredCourse");
 
             migrationBuilder.DropTable(
-                name: "Classroom_Equipment");
+                name: "ClassroomEquipment");
 
             migrationBuilder.DropTable(
-                name: "Instructor_Availability");
+                name: "InstructorAvailability");
 
             migrationBuilder.DropTable(
-                name: "Instructor_Expertise");
+                name: "InstructorExpertise");
 
             migrationBuilder.DropTable(
                 name: "Notification");
 
             migrationBuilder.DropTable(
-                name: "Payment_Transaction");
+                name: "PaymentTransaction");
 
             migrationBuilder.DropTable(
-                name: "Trainee_Certification");
+                name: "TraineeCertification");
 
             migrationBuilder.DropTable(
-                name: "Trainee_Course_Completion");
+                name: "TraineeCourseCompletion");
 
             migrationBuilder.DropTable(
                 name: "Waitlist");
@@ -1025,28 +1051,31 @@ namespace Web_API.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Payment_Record");
+                name: "PaymentMethod");
 
             migrationBuilder.DropTable(
-                name: "Certification_Status");
+                name: "PaymentRecord");
 
             migrationBuilder.DropTable(
-                name: "Certification_Track");
+                name: "CertificationStatus");
 
             migrationBuilder.DropTable(
-                name: "Waitlist_Status");
+                name: "CertificationTrack");
+
+            migrationBuilder.DropTable(
+                name: "WaitlistStatus");
 
             migrationBuilder.DropTable(
                 name: "Enrollment");
 
             migrationBuilder.DropTable(
-                name: "Payment_Status");
+                name: "PaymentStatus");
 
             migrationBuilder.DropTable(
-                name: "Course_Session");
+                name: "CourseSession");
 
             migrationBuilder.DropTable(
-                name: "Enrollment_Status");
+                name: "EnrollmentStatus");
 
             migrationBuilder.DropTable(
                 name: "Trainee");
@@ -1061,7 +1090,7 @@ namespace Web_API.Migrations
                 name: "Course");
 
             migrationBuilder.DropTable(
-                name: "Course_Session_Status");
+                name: "CourseSessionStatus");
 
             migrationBuilder.DropTable(
                 name: "Instructor");
@@ -1070,7 +1099,7 @@ namespace Web_API.Migrations
                 name: "Category");
 
             migrationBuilder.DropTable(
-                name: "Subject_Area");
+                name: "SubjectArea");
         }
     }
 }

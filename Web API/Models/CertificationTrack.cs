@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-[Table("Certification_Track")]
+[Table("CertificationTrack")]
 public partial class CertificationTrack
 {
     [Key]

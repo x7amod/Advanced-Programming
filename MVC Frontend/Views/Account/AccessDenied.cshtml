@@ -1,0 +1,111 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Access Denied";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Denied – Taalam</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8F9FA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            max-width: 420px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .icon {
+            width: 64px;
+            height: 64px;
+            background: #F0FDFA;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+            .icon svg {
+                width: 32px;
+                height: 32px;
+                stroke: #0D9488;
+            }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #6B7280;
+            line-height: 22px;
+            margin-bottom: 32px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: #0D9488;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border: 1px solid #0D9488;
+            color: #0D9488;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+        </div>
+        <h1>Access Denied</h1>
+        <p>You don't have permission to view this page. Please contact your coordinator if you believe this is an error.</p>
+        <div class="btn-row">
+            <a href="/" class="btn-primary">Go to Dashboard</a>
+            <a asp-controller="Account" asp-action="Login" class="btn-secondary">Sign In</a>
+        </div>
+    </div>
+</body>
+</html>

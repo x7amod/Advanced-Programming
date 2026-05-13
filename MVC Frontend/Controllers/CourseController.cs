@@ -74,7 +74,7 @@ namespace MVC_Frontend.Controllers
         }
 
         // GET: Course/Create
-        [Authorize(Roles = "Training Coordinator")]
+        [Authorize(Roles = AppRoles.Coordinator)]
         public IActionResult Create()
         {
             return View(PopulateDropdowns(new CourseFormViewModel { IsActive = true }));
@@ -83,7 +83,7 @@ namespace MVC_Frontend.Controllers
         // POST: Course/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Training Coordinator")]
+        [Authorize(Roles = AppRoles.Coordinator)]
         public async Task<IActionResult> Create(CourseFormViewModel vm)
         {
             if (!ModelState.IsValid)

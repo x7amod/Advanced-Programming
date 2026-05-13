@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-[Table("Certification_Required_Course")]
+[Table("CertificationRequiredCourse")]
 [Index("CourseId", "CertificationTrackId", Name = "Certification_Required_Course_unique_comb", IsUnique = true)]
 public partial class CertificationRequiredCourse
 {

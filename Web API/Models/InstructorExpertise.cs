@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
 
-[Table("Instructor_Expertise")]
+[Table("InstructorExpertise")]
 [Index("InstructorId", "SubjectAreaId", Name = "Instructor_Expertise_unique_comb", IsUnique = true)]
 public partial class InstructorExpertise
 {

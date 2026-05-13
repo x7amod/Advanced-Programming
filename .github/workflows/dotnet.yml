@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ '**' ]
     paths:
       - "MVC Frontend/**"
       - "Reporting App/**"
@@ -10,7 +10,7 @@ on:
       - "*.sln"
       - ".github/workflows/dotnet.yml"
   pull_request:
-    branches: [ "master" ]
+    branches: [ '**' ]
     paths:
       - "MVC Frontend/**"
       - "Reporting App/**"
