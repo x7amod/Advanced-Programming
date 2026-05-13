@@ -1,0 +1,131 @@
+@using Web_API.Models
+@{
+    ViewData["Title"] = "Session Schedule";
+    bool isCoordinator = User.IsInRole("Training Coordinator");
+
+    var monday     = (DateTime)ViewBag.Monday;
+    var sunday     = (DateTime)ViewBag.Sunday;
+    var weekOffset = (int)ViewBag.WeekOffset;
+    var today      = (DateTime)ViewBag.Today;
+    var grouped    = (Dictionary<int, List<CourseSession>>)ViewBag.Grouped;
+
+    string[] dayNames = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+
+    string StatusBadge(string? status) => status switch
+    {
+        "Scheduled" => "bg-primary",
+        "Ongoing"   => "bg-success",
+        "Completed" => "bg-secondary",
+        "Cancelled" => "bg-danger",
+        _           => "bg-light text-dark"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Session Schedule</h2>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">List view</a>
+        @if (isCoordinator)
+        {
+            <a asp-action="Create" class="btn btn-primary btn-sm">+ Schedule Session</a>
+        }
+    </div>
+</div>
+
+<!-- Week navigation -->
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Schedule" asp-route-weekOffset="@(weekOffset - 1)" class="btn btn-outline-secondary btn-sm">
+        ← Prev Week
+    </a>
+
+    <div class="text-center">
+        <div class="fw-semibold">@monday.ToString("dd MMM") – @sunday.ToString("dd MMM yyyy")</div>
+        @if (weekOffset != 0)
+        {
+            <a asp-action="Schedule" asp-route-weekOffset="0" class="small text-muted">Back to current week</a>
+        }
+        else
+        {
+            <span class="small text-muted">Current week</span>
+        }
+    </div>
+
+    <a asp-action="Schedule" asp-route-weekOffset="@(weekOffset + 1)" class="btn btn-outline-secondary btn-sm">
+        Next Week →
+    </a>
+</div>
+
+<!-- Calendar grid -->
+<div class="row g-2">
+    @for (int dayIdx = 0; dayIdx < 7; dayIdx++)
+    {
+        var dayDate    = monday.AddDays(dayIdx);
+        var dayName    = dayNames[dayIdx];
+        var daySessions = grouped[dayIdx];
+        bool isToday   = dayDate.Date == today.Date;
+        bool isPast    = dayDate.Date < today.Date;
+
+        <div class="col-xl @(dayIdx >= 5 ? "col-md-6" : "")">
+            <div class="card h-100 @(isToday ? "border-primary" : isPast ? "border-light opacity-75" : "")">
+                <div class="card-header py-2 @(isToday ? "bg-primary text-white" : isPast ? "bg-light text-muted" : "bg-light")">
+                    <div class="fw-semibold small">@dayName</div>
+                    <div class="small @(isToday ? "opacity-75" : "text-muted")">@dayDate.ToString("dd MMM")</div>
+                    @if (isToday)
+                    {
+                        <span class="badge bg-white text-primary mt-1" style="font-size:.65rem;">TODAY</span>
+                    }
+                </div>
+                <div class="card-body p-2">
+                    @if (!daySessions.Any())
+                    {
+                        <p class="text-muted small text-center mb-0 py-2">No sessions</p>
+                    }
+                    else
+                    {
+                        @foreach (var session in daySessions.OrderBy(s => s.StartTime))
+                        {
+                            var badge = StatusBadge(session.Status?.Status);
+                            var seatsLeft = session.MaxCapacity - session.CurrentEnrollment;
+                            <a asp-action="Details" asp-route-id="@session.SessionId"
+                               class="d-block text-decoration-none mb-2">
+                                <div class="rounded p-2 border @(session.Status?.Status == "Cancelled" ? "opacity-50" : "")"
+                                     style="border-left: 3px solid var(--bs-primary) !important; background: #f8f9fa;">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <span class="small fw-semibold text-dark lh-sm">@session.Course?.Title</span>
+                                        <span class="badge @badge ms-1" style="font-size:.6rem;">@session.Status?.Status</span>
+                                    </div>
+                                    <div class="text-muted" style="font-size:.72rem; margin-top:2px;">
+                                        @session.StartTime.ToString("HH:mm") – @session.EndTime.ToString("HH:mm")
+                                    </div>
+                                    <div class="text-muted" style="font-size:.72rem;">
+                                        📍 @session.Classroom?.Name
+                                    </div>
+                                    <div class="text-muted" style="font-size:.72rem;">
+                                        @(seatsLeft) / @session.MaxCapacity seats left
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+                @if (isCoordinator && !isPast)
+                {
+                    <div class="card-footer p-1 text-center">
+                        <a asp-action="Create" class="btn btn-link btn-sm py-0 small text-muted">
+                            + Add session
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Legend -->
+<div class="d-flex gap-3 mt-3 flex-wrap">
+    <span class="small text-muted">Status:</span>
+    <span class="badge bg-primary">Scheduled</span>
+    <span class="badge bg-success">Ongoing</span>
+    <span class="badge bg-secondary">Completed</span>
+    <span class="badge bg-danger">Cancelled</span>
+</div>

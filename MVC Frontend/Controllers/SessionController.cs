@@ -73,18 +73,20 @@ namespace MVC_Frontend.Controllers
             // Instructor filter only for coordinators
             if (User.IsInRole(AppRoles.Coordinator))
             {
-                var instructorUsers = await _context.Instructors
-                    .Join(_context.Users,
-                          i => i.UserId,
-                          u => u.Id,
-                          (i, u) => new SelectListItem
-                          {
-                              Value = i.InstructorId.ToString(),
-                              Text = u.UserName ?? $"Instructor {i.InstructorId}"
-                          })
+                var allInstructors = await _context.Instructors.ToListAsync();
+                var iUserIds = allInstructors.Select(i => i.UserId).ToList();
+                var iUsers = await _context.Users
+                    .Where(u => iUserIds.Contains(u.Id))
+                    .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+                var instructorItems = allInstructors
+                    .Select(i => new SelectListItem
+                    {
+                        Value = i.InstructorId.ToString(),
+                        Text = iUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}"
+                    })
                     .OrderBy(x => x.Text)
-                    .ToListAsync();
-                ViewBag.Instructors = new SelectList(instructorUsers, "Value", "Text", instructorId);
+                    .ToList();
+                ViewBag.Instructors = new SelectList(instructorItems, "Value", "Text", instructorId);
             }
 
             ViewBag.SelectedCourseId = courseId;
@@ -97,13 +99,16 @@ namespace MVC_Frontend.Controllers
 
             // Build a map of instructorId -> display name for the list view
             var instructorIds = sessions.Select(s => s.InstructorId).Distinct().ToList();
-            var nameMap = await _context.Instructors
+            var sessionInstructors = await _context.Instructors
                 .Where(i => instructorIds.Contains(i.InstructorId))
-                .Join(_context.Users,
-                      i => i.UserId,
-                      u => u.Id,
-                      (i, u) => new { i.InstructorId, Name = u.UserName ?? $"Instructor {i.InstructorId}" })
-                .ToDictionaryAsync(x => x.InstructorId, x => x.Name);
+                .ToListAsync();
+            var sessionUserIds = sessionInstructors.Select(i => i.UserId).ToList();
+            var sessionUsers = await _context.Users
+                .Where(u => sessionUserIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+            var nameMap = sessionInstructors.ToDictionary(
+                i => i.InstructorId,
+                i => sessionUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}");
             ViewBag.InstructorNames = nameMap;
 
             return View(sessions);
@@ -411,17 +416,19 @@ namespace MVC_Frontend.Controllers
                 })
                 .ToListAsync();
 
-            vm.Instructors = await _context.Instructors
-                .Join(_context.Users,
-                      i => i.UserId,
-                      u => u.Id,
-                      (i, u) => new SelectListItem
-                      {
-                          Value = i.InstructorId.ToString(),
-                          Text = u.UserName ?? $"Instructor {i.InstructorId}"
-                      })
+            var dropdownInstructors = await _context.Instructors.ToListAsync();
+            var dropdownUserIds = dropdownInstructors.Select(i => i.UserId).ToList();
+            var dropdownUsers = await _context.Users
+                .Where(u => dropdownUserIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+            vm.Instructors = dropdownInstructors
+                .Select(i => new SelectListItem
+                {
+                    Value = i.InstructorId.ToString(),
+                    Text = dropdownUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}"
+                })
                 .OrderBy(x => x.Text)
-                .ToListAsync();
+                .ToList();
 
             vm.Classrooms = await _context.Classrooms
                 .Where(c => c.IsActive)
