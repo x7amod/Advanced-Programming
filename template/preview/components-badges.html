@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Components · Status badges</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  h4 { margin: 18px 0 8px; font: var(--tl-eyebrow); text-transform: uppercase; letter-spacing: 0.06em; color: var(--tl-text-2); }
+  h4:first-child { margin-top: 0; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .b { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: var(--tl-r-pill); font: var(--tl-micro); font-weight: 600; }
+  .dot { width: 6px; height: 6px; border-radius: 999px; }
+</style>
+</head>
+<body>
+  <h4>Enrollment</h4>
+  <div class="row">
+    <span class="b" style="background:#D1FAE5;color:#065F46;"><span class="dot" style="background:#10B981"></span>Enrolled</span>
+    <span class="b" style="background:#FEF3C7;color:#92400E;"><span class="dot" style="background:#F59E0B"></span>Waitlisted</span>
+    <span class="b" style="background:#DBEAFE;color:#1E40AF;"><span class="dot" style="background:#3B82F6"></span>Completed</span>
+    <span class="b" style="background:#F3F4F6;color:#374151;"><span class="dot" style="background:#6B7280"></span>Dropped</span>
+    <span class="b" style="background:#FEE2E2;color:#991B1B;"><span class="dot" style="background:#EF4444"></span>Cancelled</span>
+  </div>
+  <h4>Payment</h4>
+  <div class="row">
+    <span class="b" style="background:#FEF3C7;color:#92400E;">Pending</span>
+    <span class="b" style="background:#DBEAFE;color:#1E40AF;">Partially paid</span>
+    <span class="b" style="background:#D1FAE5;color:#065F46;">Paid</span>
+    <span class="b" style="background:#FEE2E2;color:#991B1B;">Overdue</span>
+    <span class="b" style="background:#F3F4F6;color:#374151;">Refunded</span>
+  </div>
+  <h4>Session · Certification · Result</h4>
+  <div class="row">
+    <span class="b" style="background:#DBEAFE;color:#1E40AF;">Scheduled</span>
+    <span class="b" style="background:#CCFBF1;color:#0F766E;">In progress</span>
+    <span class="b" style="background:#D1FAE5;color:#065F46;">Awarded</span>
+    <span class="b" style="background:#FEE2E2;color:#991B1B;">Expired</span>
+    <span class="b" style="background:#D1FAE5;color:#065F46;">Pass</span>
+    <span class="b" style="background:#FEE2E2;color:#991B1B;">Fail</span>
+  </div>
+</body>
+</html>

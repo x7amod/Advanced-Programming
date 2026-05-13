@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Colors · Neutrals & surfaces</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .sw { aspect-ratio: 1.4 / 1; border-radius: var(--tl-r-sm); padding: 10px 12px; display: flex; flex-direction: column; justify-content: flex-end; font: var(--tl-micro); border: 1px solid var(--tl-border); }
+  .name { font-weight: 600; }
+  .hex { opacity: 0.65; font-variant-numeric: tabular-nums; }
+  h4 { margin: 0 0 12px; font: var(--tl-eyebrow); text-transform: uppercase; letter-spacing: 0.06em; color: var(--tl-text-2); }
+</style>
+</head>
+<body>
+  <h4>Surfaces · borders · text</h4>
+  <div class="grid">
+    <div class="sw" style="background:#F8F9FA; color:#1A1A2E;"><span class="name">bg</span><span class="hex">F8F9FA</span></div>
+    <div class="sw" style="background:#FFFFFF; color:#1A1A2E;"><span class="name">surface</span><span class="hex">FFFFFF</span></div>
+    <div class="sw" style="background:#F3F4F6; color:#1A1A2E;"><span class="name">surface-2</span><span class="hex">F3F4F6</span></div>
+    <div class="sw" style="background:#1A1A2E; color:#fff; border-color:#1A1A2E;"><span class="name">text-1</span><span class="hex">1A1A2E</span></div>
+    <div class="sw" style="background:#6B7280; color:#fff; border-color:#6B7280;"><span class="name">text-2</span><span class="hex">6B7280</span></div>
+    <div class="sw" style="background:#9CA3AF; color:#fff; border-color:#9CA3AF;"><span class="name">text-3</span><span class="hex">9CA3AF</span></div>
+    <div class="sw" style="background:#E5E7EB; color:#1A1A2E;"><span class="name">border</span><span class="hex">E5E7EB</span></div>
+    <div class="sw" style="background:#D1D5DB; color:#1A1A2E;"><span class="name">border-strong</span><span class="hex">D1D5DB</span></div>
+  </div>
+</body>
+</html>

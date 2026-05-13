@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Brand · Logo</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .swatch { padding: 28px 24px; border-radius: var(--tl-r-md); border: 1px solid var(--tl-border); display: flex; align-items: center; justify-content: center; min-height: 80px; }
+  .swatch.dark { background: var(--tl-primary); border-color: var(--tl-primary); }
+  .swatch.light { background: var(--tl-surface); }
+  .swatch img { height: 32px; }
+  .label { margin-top: 6px; font: var(--tl-micro); color: var(--tl-text-2); text-transform: uppercase; letter-spacing: 0.06em; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div>
+      <div class="swatch light"><img src="../assets/logo.svg" alt="Taalam logo on light"/></div>
+      <div class="label">on surface</div>
+    </div>
+    <div>
+      <div class="swatch dark"><img src="../assets/logo.svg" alt="Taalam logo on teal" style="filter: brightness(0) invert(1);"/></div>
+      <div class="label">on teal</div>
+    </div>
+  </div>
+</body>
+</html>

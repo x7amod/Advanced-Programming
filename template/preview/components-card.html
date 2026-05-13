@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Components · Card</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  .card { background: var(--tl-surface); border: 1px solid var(--tl-border); border-radius: var(--tl-r-md); box-shadow: var(--tl-shadow-xs); padding: 20px; }
+  .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .ttl { font: var(--tl-h3); }
+  .meta { font: var(--tl-small); color: var(--tl-text-2); }
+  .row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--tl-divider); font: var(--tl-body); }
+  .row:first-of-type { border-top: 0; padding-top: 0; }
+  .val { font-variant-numeric: tabular-nums; font-weight: 500; }
+  .b { display: inline-flex; padding: 2px 8px; border-radius: var(--tl-r-pill); font: var(--tl-micro); font-weight: 600; background:#D1FAE5;color:#065F46; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div class="ttl">Project Management Fundamentals</div>
+      <span class="b">Enrolled</span>
+    </div>
+    <div class="row"><span class="meta">Session</span><span class="val">12 May 2026 · 14:00 – 17:00</span></div>
+    <div class="row"><span class="meta">Instructor</span><span class="val">Noora Humaid</span></div>
+    <div class="row"><span class="meta">Fee</span><span class="val">BHD 120.000</span></div>
+  </div>
+</body>
+</html>

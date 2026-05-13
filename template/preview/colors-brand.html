@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Colors · Brand</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  .scale { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; }
+  .sw { aspect-ratio: 1.1 / 1; border-radius: var(--tl-r-sm); display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; color: #fff; font: var(--tl-micro); }
+  .sw.lt { color: var(--tl-text-1); }
+  .name { opacity: 0.85; font-weight: 600; }
+  .hex { opacity: 0.7; font-variant-numeric: tabular-nums; }
+  h4 { margin: 0 0 12px; font: var(--tl-eyebrow); text-transform: uppercase; letter-spacing: 0.06em; color: var(--tl-text-2); }
+</style>
+</head>
+<body>
+  <h4>Teal · brand scale (50 → 900)</h4>
+  <div class="scale">
+    <div class="sw lt" style="background:#F0FDFA"><span class="name">50</span><span class="hex">F0FDFA</span></div>
+    <div class="sw lt" style="background:#CCFBF1"><span class="name">100</span><span class="hex">CCFBF1</span></div>
+    <div class="sw lt" style="background:#99F6E4"><span class="name">200</span><span class="hex">99F6E4</span></div>
+    <div class="sw lt" style="background:#5EEAD4"><span class="name">300</span><span class="hex">5EEAD4</span></div>
+    <div class="sw lt" style="background:#2DD4BF"><span class="name">400</span><span class="hex">2DD4BF</span></div>
+    <div class="sw" style="background:#14B8A6"><span class="name">500</span><span class="hex">14B8A6</span></div>
+    <div class="sw" style="background:#0D9488; outline: 2px solid #1A1A2E; outline-offset: -2px;"><span class="name">600 ★</span><span class="hex">0D9488</span></div>
+    <div class="sw" style="background:#0F766E"><span class="name">700</span><span class="hex">0F766E</span></div>
+    <div class="sw" style="background:#115E59"><span class="name">800</span><span class="hex">115E59</span></div>
+  </div>
+</body>
+</html>
