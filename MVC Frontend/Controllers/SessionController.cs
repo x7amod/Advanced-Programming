@@ -226,6 +226,13 @@ namespace MVC_Frontend.Controllers
                 return View(await PopulateDropdowns(vm));
             }
 
+            if (startDt <= DateTime.Now)
+            {
+                ModelState.AddModelError(string.Empty,
+                    "Session start time must be in the future. Please choose a later date or time.");
+                return View(await PopulateDropdowns(vm));
+            }
+
             if (await HasInstructorConflict(vm.InstructorId, vm.SessionDate, startDt, endDt))
             {
                 ModelState.AddModelError(string.Empty,
@@ -359,6 +366,14 @@ namespace MVC_Frontend.Controllers
             {
                 ViewBag.SessionStatus = currentStatus;
                 ModelState.AddModelError(string.Empty, timeError);
+                return View(await PopulateDropdowns(vm));
+            }
+
+            if (currentStatus == "Scheduled" && startDt <= DateTime.Now)
+            {
+                ViewBag.SessionStatus = currentStatus;
+                ModelState.AddModelError(string.Empty,
+                    "Session start time must be in the future. Please choose a later date or time.");
                 return View(await PopulateDropdowns(vm));
             }
 
