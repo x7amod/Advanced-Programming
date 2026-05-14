@@ -487,6 +487,7 @@ namespace MVC_Frontend.Controllers
         {
             var query = _context.CourseSessions.Where(s =>
                 s.InstructorId == instructorId &&
+                s.Status.Status != "Cancelled" &&
                 s.SessionDate.Date == date.Date &&
                 s.StartTime < end &&
                 s.EndTime > start);
@@ -502,6 +503,7 @@ namespace MVC_Frontend.Controllers
         {
             var query = _context.CourseSessions.Where(s =>
                 s.ClassroomId == classroomId &&
+                s.Status.Status != "Cancelled" &&
                 s.SessionDate.Date == date.Date &&
                 s.StartTime < end &&
                 s.EndTime > start);
