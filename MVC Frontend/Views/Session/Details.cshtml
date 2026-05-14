@@ -30,9 +30,26 @@
     </div>
     @if (isCoordinator)
     {
-        <div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model.SessionId" class="btn btn-outline-secondary">Edit</a>
-            <a asp-action="Delete" asp-route-id="@Model.SessionId" class="btn btn-outline-danger">Delete</a>
+        <div class="d-flex gap-2 align-items-center">
+            @{
+                var st = Model.Status?.Status;
+            }
+            @if (st == "Scheduled" || st == "Cancelled")
+            {
+                <a asp-action="Edit" asp-route-id="@Model.SessionId" class="btn btn-outline-secondary">Edit</a>
+                <a asp-action="Delete" asp-route-id="@Model.SessionId" class="btn btn-outline-danger">Delete</a>
+            }
+            else if (st == "Ongoing")
+            {
+                <a asp-action="Edit" asp-route-id="@Model.SessionId" class="btn btn-outline-secondary">
+                    Edit <span class="badge bg-warning text-dark ms-1" style="font-size:.7rem;">room only</span>
+                </a>
+            }
+            else if (st == "Completed")
+            {
+                <button class="btn btn-outline-secondary" disabled title="Completed sessions cannot be edited.">Edit</button>
+                <span class="text-muted small">Read-only — session is completed.</span>
+            }
         </div>
     }
 </div>

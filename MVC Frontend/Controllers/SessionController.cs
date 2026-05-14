@@ -275,9 +275,18 @@ namespace MVC_Frontend.Controllers
         [Authorize(Roles = AppRoles.Coordinator)]
         public async Task<IActionResult> Edit(int id)
         {
-            var session = await _context.CourseSessions.FindAsync(id);
+            var session = await _context.CourseSessions
+                .Include(s => s.Status)
+                .FirstOrDefaultAsync(s => s.SessionId == id);
             if (session == null)
                 return NotFound();
+
+            // Completed sessions are read-only — redirect back
+            if (session.Status?.Status == "Completed")
+            {
+                TempData["Error"] = "Completed sessions cannot be edited.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
 
             var vm = new SessionFormViewModel
             {
@@ -292,6 +301,7 @@ namespace MVC_Frontend.Controllers
                 MaxCapacity = session.MaxCapacity
             };
 
+            ViewBag.SessionStatus = session.Status?.Status ?? "Scheduled";
             return View(await PopulateDropdowns(vm));
         }
 
@@ -304,17 +314,57 @@ namespace MVC_Frontend.Controllers
             if (id != vm.SessionId)
                 return BadRequest();
 
+            var session = await _context.CourseSessions
+                .Include(s => s.Status)
+                .FirstOrDefaultAsync(s => s.SessionId == id);
+            if (session == null)
+                return NotFound();
+
+            var currentStatus = session.Status?.Status ?? "Scheduled";
+
+            // Completed: block all edits
+            if (currentStatus == "Completed")
+            {
+                TempData["Error"] = "Completed sessions cannot be edited.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            // Ongoing: only classroom change is allowed
+            if (currentStatus == "Ongoing")
+            {
+                if (await HasClassroomConflict(vm.ClassroomId, session.SessionDate, session.StartTime, session.EndTime, excludeId: id))
+                {
+                    ViewBag.SessionStatus = currentStatus;
+                    ModelState.AddModelError(string.Empty,
+                        "This classroom is already booked during this session's time slot. Please choose a different classroom.");
+                    return View(await PopulateDropdowns(vm));
+                }
+
+                session.ClassroomId = vm.ClassroomId;
+                session.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Classroom updated successfully.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            // Scheduled / Cancelled: full edit allowed
             if (!ModelState.IsValid)
+            {
+                ViewBag.SessionStatus = currentStatus;
                 return View(await PopulateDropdowns(vm));
+            }
 
             if (!TryParseTimesToDateTimes(vm, out var startDt, out var endDt, out var timeError))
             {
+                ViewBag.SessionStatus = currentStatus;
                 ModelState.AddModelError(string.Empty, timeError);
                 return View(await PopulateDropdowns(vm));
             }
 
             if (await HasInstructorConflict(vm.InstructorId, vm.SessionDate, startDt, endDt, excludeId: id))
             {
+                ViewBag.SessionStatus = currentStatus;
                 ModelState.AddModelError(string.Empty,
                     "This instructor already has a session scheduled during the selected time slot. Please choose a different time or instructor.");
                 return View(await PopulateDropdowns(vm));
@@ -322,18 +372,15 @@ namespace MVC_Frontend.Controllers
 
             if (await HasClassroomConflict(vm.ClassroomId, vm.SessionDate, startDt, endDt, excludeId: id))
             {
+                ViewBag.SessionStatus = currentStatus;
                 ModelState.AddModelError(string.Empty,
                     "This classroom is already booked during the selected time slot. Please choose a different classroom or time.");
                 return View(await PopulateDropdowns(vm));
             }
 
-            var session = await _context.CourseSessions.FindAsync(id);
-            if (session == null)
-                return NotFound();
-
-            // Prevent reducing capacity below current enrollment
             if (vm.MaxCapacity < session.CurrentEnrollment)
             {
+                ViewBag.SessionStatus = currentStatus;
                 ModelState.AddModelError(nameof(vm.MaxCapacity),
                     $"Max capacity cannot be less than the current enrollment count ({session.CurrentEnrollment}).");
                 return View(await PopulateDropdowns(vm));

@@ -137,10 +137,22 @@ else
                                    class="btn btn-sm btn-outline-primary">View</a>
                                 @if (isCoordinator)
                                 {
-                                    <a asp-action="Edit" asp-route-id="@session.SessionId"
-                                       class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
-                                    <a asp-action="Delete" asp-route-id="@session.SessionId"
-                                       class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                                    var st = session.Status?.Status;
+                                    @if (st == "Scheduled" || st == "Cancelled")
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@session.SessionId"
+                                           class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@session.SessionId"
+                                           class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                                    }
+                                    else if (st == "Ongoing")
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@session.SessionId"
+                                           class="btn btn-sm btn-outline-secondary ms-1" title="Room change only">
+                                            Edit*
+                                        </a>
+                                    }
+                                    @* Completed: no edit button *@
                                 }
                             </td>
                         </tr>
