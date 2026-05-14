@@ -16,10 +16,13 @@
 </div>
 
 <div class="row">
-    <div class="col-lg-9">
+    <div class="col-lg-8">
         <form asp-action="Edit" method="post">
             <input asp-for="SessionId" type="hidden" />
-            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+            }
 
             <!-- Course & Instructor -->
             <div class="card mb-3">
@@ -111,24 +114,6 @@
         </form>
     </div>
 
-    <!-- Conflict reminder panel -->
-    <div class="col-lg-3">
-        <div class="card border-info">
-            <div class="card-body">
-                <h6 class="card-title text-info">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    Edit Notes
-                </h6>
-                <ul class="small text-muted mb-0">
-                    <li>Changing the instructor or time will re-validate scheduling conflicts.</li>
-                    <li>Max capacity cannot be set below the number of existing enrollments.</li>
-                    <li>Cancelled sessions with enrollments cannot be deleted; change the status instead.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section Scripts {

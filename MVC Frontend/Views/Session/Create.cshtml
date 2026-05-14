@@ -13,9 +13,12 @@
 <h2 class="mb-4">Schedule New Session</h2>
 
 <div class="row">
-    <div class="col-lg-9">
+    <div class="col-lg-8">
         <form asp-action="Create" method="post">
-            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+            }
 
             <!-- Course & Instructor -->
             <div class="card mb-3">
@@ -109,25 +112,6 @@
         </form>
     </div>
 
-    <!-- Conflict reminder panel -->
-    <div class="col-lg-3">
-        <div class="card border-warning">
-            <div class="card-body">
-                <h6 class="card-title text-warning">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
-                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    Conflict Checks
-                </h6>
-                <p class="small text-muted mb-2">The system will automatically validate:</p>
-                <ul class="small text-muted mb-0">
-                    <li>Instructor is not assigned to another session at the same time</li>
-                    <li>Classroom is not booked for another session at the same time</li>
-                    <li>End time is after start time</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section Scripts {
