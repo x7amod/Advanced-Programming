@@ -93,6 +93,10 @@
                    asp-route-showInactive="true">
                     @NavIcon("clip") All courses
                 </a>
+                <a class="tl-nav-item @(ctrl=="UserManagement"?"active":"")"
+                   asp-controller="UserManagement" asp-action="Index">
+                    @NavIcon("user") Users
+                </a>
             </nav>
         }
 
@@ -210,6 +214,13 @@
             {
                 <div class="alert alert-danger alert-dismissible fade show mb-4">
                     @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Info"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show mb-4">
+                    @TempData["Info"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
