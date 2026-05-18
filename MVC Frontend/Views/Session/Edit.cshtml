@@ -87,7 +87,8 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label asp-for="SessionDate" class="form-label"></label>
-                            <input asp-for="SessionDate" type="date" class="form-control" disabled="@isOngoing" />
+                            <input asp-for="SessionDate" type="date" class="form-control" disabled="@isOngoing"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
                             @if (isOngoing) { <input type="hidden" asp-for="SessionDate" /> }
                             <span asp-validation-for="SessionDate" class="text-danger small"></span>
                         </div>
