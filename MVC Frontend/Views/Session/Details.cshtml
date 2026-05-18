@@ -1,0 +1,207 @@
+@model CourseSession
+@{
+    ViewData["Title"] = $"Session – {Model.Course?.Title}";
+    bool isCoordinator = User.IsInRole("Training Coordinator");
+
+    var statusBadge = Model.Status?.Status switch
+    {
+        "Scheduled" => "bg-primary",
+        "Ongoing"   => "bg-success",
+        "Completed" => "bg-secondary",
+        "Cancelled" => "bg-danger",
+        _           => "bg-light text-dark border"
+    };
+    var seatsLeft = Model.MaxCapacity - Model.CurrentEnrollment;
+    var seatsClass = seatsLeft == 0 ? "text-danger" : seatsLeft <= 3 ? "text-warning" : "text-success";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Sessions</a></li>
+        <li class="breadcrumb-item active">Session #@Model.SessionId</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h2 class="mb-1">@Model.Course?.Title</h2>
+        <span class="badge bg-secondary me-1">@Model.Course?.CourseCode</span>
+        <span class="badge @statusBadge">@Model.Status?.Status</span>
+    </div>
+    @if (isCoordinator)
+    {
+        <div class="d-flex gap-2 align-items-center">
+            @{
+                var st = Model.Status?.Status;
+            }
+            @if (st == "Scheduled" || st == "Cancelled")
+            {
+                <a asp-action="Edit" asp-route-id="@Model.SessionId" class="btn btn-outline-secondary">Edit</a>
+                <a asp-action="Delete" asp-route-id="@Model.SessionId" class="btn btn-outline-danger">Delete</a>
+            }
+            else if (st == "Ongoing")
+            {
+                <a asp-action="Edit" asp-route-id="@Model.SessionId" class="btn btn-outline-secondary">
+                    Edit <span class="badge bg-warning text-dark ms-1" style="font-size:.7rem;">room only</span>
+                </a>
+            }
+            else if (st == "Completed")
+            {
+                <button class="btn btn-outline-secondary" disabled title="Completed sessions cannot be edited.">Edit</button>
+                <span class="text-muted small">Read-only — session is completed.</span>
+            }
+        </div>
+    }
+</div>
+
+<div class="row g-4">
+    <!-- Main info -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Session Details</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">@Model.SessionDate.ToString("dddd, dd MMMM yyyy")</dd>
+
+                    <dt class="col-sm-4">Start Time</dt>
+                    <dd class="col-sm-8">@Model.StartTime.ToString("HH:mm")</dd>
+
+                    <dt class="col-sm-4">End Time</dt>
+                    <dd class="col-sm-8">
+                        @Model.EndTime.ToString("HH:mm")
+                        @{
+                            var duration = Model.EndTime - Model.StartTime;
+                        }
+                        <span class="text-muted small ms-2">(@((int)duration.TotalHours)h @duration.Minutes.ToString("D2")min)</span>
+                    </dd>
+
+                    <dt class="col-sm-4">Instructor</dt>
+                    <dd class="col-sm-8">@ViewBag.InstructorName</dd>
+
+                    <dt class="col-sm-4">Scheduled by</dt>
+                    <dd class="col-sm-8">@ViewBag.CoordinatorName</dd>
+
+                    <dt class="col-sm-4">Created</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</dd>
+
+                    @if (Model.UpdatedAt != Model.CreatedAt)
+                    {
+                        <dt class="col-sm-4">Last Updated</dt>
+                        <dd class="col-sm-8">@Model.UpdatedAt.ToString("dd MMM yyyy, HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <!-- Classroom -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Classroom</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Name</dt>
+                    <dd class="col-sm-8">@Model.Classroom?.Name</dd>
+
+                    <dt class="col-sm-4">Location</dt>
+                    <dd class="col-sm-8">@Model.Classroom?.Building, Floor @Model.Classroom?.Floor</dd>
+
+                    <dt class="col-sm-4">Address</dt>
+                    <dd class="col-sm-8">@Model.Classroom?.Location</dd>
+
+                    <dt class="col-sm-4">Room Capacity</dt>
+                    <dd class="col-sm-8">@Model.Classroom?.Capacity seats</dd>
+
+                    @if (Model.Classroom?.ClassroomEquipments?.Any() == true)
+                    {
+                        <dt class="col-sm-4">Equipment</dt>
+                        <dd class="col-sm-8">
+                            @foreach (var eq in Model.Classroom.ClassroomEquipments)
+                            {
+                                <span class="badge bg-light text-dark border me-1">@eq.EquipmentType ×@eq.Quantity</span>
+                            }
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <!-- Enrollments (coordinator only) -->
+        @if (isCoordinator && Model.Enrollments.Any())
+        {
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Enrollments (@Model.Enrollments.Count)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Enrollment Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var enrollment in Model.Enrollments.OrderBy(e => e.EnrollmentDate))
+                                {
+                                    <tr>
+                                        <td>@enrollment.EnrollmentId</td>
+                                        <td>@enrollment.EnrollmentDate.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@enrollment.EnrollmentStatus?.Status</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Seats card -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5 class="card-title">Seat Availability</h5>
+                <div class="display-4 fw-bold @seatsClass">@seatsLeft</div>
+                <div class="text-muted">of @Model.MaxCapacity seats available</div>
+                <div class="progress mt-3" style="height: 8px;">
+                    @{
+                        var pct = Model.MaxCapacity > 0
+                            ? (int)((Model.CurrentEnrollment * 100.0) / Model.MaxCapacity)
+                            : 0;
+                        var barColor = pct >= 100 ? "bg-danger" : pct >= 80 ? "bg-warning" : "bg-success";
+                    }
+                    <div class="progress-bar @barColor" role="progressbar"
+                         style="width: @pct%" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="small text-muted mt-1">@Model.CurrentEnrollment enrolled (@pct% full)</div>
+            </div>
+        </div>
+
+        <!-- Course info -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Course Info</h5>
+                <dl class="row small mb-0">
+                    <dt class="col-5">Subject</dt>
+                    <dd class="col-7">@Model.Course?.SubjectArea?.Name</dd>
+
+                    <dt class="col-5">Duration</dt>
+                    <dd class="col-7">@Model.Course?.DurationHours hrs</dd>
+
+                    <dt class="col-5">Fee</dt>
+                    <dd class="col-7">BHD @Model.Course?.EnrollmentFee.ToString("F2")</dd>
+                </dl>
+                <a asp-controller="Course" asp-action="Details" asp-route-id="@Model.CourseId"
+                   class="btn btn-sm btn-outline-secondary mt-2 w-100">View Course</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Back to Sessions</a>
+</div>

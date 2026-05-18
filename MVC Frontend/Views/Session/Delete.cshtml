@@ -1,0 +1,97 @@
+@model CourseSession
+@{
+    ViewData["Title"] = "Delete Session";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Sessions</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.SessionId">Session #@Model.SessionId</a></li>
+        <li class="breadcrumb-item active">Delete</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Confirm Delete
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">You are about to permanently delete the following session. This action cannot be undone.</p>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Course</dt>
+                    <dd class="col-sm-8">
+                        <strong>@Model.Course?.Title</strong>
+                        <span class="text-muted ms-1">(@Model.Course?.CourseCode)</span>
+                    </dd>
+
+                    <dt class="col-sm-4">Instructor</dt>
+                    <dd class="col-sm-8">@ViewBag.InstructorName</dd>
+
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">@Model.SessionDate.ToString("dddd, dd MMMM yyyy")</dd>
+
+                    <dt class="col-sm-4">Time</dt>
+                    <dd class="col-sm-8">
+                        @Model.StartTime.ToString("HH:mm") – @Model.EndTime.ToString("HH:mm")
+                    </dd>
+
+                    <dt class="col-sm-4">Classroom</dt>
+                    <dd class="col-sm-8">@Model.Classroom?.Name (@Model.Classroom?.Building)</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        @{
+                            var badge = Model.Status?.Status switch
+                            {
+                                "Scheduled" => "bg-primary",
+                                "Ongoing"   => "bg-success",
+                                "Completed" => "bg-secondary",
+                                "Cancelled" => "bg-danger",
+                                _           => "bg-light text-dark"
+                            };
+                        }
+                        <span class="badge @badge">@Model.Status?.Status</span>
+                    </dd>
+
+                    <dt class="col-sm-4">Enrollments</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Enrollments.Any())
+                        {
+                            <span class="text-danger fw-semibold">@Model.Enrollments.Count enrolled</span>
+                            <div class="small text-danger mt-1">
+                                ⚠ This session has active enrollments and cannot be deleted. Change its status to Cancelled instead.
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No enrollments</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                @if (!Model.Enrollments.Any())
+                {
+                    <form asp-action="Delete" asp-route-id="@Model.SessionId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">Yes, Delete Session</button>
+                    </form>
+                }
+                <a asp-action="Details" asp-route-id="@Model.SessionId" class="btn btn-secondary">Cancel</a>
+                @if (Model.Enrollments.Any())
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.SessionId" class="btn btn-outline-warning ms-auto">Edit Status Instead</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
