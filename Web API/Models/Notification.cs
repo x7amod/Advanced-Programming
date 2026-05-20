@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models;
@@ -15,7 +16,10 @@ public partial class Notification
 
     [Column("userID")]
     [StringLength(450)]
+    [ForeignKey(nameof(User))]
     public string UserId { get; set; } = null!;
+
+    public virtual IdentityUser User { get; set; } = null!;
 
     [Column("title")]
     [StringLength(150)]

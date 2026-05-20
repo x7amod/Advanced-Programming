@@ -149,6 +149,11 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
         modelBuilder.Entity<Coordinator>(entity =>
         {
             entity.HasKey(e => e.CoordinatorId).HasName("coordinatorID");
+
+            entity.HasOne(d => d.User)
+                .WithOne()
+                .HasForeignKey<Coordinator>(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<Course>(entity =>
@@ -229,6 +234,11 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
         modelBuilder.Entity<Instructor>(entity =>
         {
             entity.HasKey(e => e.InstructorId).HasName("instructorID");
+
+            entity.HasOne(d => d.User)
+                .WithOne()
+                .HasForeignKey<Instructor>(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<InstructorAvailability>(entity =>
@@ -261,6 +271,11 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
             entity.HasKey(e => e.NotificationId).HasName("notificationID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<PaymentMethod>(entity =>
@@ -320,6 +335,11 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
         modelBuilder.Entity<Trainee>(entity =>
         {
             entity.HasKey(e => e.TraineeId).HasName("traineeID");
+
+            entity.HasOne(d => d.User)
+                .WithOne()
+                .HasForeignKey<Trainee>(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<TraineeCertification>(entity =>
