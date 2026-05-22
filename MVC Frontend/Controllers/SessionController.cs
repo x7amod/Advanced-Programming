@@ -75,9 +75,10 @@ namespace MVC_Frontend.Controllers
             {
                 var allInstructors = await _context.Instructors.ToListAsync();
                 var iUserIds = allInstructors.Select(i => i.UserId).ToList();
-                var iUsers = await _context.Users
+                var iUsersAll = await _context.Users.ToListAsync();
+                var iUsers = iUsersAll
                     .Where(u => iUserIds.Contains(u.Id))
-                    .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+                    .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
                 var instructorItems = allInstructors
                     .Select(i => new SelectListItem
                     {
@@ -103,9 +104,10 @@ namespace MVC_Frontend.Controllers
                 .Where(i => instructorIds.Contains(i.InstructorId))
                 .ToListAsync();
             var sessionUserIds = sessionInstructors.Select(i => i.UserId).ToList();
-            var sessionUsers = await _context.Users
+            var sessionUsersAll = await _context.Users.ToListAsync();
+            var sessionUsers = sessionUsersAll
                 .Where(u => sessionUserIds.Contains(u.Id))
-                .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+                .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
             var nameMap = sessionInstructors.ToDictionary(
                 i => i.InstructorId,
                 i => sessionUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}");
@@ -480,9 +482,10 @@ namespace MVC_Frontend.Controllers
 
             var dropdownInstructors = await _context.Instructors.ToListAsync();
             var dropdownUserIds = dropdownInstructors.Select(i => i.UserId).ToList();
-            var dropdownUsers = await _context.Users
+            var dropdownUsersAll = await _context.Users.ToListAsync();
+            var dropdownUsers = dropdownUsersAll
                 .Where(u => dropdownUserIds.Contains(u.Id))
-                .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+                .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
             vm.Instructors = dropdownInstructors
                 .Select(i => new SelectListItem
                 {
