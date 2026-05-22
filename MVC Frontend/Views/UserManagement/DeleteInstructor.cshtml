@@ -1,0 +1,55 @@
+@model Web_API.Models.Instructor
+@{
+    ViewData["Title"] = "Delete Instructor";
+    var hasRestrictions = (bool)(ViewBag.HasSessions ?? false) || (bool)(ViewBag.HasAssessments ?? false);
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Manage Users</a></li>
+        <li class="breadcrumb-item active">Delete Instructor</li>
+    </ol>
+</nav>
+
+<h2 class="mb-4">Delete Instructor</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-body">
+                <h5 class="card-title text-danger">Confirm Deletion</h5>
+                <p class="mb-1"><strong>@ViewBag.FullName</strong></p>
+                <p class="text-muted mb-3">@ViewBag.Email</p>
+
+                @if (hasRestrictions)
+                {
+                    <div class="alert alert-warning mb-3">
+                        <strong>Cannot delete this instructor.</strong>
+                        @if ((bool)(ViewBag.HasSessions ?? false))
+                        {
+                            <div>This instructor is assigned to one or more course sessions.</div>
+                        }
+                        @if ((bool)(ViewBag.HasAssessments ?? false))
+                        {
+                            <div>This instructor has assessment records on file.</div>
+                        }
+                        <div class="mt-1 small">Reassign or remove these records before deleting.</div>
+                    </div>
+                    <a asp-action="Index" class="btn btn-secondary">Back to Users</a>
+                }
+                else
+                {
+                    <p class="text-danger small">
+                        This action is permanent. The instructor account and all profile data will be removed.
+                    </p>
+                    <form asp-action="DeleteInstructor" asp-route-id="@Model.InstructorId" method="post">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">Delete Instructor</button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,73 @@
+@model MVC_Frontend.Models.EditTraineeViewModel
+@{
+    ViewData["Title"] = "Edit Trainee";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Manage Users</a></li>
+        <li class="breadcrumb-item active">Edit Trainee</li>
+    </ol>
+</nav>
+
+<h2 class="mb-4">Edit Trainee</h2>
+
+<div class="row">
+    <div class="col-md-7">
+        <form asp-action="EditTrainee" asp-route-id="@Model.TraineeId" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <input asp-for="UserId" type="hidden" />
+            <input asp-for="TraineeId" type="hidden" />
+
+            <h6 class="text-muted mb-3">Account Details</h6>
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Phone" class="form-label"></label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger small"></span>
+            </div>
+
+            <h6 class="text-muted mb-3 mt-4">Trainee Details</h6>
+
+            <div class="mb-3">
+                <label asp-for="DateOfBirth" class="form-label"></label>
+                <input asp-for="DateOfBirth" class="form-control" />
+                <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="EmergencyContact" class="form-label"></label>
+                <input asp-for="EmergencyContact" class="form-control" />
+                <span asp-validation-for="EmergencyContact" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -36,9 +36,13 @@
                 <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
                     @NavIcon("book") Browse courses
                 </a>
+                <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
+                   asp-controller="Session" asp-action="Index">
+                    @NavIcon("cal") Available sessions
+                </a>
                 <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MyEnrollments"?"active":"")"
                    asp-controller="Enrollment" asp-action="MyEnrollments">
-                    @NavIcon("cal") My enrollments
+                    @NavIcon("clip") My enrollments
                 </a>
                 <a class="tl-nav-item @(ctrl=="Certification"&&action=="MyProgress"?"active":"")"
                    asp-controller="Certification" asp-action="MyProgress">
@@ -62,9 +66,17 @@
                 <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
                     @NavIcon("book") Browse courses
                 </a>
+                <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
+                   asp-controller="Session" asp-action="Index">
+                    @NavIcon("cal") My sessions
+                </a>
+                <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
+                   asp-controller="Session" asp-action="Schedule">
+                    @NavIcon("bar") My schedule
+                </a>
                 <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MySessions"?"active":"")"
                    asp-controller="Enrollment" asp-action="MySessions">
-                    @NavIcon("cal") My sessions
+                    @NavIcon("clip") My enrollments
                 </a>
             </nav>
         }
@@ -86,6 +98,20 @@
                 <a class="tl-nav-item @(ctrl=="Course"&&action=="Create"?"active":"")"
                    asp-controller="Course" asp-action="Create">
                     @NavIcon("plus") Add course
+                </a>
+
+                <div class="tl-nav-section">Sessions</div>
+                <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
+                   asp-controller="Session" asp-action="Index">
+                    @NavIcon("cal") All sessions
+                </a>
+                <a class="tl-nav-item @(ctrl=="Session"&&action=="Create"?"active":"")"
+                   asp-controller="Session" asp-action="Create">
+                    @NavIcon("plus") Schedule session
+                </a>
+                <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
+                   asp-controller="Session" asp-action="Schedule">
+                    @NavIcon("bar") Calendar view
                 </a>
 
                 <div class="tl-nav-section">Manage</div>
@@ -238,6 +264,13 @@
             {
                 <div class="alert alert-danger alert-dismissible fade show mb-4">
                     @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Info"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show mb-4">
+                    @TempData["Info"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }

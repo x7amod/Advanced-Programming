@@ -10,7 +10,8 @@ publish/
 *.suo
 *.userosscache
 *.sln.docstates
-
+*.md
+!README.md
 ## Rider / VS Code
 .idea/
 .vscode/

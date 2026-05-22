@@ -1,0 +1,48 @@
+@model Web_API.Models.Trainee
+@{
+    ViewData["Title"] = "Delete Trainee";
+    var hasEnrollments = (bool)(ViewBag.HasEnrollments ?? false);
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Manage Users</a></li>
+        <li class="breadcrumb-item active">Delete Trainee</li>
+    </ol>
+</nav>
+
+<h2 class="mb-4">Delete Trainee</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-body">
+                <h5 class="card-title text-danger">Confirm Deletion</h5>
+                <p class="mb-1"><strong>@ViewBag.FullName</strong></p>
+                <p class="text-muted mb-3">@ViewBag.Email</p>
+
+                @if (hasEnrollments)
+                {
+                    <div class="alert alert-warning mb-3">
+                        <strong>Cannot delete this trainee.</strong>
+                        <div>This trainee has enrollment records on file.</div>
+                        <div class="mt-1 small">Remove enrollments before deleting the account.</div>
+                    </div>
+                    <a asp-action="Index" class="btn btn-secondary">Back to Users</a>
+                }
+                else
+                {
+                    <p class="text-danger small">
+                        This action is permanent. The trainee account and all profile data will be removed.
+                    </p>
+                    <form asp-action="DeleteTrainee" asp-route-id="@Model.TraineeId" method="post">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">Delete Trainee</button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
