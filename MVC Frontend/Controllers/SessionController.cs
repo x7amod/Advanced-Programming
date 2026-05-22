@@ -100,9 +100,10 @@ namespace MVC_Frontend.Controllers
 
             // Build a map of instructorId -> display name for the list view
             var instructorIds = sessions.Select(s => s.InstructorId).Distinct().ToList();
-            var sessionInstructors = await _context.Instructors
+            var allInstructorsForMap = await _context.Instructors.ToListAsync();
+            var sessionInstructors = allInstructorsForMap
                 .Where(i => instructorIds.Contains(i.InstructorId))
-                .ToListAsync();
+                .ToList();
             var sessionUserIds = sessionInstructors.Select(i => i.UserId).ToList();
             var sessionUsersAll = await _context.Users.ToListAsync();
             var sessionUsers = sessionUsersAll

@@ -426,9 +426,17 @@ namespace MVC_Frontend.Controllers
 
             if (currentRole == AppRoles.Instructor && vm.NewRole == AppRoles.Trainee)
             {
-                var instructor = await _context.Instructors.FirstOrDefaultAsync(i => i.UserId == user.Id);
+                var instructor = await _context.Instructors
+                    .Include(i => i.CourseSessions)
+                    .Include(i => i.Assessments)
+                    .FirstOrDefaultAsync(i => i.UserId == user.Id);
                 if (instructor != null)
                 {
+                    if (instructor.CourseSessions?.Any() == true || instructor.Assessments?.Any() == true)
+                    {
+                        TempData["Error"] = "Cannot change role: this instructor is assigned to sessions or has assessments on record.";
+                        return RedirectToAction(nameof(Index));
+                    }
                     _context.Instructors.Remove(instructor);
                     await _context.SaveChangesAsync();
                 }
