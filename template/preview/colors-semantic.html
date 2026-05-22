@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Colors · Semantic</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 10px 8px; vertical-align: middle; font: var(--tl-small); }
+  .dot { width: 16px; height: 16px; border-radius: 999px; display: inline-block; vertical-align: middle; margin-right: 10px; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: var(--tl-r-pill); font: var(--tl-micro); font-weight: 600; }
+  .name { font-weight: 600; color: var(--tl-text-1); }
+  .hex { font-variant-numeric: tabular-nums; color: var(--tl-text-2); }
+  h4 { margin: 0 0 8px; font: var(--tl-eyebrow); text-transform: uppercase; letter-spacing: 0.06em; color: var(--tl-text-2); }
+</style>
+</head>
+<body>
+  <h4>Semantic colour roles</h4>
+  <table>
+    <tr>
+      <td><span class="dot" style="background:#10B981"></span><span class="name">Success</span></td>
+      <td class="hex">#10B981</td>
+      <td><span class="pill" style="background:#D1FAE5; color:#065F46;">Paid</span></td>
+    </tr>
+    <tr>
+      <td><span class="dot" style="background:#F59E0B"></span><span class="name">Warning</span></td>
+      <td class="hex">#F59E0B</td>
+      <td><span class="pill" style="background:#FEF3C7; color:#92400E;">Pending</span></td>
+    </tr>
+    <tr>
+      <td><span class="dot" style="background:#EF4444"></span><span class="name">Danger</span></td>
+      <td class="hex">#EF4444</td>
+      <td><span class="pill" style="background:#FEE2E2; color:#991B1B;">Overdue</span></td>
+    </tr>
+    <tr>
+      <td><span class="dot" style="background:#3B82F6"></span><span class="name">Info</span></td>
+      <td class="hex">#3B82F6</td>
+      <td><span class="pill" style="background:#DBEAFE; color:#1E40AF;">In progress</span></td>
+    </tr>
+    <tr>
+      <td><span class="dot" style="background:#6B7280"></span><span class="name">Neutral</span></td>
+      <td class="hex">#6B7280</td>
+      <td><span class="pill" style="background:#F3F4F6; color:#374151;">Draft</span></td>
+    </tr>
+  </table>
+</body>
+</html>

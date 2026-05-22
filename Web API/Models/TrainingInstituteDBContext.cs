@@ -80,6 +80,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<Assessment>(entity =>
         {
+            entity.ToTable("Assessment");
             entity.HasKey(e => e.AssessmentId).HasName("assessmentID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -95,6 +96,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<Category>(entity =>
         {
+            entity.ToTable("Category");
             entity.HasKey(e => e.CategoryId).HasName("categoryID");
 
             entity.HasOne(d => d.ParentCategory).WithMany(p => p.InverseParentCategory).HasConstraintName("Category_Category_fk");
@@ -102,6 +104,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<CertificationRequiredCourse>(entity =>
         {
+            entity.ToTable("CertificationRequiredCourse");
             entity.HasKey(e => e.Id).HasName("certReqCourseID");
 
             entity.Property(e => e.IsMandatory).HasDefaultValue(true);
@@ -117,11 +120,13 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<CertificationStatus>(entity =>
         {
+            entity.ToTable("CertificationStatus");
             entity.HasKey(e => e.StatusId).HasName("CertificationStatus_pk");
         });
 
         modelBuilder.Entity<CertificationTrack>(entity =>
         {
+            entity.ToTable("CertificationTrack");
             entity.HasKey(e => e.CertificationTrackId).HasName("certificationID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -130,6 +135,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<Classroom>(entity =>
         {
+            entity.ToTable("Classroom");
             entity.HasKey(e => e.ClassroomId).HasName("classroomID");
 
             entity.Property(e => e.IsActive).HasDefaultValue(true);
@@ -137,6 +143,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<ClassroomEquipment>(entity =>
         {
+            entity.ToTable("ClassroomEquipment");
             entity.HasKey(e => new { e.EquipmentId, e.ClassroomId }).HasName("equipmentID");
 
             entity.Property(e => e.EquipmentId).ValueGeneratedOnAdd();
@@ -148,6 +155,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<Coordinator>(entity =>
         {
+            entity.ToTable("Coordinator");
             entity.HasKey(e => e.CoordinatorId).HasName("coordinatorID");
 
             entity.HasOne(d => d.User)
@@ -158,6 +166,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<Course>(entity =>
         {
+            entity.ToTable("Course");
             entity.HasKey(e => e.CourseId).HasName("courseID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -176,6 +185,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<CourseSession>(entity =>
         {
+            entity.ToTable("CourseSession");
             entity.HasKey(e => e.SessionId).HasName("sessionID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -203,11 +213,13 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<CourseSessionStatus>(entity =>
         {
+            entity.ToTable("CourseSessionStatus");
             entity.HasKey(e => e.StatusId).HasName("CourseSessionStatus_pk");
         });
 
         modelBuilder.Entity<Enrollment>(entity =>
         {
+            entity.ToTable("Enrollment");
             entity.HasKey(e => e.EnrollmentId).HasName("enrollmentID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -228,11 +240,13 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<EnrollmentStatus>(entity =>
         {
+            entity.ToTable("EnrollmentStatus");
             entity.HasKey(e => e.EnrollmentStatusId).HasName("EnrollmentStatus_pk");
         });
 
         modelBuilder.Entity<Instructor>(entity =>
         {
+            entity.ToTable("Instructor");
             entity.HasKey(e => e.InstructorId).HasName("instructorID");
 
             entity.HasOne(d => d.User)
@@ -243,6 +257,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<InstructorAvailability>(entity =>
         {
+            entity.ToTable("InstructorAvailability");
             entity.HasKey(e => new { e.AvailabilityId, e.InstructorId }).HasName("availabilityID");
 
             entity.Property(e => e.AvailabilityId).ValueGeneratedOnAdd();
@@ -255,6 +270,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<InstructorExpertise>(entity =>
         {
+            entity.ToTable("InstructorExpertise");
             entity.HasKey(e => e.ExpertiseId).HasName("ID");
 
             entity.HasOne(d => d.Instructor).WithMany(p => p.InstructorExpertises)
@@ -268,6 +284,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<Notification>(entity =>
         {
+            entity.ToTable("Notification");
             entity.HasKey(e => e.NotificationId).HasName("notificationID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -280,11 +297,13 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
+            entity.ToTable("PaymentMethod");
             entity.HasKey(e => e.PaymentMethodId).HasName("PaymentMethod_pk");
         });
 
         modelBuilder.Entity<PaymentRecord>(entity =>
         {
+            entity.ToTable("PaymentRecord");
             entity.HasKey(e => e.PaymentRecordId).HasName("paymentRecordID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -304,11 +323,13 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<PaymentStatus>(entity =>
         {
+            entity.ToTable("PaymentStatus");
             entity.HasKey(e => e.StatusId).HasName("PaymentStatus_pk");
         });
 
         modelBuilder.Entity<PaymentTransaction>(entity =>
         {
+            entity.ToTable("PaymentTransaction");
             entity.HasKey(e => e.TransactionId).HasName("transactionID");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -329,11 +350,13 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<SubjectArea>(entity =>
         {
+            entity.ToTable("SubjectArea");
             entity.HasKey(e => e.SubjectAreaId).HasName("subjectAreaID");
         });
 
         modelBuilder.Entity<Trainee>(entity =>
         {
+            entity.ToTable("Trainee");
             entity.HasKey(e => e.TraineeId).HasName("traineeID");
 
             entity.HasOne(d => d.User)
@@ -344,6 +367,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<TraineeCertification>(entity =>
         {
+            entity.ToTable("TraineeCertification");
             entity.HasKey(e => e.TraineeCertId).HasName("traineeCertID");
 
             entity.HasOne(d => d.CertificationTrack).WithMany(p => p.TraineeCertifications)
@@ -361,6 +385,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<TraineeCourseCompletion>(entity =>
         {
+            entity.ToTable("TraineeCourseCompletion");
             entity.HasKey(e => e.CompletionId).HasName("completionID");
 
             entity.HasOne(d => d.Course).WithMany(p => p.TraineeCourseCompletions)
@@ -374,6 +399,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<Waitlist>(entity =>
         {
+            entity.ToTable("Waitlist");
             entity.HasKey(e => e.WaitlistId).HasName("waitlistID");
 
             entity.Property(e => e.AddedAt).HasDefaultValueSql("(getdate())");
@@ -393,6 +419,7 @@ public partial class TrainingInstituteDBContext : IdentityDbContext<IdentityUser
 
         modelBuilder.Entity<WaitlistStatus>(entity =>
         {
+            entity.ToTable("WaitlistStatus");
             entity.HasKey(e => e.StatusId).HasName("WaitlistStatus_pk");
         });
 

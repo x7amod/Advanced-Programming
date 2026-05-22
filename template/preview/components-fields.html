@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Components · Form fields</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  label { display: block; font: var(--tl-micro); font-weight: 600; color: var(--tl-text-1); margin-bottom: 6px; }
+  .input, .select { width: 100%; padding: 9px 12px; border: 1px solid var(--tl-border); border-radius: var(--tl-r-xs); background: var(--tl-surface); font: var(--tl-body); color: var(--tl-text-1); }
+  .input:focus, .select:focus { outline: none; border-color: var(--tl-primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.18); }
+  .focused { border-color: var(--tl-primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.18); }
+  .error { border-color: var(--tl-danger); }
+  .hint { font: var(--tl-micro); color: var(--tl-text-2); margin-top: 4px; }
+  .err { font: var(--tl-micro); color: var(--tl-danger-fg); margin-top: 4px; }
+  .check { display: flex; align-items: center; gap: 8px; font: var(--tl-body); color: var(--tl-text-1); }
+  .check input { accent-color: var(--tl-primary); width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div>
+      <label>Email address</label>
+      <input class="input" value="hajar@taalam.bh"/>
+      <div class="hint">Use your registered work email.</div>
+    </div>
+    <div>
+      <label>Course title</label>
+      <input class="input focused" placeholder="e.g. Project Management"/>
+    </div>
+    <div>
+      <label>Subject area</label>
+      <select class="select"><option>Information Technology</option></select>
+    </div>
+    <div>
+      <label>Enrollment fee (BHD)</label>
+      <input class="input error" value="abc"/>
+      <div class="err">Enter a numeric amount.</div>
+    </div>
+    <div style="grid-column: 1 / -1; display: flex; gap: 24px;">
+      <label class="check"><input type="checkbox" checked/> I agree to the terms</label>
+      <label class="check"><input type="checkbox"/> Email me updates</label>
+    </div>
+  </div>
+</body>
+</html>

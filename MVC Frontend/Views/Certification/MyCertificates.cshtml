@@ -1,0 +1,68 @@
+@model IEnumerable<Web_API.Models.TraineeCertification>
+@{
+    ViewData["Title"] = "My Certificates";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">My Certificates</h2>
+    <a asp-action="MyProgress" class="btn btn-outline-secondary">← Back to Progress</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You have not been issued any certificates yet. Complete all mandatory courses in a
+        certification track to become eligible.
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var cert in Model)
+        {
+            var isExpired = cert.ExpiryDate.HasValue && cert.ExpiryDate.Value < DateTime.Now;
+            var statusLabel = isExpired ? "Expired" : cert.Status?.Status ?? "—";
+            var cardBorder = isExpired ? "border-danger" : "border-success";
+            var badgeClass = isExpired ? "bg-danger" : "bg-success";
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 @cardBorder">
+                    <div class="card-header d-flex justify-content-between align-items-center @(isExpired ? "bg-danger text-white" : "bg-success text-white")">
+                        <strong>Certificate</strong>
+                        <span class="badge bg-white @(isExpired ? "text-danger" : "text-success")">@statusLabel</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">@cert.CertificationTrack.Name</h5>
+
+                        <dl class="row small mb-0">
+                            <dt class="col-5">Certificate #</dt>
+                            <dd class="col-7"><code>@(cert.CertificateNumber ?? "—")</code></dd>
+
+                            <dt class="col-5">Issued</dt>
+                            <dd class="col-7">
+                                @(cert.CertificateIssuedDate?.ToString("dd MMM yyyy") ?? "—")
+                            </dd>
+
+                            <dt class="col-5">Expires</dt>
+                            <dd class="col-7 @(isExpired ? "text-danger fw-bold" : "")">
+                                @if (cert.ExpiryDate.HasValue)
+                                {
+                                    @cert.ExpiryDate.Value.ToString("dd MMM yyyy")
+                                    if (isExpired) { <span> (Expired)</span> }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No expiry</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a asp-action="Progress" asp-route-id="@cert.CertificationTrackId"
+                           class="btn btn-sm btn-outline-primary w-100">View Track Progress</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

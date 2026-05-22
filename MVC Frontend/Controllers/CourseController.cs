@@ -95,6 +95,17 @@ namespace MVC_Frontend.Controllers
                 return View(PopulateDropdowns(vm));
             }
 
+            if (vm.PrerequisiteCourseId.HasValue)
+            {
+                var prereq = await _context.Courses.FindAsync(vm.PrerequisiteCourseId.Value);
+                if (prereq?.PrerequisiteCourseId != null)
+                {
+                    ModelState.AddModelError(nameof(vm.PrerequisiteCourseId),
+                        "This course already has a prerequisite. Only single-level prerequisites are allowed.");
+                    return View(PopulateDropdowns(vm));
+                }
+            }
+
             var course = new Course
             {
                 SubjectAreaId = vm.SubjectAreaId,
@@ -120,7 +131,7 @@ namespace MVC_Frontend.Controllers
         }
 
         // GET: Course/Edit/5
-        [Authorize(Roles = "Coordinator")]
+        [Authorize(Roles = "Training Coordinator")]
         public async Task<IActionResult> Edit(int id)
         {
             var course = await _context.Courses.FindAsync(id);
@@ -149,7 +160,7 @@ namespace MVC_Frontend.Controllers
         // POST: Course/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Coordinator")]
+        [Authorize(Roles = "Training Coordinator")]
         public async Task<IActionResult> Edit(int id, CourseFormViewModel vm)
         {
             if (id != vm.CourseId)
@@ -166,6 +177,23 @@ namespace MVC_Frontend.Controllers
             {
                 ModelState.AddModelError(nameof(vm.CourseCode), "This course code is already in use.");
                 return View(PopulateDropdowns(vm, excludeId: id));
+            }
+
+            if (vm.PrerequisiteCourseId.HasValue)
+            {
+                var prereq = await _context.Courses.FindAsync(vm.PrerequisiteCourseId.Value);
+                if (prereq?.PrerequisiteCourseId != null)
+                {
+                    ModelState.AddModelError(nameof(vm.PrerequisiteCourseId),
+                        "This course already has a prerequisite. Only single-level prerequisites are allowed.");
+                    return View(PopulateDropdowns(vm, excludeId: id));
+                }
+                // Prevent circular: chosen prerequisite must not already list this course as its prerequisite
+                if (prereq?.CourseId == id)
+                {
+                    ModelState.AddModelError(nameof(vm.PrerequisiteCourseId), "A course cannot be its own prerequisite.");
+                    return View(PopulateDropdowns(vm, excludeId: id));
+                }
             }
 
             course.SubjectAreaId = vm.SubjectAreaId;
@@ -188,7 +216,7 @@ namespace MVC_Frontend.Controllers
         }
 
         // GET: Course/Deactivate/5 — confirmation page
-        [Authorize(Roles = "Coordinator")]
+        [Authorize(Roles = "Training Coordinator")]
         public async Task<IActionResult> Deactivate(int id)
         {
             var course = await _context.Courses
@@ -205,7 +233,7 @@ namespace MVC_Frontend.Controllers
         // POST: Course/Deactivate/5
         [HttpPost, ActionName("Deactivate")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Coordinator")]
+        [Authorize(Roles = "Training Coordinator")]
         public async Task<IActionResult> DeactivateConfirmed(int id)
         {
             var course = await _context.Courses.FindAsync(id);
@@ -230,7 +258,8 @@ namespace MVC_Frontend.Controllers
                 .OrderBy(c => c.Name)
                 .Select(c => new SelectListItem { Value = c.CategoryId.ToString(), Text = c.Name });
 
-            var prereqQuery = _context.Courses.Where(c => c.IsActive);
+            // Only courses with no prerequisite themselves can be selected as a prerequisite (single-level rule)
+            var prereqQuery = _context.Courses.Where(c => c.IsActive && c.PrerequisiteCourseId == null);
             if (excludeId.HasValue)
                 prereqQuery = prereqQuery.Where(c => c.CourseId != excludeId.Value);
 
