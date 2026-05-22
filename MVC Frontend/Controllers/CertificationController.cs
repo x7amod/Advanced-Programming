@@ -50,21 +50,20 @@ namespace MVC_Frontend.Controllers
                 return NotFound();
 
             int totalMandatory = track.CertificationRequiredCourses.Count(rc => rc.IsMandatory);
-            var mandatoryIds = track.CertificationRequiredCourses
+            var mandatoryIdsList = track.CertificationRequiredCourses
                 .Where(rc => rc.IsMandatory)
                 .Select(rc => rc.CourseId)
-                .ToHashSet();
+                .ToList();
 
             var summaries = new List<TrackEnrollmentSummaryViewModel>();
             foreach (var cert in track.TraineeCertifications)
             {
-                var completedCount = await _context.TraineeCourseCompletions
-                    .Where(c => c.TraineeId == cert.TraineeId
-                             && mandatoryIds.Contains(c.CourseId)
-                             && c.Result == "Pass")
+                // Pull completions to memory to avoid EF Core 9 CTE generation
+                var allCompleted = await _context.TraineeCourseCompletions
+                    .Where(c => c.TraineeId == cert.TraineeId && c.Result == "Pass")
                     .Select(c => c.CourseId)
-                    .Distinct()
-                    .CountAsync();
+                    .ToListAsync();
+                var completedCount = allCompleted.Intersect(mandatoryIdsList).Count();
 
                 var user = await _context.Users.FindAsync(cert.Trainee.UserId);
                 summaries.Add(new TrackEnrollmentSummaryViewModel
@@ -212,15 +211,19 @@ namespace MVC_Frontend.Controllers
                 .Select(rc => rc.CourseId)
                 .ToListAsync();
 
-            var availableCourses = await _context.Courses
-                .Where(c => c.IsActive && !existingCourseIds.Contains(c.CourseId))
+            // Pull to memory first to avoid NOT IN generating a CTE in EF Core 9
+            var allActiveCourses = await _context.Courses
+                .Where(c => c.IsActive)
                 .OrderBy(c => c.Title)
+                .ToListAsync();
+            var availableCourses = allActiveCourses
+                .Where(c => !existingCourseIds.Contains(c.CourseId))
                 .Select(c => new SelectListItem
                 {
                     Value = c.CourseId.ToString(),
                     Text = $"{c.CourseCode} – {c.Title}"
                 })
-                .ToListAsync();
+                .ToList();
 
             return View(new AddCourseToTrackViewModel
             {
@@ -243,15 +246,18 @@ namespace MVC_Frontend.Controllers
                     .Select(rc => rc.CourseId)
                     .ToListAsync();
 
-                vm.AvailableCourses = await _context.Courses
-                    .Where(c => c.IsActive && !existingIds.Contains(c.CourseId))
+                var allActive = await _context.Courses
+                    .Where(c => c.IsActive)
                     .OrderBy(c => c.Title)
+                    .ToListAsync();
+                vm.AvailableCourses = allActive
+                    .Where(c => !existingIds.Contains(c.CourseId))
                     .Select(c => new SelectListItem
                     {
                         Value = c.CourseId.ToString(),
                         Text = $"{c.CourseCode} – {c.Title}"
                     })
-                    .ToListAsync();
+                    .ToList();
 
                 var t = await _context.CertificationTracks.FindAsync(vm.CertificationTrackId);
                 vm.TrackName = t?.Name ?? string.Empty;
@@ -302,11 +308,12 @@ namespace MVC_Frontend.Controllers
                 .OrderBy(t => t.Name)
                 .ToListAsync();
 
-            var passedCourseIds = await _context.TraineeCourseCompletions
+            var passedCourseIds = (await _context.TraineeCourseCompletions
                 .Where(c => c.TraineeId == trainee.TraineeId && c.Result == "Pass")
                 .Select(c => c.CourseId)
+                .ToListAsync())
                 .Distinct()
-                .ToListAsync();
+                .ToList();
 
             var myCerts = await _context.TraineeCertifications
                 .Include(tc => tc.Status)
@@ -372,9 +379,13 @@ namespace MVC_Frontend.Controllers
 
             var courseIds = track.CertificationRequiredCourses.Select(rc => rc.CourseId).ToList();
 
-            var completions = await _context.TraineeCourseCompletions
-                .Where(c => c.TraineeId == resolvedTraineeId && courseIds.Contains(c.CourseId))
+            // Filter by traineeId only in SQL, then filter by courseIds in memory
+            var allTraineeCompletions = await _context.TraineeCourseCompletions
+                .Where(c => c.TraineeId == resolvedTraineeId)
                 .ToListAsync();
+            var completions = allTraineeCompletions
+                .Where(c => courseIds.Contains(c.CourseId))
+                .ToList();
 
             var completionMap = completions
                 .GroupBy(c => c.CourseId)
@@ -433,13 +444,11 @@ namespace MVC_Frontend.Controllers
                 .Select(rc => rc.CourseId)
                 .ToListAsync();
 
-            var passedCount = await _context.TraineeCourseCompletions
-                .Where(c => c.TraineeId == traineeId
-                         && c.Result == "Pass"
-                         && mandatoryIds.Contains(c.CourseId))
+            var allPassed = await _context.TraineeCourseCompletions
+                .Where(c => c.TraineeId == traineeId && c.Result == "Pass")
                 .Select(c => c.CourseId)
-                .Distinct()
-                .CountAsync();
+                .ToListAsync();
+            var passedCount = allPassed.Intersect(mandatoryIds).Count();
 
             if (passedCount < mandatoryIds.Count)
             {
