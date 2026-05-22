@@ -40,6 +40,14 @@
                    asp-controller="Enrollment" asp-action="MyEnrollments">
                     @NavIcon("cal") My enrollments
                 </a>
+                <a class="tl-nav-item @(ctrl=="Certification"&&action=="MyProgress"?"active":"")"
+                   asp-controller="Certification" asp-action="MyProgress">
+                    @NavIcon("cert") My progress
+                </a>
+                <a class="tl-nav-item @(ctrl=="Certification"&&action=="MyCertificates"?"active":"")"
+                   asp-controller="Certification" asp-action="MyCertificates">
+                    @NavIcon("award") My certificates
+                </a>
             </nav>
         }
 
@@ -92,6 +100,26 @@
                 <a class="tl-nav-item" asp-controller="Course" asp-action="Index"
                    asp-route-showInactive="true">
                     @NavIcon("clip") All courses
+                </a>
+
+                <div class="tl-nav-section">Certification</div>
+                <a class="tl-nav-item @(ctrl=="Certification"&&action!="Create"?"active":"")"
+                   asp-controller="Certification" asp-action="Index">
+                    @NavIcon("award") Tracks
+                </a>
+                <a class="tl-nav-item @(ctrl=="Certification"&&action=="Create"?"active":"")"
+                   asp-controller="Certification" asp-action="Create">
+                    @NavIcon("plus") New track
+                </a>
+
+                <div class="tl-nav-section">Scheduling</div>
+                <a class="tl-nav-item @(ctrl=="Session"?"active":"")"
+                   asp-controller="Session" asp-action="Index">
+                    @NavIcon("cal") Sessions
+                </a>
+                <a class="tl-nav-item @(ctrl=="UserManagement"?"active":"")"
+                   asp-controller="UserManagement" asp-action="Index">
+                    @NavIcon("user") Users
                 </a>
             </nav>
         }
@@ -252,6 +280,8 @@
             "plus"  => "<path d='M12 5v14M5 12h14'/>",
             "tag"   => "<path d='M4 4h7l9 9-7 7-9-9V4z'/><circle cx='8.5' cy='8.5' r='1.5'/>",
             "user"  => "<circle cx='12' cy='8' r='4'/><path d='M4 21a8 8 0 0 1 16 0'/>",
+            "cert"  => "<path d='M12 2l3 6.5 7 1-5 4.9 1.2 7L12 18l-6.2 3.4 1.2-7L2 9.5l7-1z'/>",
+            "award" => "<circle cx='12' cy='9' r='6'/><path d='m9.2 14.8-1.7 5.2 4.5-2.7 4.5 2.7-1.7-5.2'/>",
             _       => "<circle cx='12' cy='12' r='4'/>"
         };
         return new Microsoft.AspNetCore.Html.HtmlString(

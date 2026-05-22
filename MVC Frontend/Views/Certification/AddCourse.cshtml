@@ -1,0 +1,56 @@
+@model MVC_Frontend.Models.AddCourseToTrackViewModel
+@{
+    ViewData["Title"] = "Add Course to Track";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Add Course to Track</h2>
+        <p class="text-muted mb-0">Track: <strong>@Model.TrackName</strong></p>
+    </div>
+    <a asp-action="Details" asp-route-id="@Model.CertificationTrackId" class="btn btn-outline-secondary">← Back</a>
+</div>
+
+<div class="card" style="max-width:520px;">
+    <div class="card-body">
+        <form asp-action="AddCourse" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="CertificationTrackId" />
+            <input type="hidden" asp-for="TrackName" />
+
+            <div class="mb-3">
+                <label asp-for="CourseId" class="form-label fw-semibold"></label>
+                <select asp-for="CourseId" asp-items="Model.AvailableCourses"
+                        class="form-select">
+                    <option value="">— Select a course —</option>
+                </select>
+                <span asp-validation-for="CourseId" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SequenceOrder" class="form-label fw-semibold"></label>
+                <input asp-for="SequenceOrder" class="form-control" type="number" min="1" max="99"
+                       style="max-width:120px;" placeholder="e.g. 1" />
+                <div class="form-text">Optional. Used to order courses within the track.</div>
+                <span asp-validation-for="SequenceOrder" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check">
+                    <input asp-for="IsMandatory" class="form-check-input" type="checkbox" />
+                    <label asp-for="IsMandatory" class="form-check-label">
+                        Mandatory (required for certification eligibility)
+                    </label>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Add Course</button>
+                <a asp-action="Details" asp-route-id="@Model.CertificationTrackId"
+                   class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

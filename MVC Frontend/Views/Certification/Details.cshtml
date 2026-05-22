@@ -1,0 +1,190 @@
+@model Web_API.Models.CertificationTrack
+@using MVC_Frontend.Models
+@{
+    ViewData["Title"] = Model.Name;
+    var summaries = ViewBag.Summaries as List<TrackEnrollmentSummaryViewModel> ?? new();
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h2 class="mb-1">@Model.Name
+            @if (Model.IsActive)
+            {
+                <span class="badge bg-success fs-6 ms-2">Active</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary fs-6 ms-2">Inactive</span>
+            }
+        </h2>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="text-muted mb-0">@Model.Description</p>
+        }
+        <small class="text-muted">
+            Validity: @(Model.ValidityPeriod.HasValue ? $"{Model.ValidityPeriod} months" : "No expiry")
+        </small>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.CertificationTrackId" class="btn btn-outline-secondary">Edit</a>
+        @if (Model.IsActive)
+        {
+            <a asp-action="Deactivate" asp-route-id="@Model.CertificationTrackId"
+               class="btn btn-outline-danger">Deactivate</a>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">← Back</a>
+    </div>
+</div>
+
+@* ── Required Courses ──────────────────────────────────────── *@
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Required Courses</strong>
+        @if (Model.IsActive)
+        {
+            <a asp-action="AddCourse" asp-route-id="@Model.CertificationTrackId"
+               class="btn btn-sm btn-primary">+ Add Course</a>
+        }
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.CertificationRequiredCourses.Any())
+        {
+            <p class="p-3 text-muted mb-0">No courses mapped to this track yet.</p>
+        }
+        else
+        {
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Code</th>
+                        <th>Course Title</th>
+                        <th>Mandatory</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rc in Model.CertificationRequiredCourses)
+                    {
+                        <tr>
+                            <td class="text-muted">@(rc.SequenceOrder?.ToString() ?? "—")</td>
+                            <td><code>@rc.Course.CourseCode</code></td>
+                            <td>@rc.Course.Title</td>
+                            <td>
+                                @if (rc.IsMandatory)
+                                {
+                                    <span class="badge bg-danger">Mandatory</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Optional</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="RemoveCourse" method="post"
+                                      onsubmit="return confirm('Remove this course from the track?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="reqCourseId" value="@rc.Id" />
+                                    <input type="hidden" name="trackId" value="@Model.CertificationTrackId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@* ── Trainee Certifications ────────────────────────────────── *@
+<div class="card">
+    <div class="card-header">
+        <strong>Trainee Certifications</strong>
+        <span class="text-muted ms-2 small">(@summaries.Count record(s))</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!summaries.Any())
+        {
+            <p class="p-3 text-muted mb-0">No certifications issued for this track yet.</p>
+        }
+        else
+        {
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Trainee</th>
+                        <th>Progress</th>
+                        <th>Status</th>
+                        <th>Certificate #</th>
+                        <th>Issued</th>
+                        <th>Expiry</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in summaries)
+                    {
+                        var status = s.Certification?.Status?.Status ?? "In Progress";
+                        var badgeClass = status switch
+                        {
+                            "Issued"      => "bg-success",
+                            "Eligible"    => "bg-warning text-dark",
+                            "Expired"     => "bg-danger",
+                            _             => "bg-secondary"
+                        };
+                        <tr>
+                            <td>@s.TraineeName</td>
+                            <td style="min-width:140px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height:8px;">
+                                        <div class="progress-bar @(s.IsEligible?"bg-success":"")"
+                                             role="progressbar" style="width:@s.ProgressPercent%"></div>
+                                    </div>
+                                    <span class="small text-muted">@s.CompletedMandatory/@s.TotalMandatory</span>
+                                </div>
+                            </td>
+                            <td><span class="badge @badgeClass">@status</span></td>
+                            <td>
+                                @if (s.Certification?.CertificateNumber != null)
+                                {
+                                    <code class="small">@s.Certification.CertificateNumber</code>
+                                }
+                                else { <span class="text-muted">—</span> }
+                            </td>
+                            <td>
+                                @(s.Certification?.CertificateIssuedDate?.ToString("dd MMM yyyy") ?? "—")
+                            </td>
+                            <td>
+                                @if (s.Certification?.ExpiryDate.HasValue == true)
+                                {
+                                    var exp = s.Certification.ExpiryDate.Value;
+                                    var expired = exp < DateTime.Now;
+                                    <span class="@(expired ? "text-danger" : "")">@exp.ToString("dd MMM yyyy")</span>
+                                }
+                                else { <span class="text-muted">No expiry</span> }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Progress"
+                                   asp-route-id="@Model.CertificationTrackId"
+                                   asp-route-traineeId="@s.TraineeId"
+                                   class="btn btn-sm btn-outline-primary me-1">Progress</a>
+
+                                @if (s.IsEligible && status != "Issued")
+                                {
+                                    <form asp-action="IssueCertificate" method="post" class="d-inline"
+                                          onsubmit="return confirm('Issue certificate for @s.TraineeName?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="traineeId" value="@s.TraineeId" />
+                                        <input type="hidden" name="trackId" value="@Model.CertificationTrackId" />
+                                        <button type="submit" class="btn btn-sm btn-success">Issue</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
