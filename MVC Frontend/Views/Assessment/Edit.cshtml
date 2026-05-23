@@ -1,0 +1,90 @@
+@model MVC_Frontend.Models.AssessmentFormViewModel
+@{
+    ViewData["Title"] = "Edit Assessment";
+}
+
+<div class="mb-4">
+    <a asp-action="Details" asp-route-id="@Model.AssessmentId"
+       class="text-decoration-none text-muted small">← Assessment Details</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-0 bg-light py-3">
+                <h5 class="fw-semibold mb-0">Edit Assessment</h5>
+                <div class="small text-muted">Update the result or remarks for this assessment</div>
+            </div>
+            <div class="card-body">
+
+                <form asp-action="Edit" asp-route-id="@Model.AssessmentId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="AssessmentId" />
+                    <input type="hidden" asp-for="EnrollmentId" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
+
+                    <!-- Context block: read-only enrollment info -->
+                    <div class="bg-light rounded p-3 mb-4">
+                        <div class="small text-muted fw-medium mb-1">Enrollment</div>
+                        <div class="fw-semibold">@Model.TraineeName</div>
+                        <div class="small text-muted">
+                            @Model.CourseTitle (@Model.CourseCode) &nbsp;·&nbsp;
+                            @Model.SessionDate.ToString("dd MMM yyyy")
+                        </div>
+                    </div>
+
+                    <!-- Instructor -->
+                    <div class="mb-4">
+                        <label asp-for="InstructorId" class="form-label fw-medium"></label>
+                        <select asp-for="InstructorId" asp-items="Model.Instructors" class="form-select">
+                            <option value="">— Select an instructor —</option>
+                        </select>
+                        <span asp-validation-for="InstructorId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Result -->
+                    <div class="mb-4">
+                        <label asp-for="Result" class="form-label fw-medium"></label>
+                        <select asp-for="Result" class="form-select">
+                            <option value="Pending">Pending</option>
+                            <option value="Pass">Pass</option>
+                            <option value="Fail">Fail</option>
+                        </select>
+                        <span asp-validation-for="Result" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Assessment Date -->
+                    <div class="mb-4">
+                        <label asp-for="AssessmentDate" class="form-label fw-medium"></label>
+                        <input asp-for="AssessmentDate" type="date" class="form-control"
+                               max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="AssessmentDate" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="mb-4">
+                        <label asp-for="Remarks" class="form-label fw-medium"></label>
+                        <textarea asp-for="Remarks" class="form-control" rows="3"
+                                  placeholder="Optional notes about this assessment"></textarea>
+                        <span asp-validation-for="Remarks" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                        <a asp-action="Details" asp-route-id="@Model.AssessmentId"
+                           class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

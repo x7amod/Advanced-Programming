@@ -1,0 +1,66 @@
+@model MVC_Frontend.Models.CancelEnrollmentViewModel
+@{
+    ViewData["Title"] = "Cancel Enrollment";
+}
+
+<div class="mb-4">
+    <a asp-action="MyEnrollments" class="text-decoration-none text-muted small">
+        ← Back to my enrollments
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-0 bg-danger bg-opacity-10 py-3">
+                <h5 class="fw-semibold mb-0 text-danger">Cancel Enrollment</h5>
+                <div class="small text-muted">This action will mark your enrollment as dropped</div>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Session summary (read-only) -->
+                <div class="mb-4">
+                    <div class="fw-semibold">@Model.CourseTitle</div>
+                    <div class="small text-muted">@Model.CourseCode &nbsp;·&nbsp; @Model.SessionDate.ToString("dd MMM yyyy")</div>
+                    <div class="mt-2">
+                        <span class="badge bg-primary rounded-pill small">@Model.StatusName</span>
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Drop reason field (optional but encouraged) -->
+                <form asp-action="CancelConfirm" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="EnrollmentId" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="DropReason" class="form-label fw-medium"></label>
+                        <textarea asp-for="DropReason" class="form-control" rows="3"
+                                  placeholder="Optional — briefly explain why you're cancelling"></textarea>
+                        <span asp-validation-for="DropReason" class="text-danger small"></span>
+                        <div class="form-text">Providing a reason helps coordinators plan better.</div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-danger px-4">
+                            Yes, Cancel Enrollment
+                        </button>
+                        <a asp-action="MyEnrollments" class="btn btn-outline-secondary">
+                            Keep Enrollment
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

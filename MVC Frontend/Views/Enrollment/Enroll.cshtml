@@ -1,0 +1,115 @@
+@model MVC_Frontend.Models.EnrollSessionViewModel
+@{
+    ViewData["Title"] = "Confirm Enrollment";
+}
+
+<div class="mb-4">
+    <a asp-controller="Session" asp-action="Index" class="text-decoration-none text-muted small">
+        ← Back to sessions
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <!-- Session summary card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header border-0 bg-primary bg-opacity-10 py-3">
+                <h5 class="fw-semibold mb-0">Enrollment Confirmation</h5>
+                <div class="small text-muted">Review the session details before confirming</div>
+            </div>
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <div class="fw-semibold fs-5">@Model.CourseTitle</div>
+                    <div class="text-muted small">@Model.CourseCode</div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.CourseDescription))
+                {
+                    <p class="text-muted small mb-3">@Model.CourseDescription</p>
+                }
+
+                <hr />
+
+                <!-- Key details grid -->
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="small text-muted fw-medium text-uppercase tracking-wide">Session Date</div>
+                        <div class="fw-medium">@Model.SessionDate.ToString("dddd, dd MMMM yyyy")</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="small text-muted fw-medium text-uppercase tracking-wide">Time</div>
+                        <div class="fw-medium">
+                            @Model.StartTime.ToString("hh:mm tt") – @Model.EndTime.ToString("hh:mm tt")
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="small text-muted fw-medium text-uppercase tracking-wide">Instructor</div>
+                        <div class="fw-medium">@Model.InstructorName</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="small text-muted fw-medium text-uppercase tracking-wide">Location</div>
+                        <div class="fw-medium">@Model.ClassroomName</div>
+                        <div class="small text-muted">@Model.ClassroomLocation</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="small text-muted fw-medium text-uppercase tracking-wide">Duration</div>
+                        <div class="fw-medium">@Model.DurationHours hrs</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="small text-muted fw-medium text-uppercase tracking-wide">Enrollment Fee</div>
+                        <div class="fw-medium">BHD @Model.EnrollmentFee.ToString("0.00")</div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Capacity indicator -->
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="small text-muted">Capacity</span>
+                    <span class="small fw-medium">@Model.CurrentEnrollment / @Model.MaxCapacity seats</span>
+                </div>
+                <div class="progress mb-2" style="height: 6px;">
+                    @{
+                        int pct = Model.MaxCapacity > 0
+                            ? (int)Math.Round((double)Model.CurrentEnrollment / Model.MaxCapacity * 100)
+                            : 0;
+                        string barColor = pct >= 90 ? "bg-danger" : pct >= 70 ? "bg-warning" : "bg-success";
+                    }
+                    <div class="progress-bar @barColor" style="width: @pct%"></div>
+                </div>
+                @if (Model.SpotsLeft <= 3 && Model.SpotsLeft > 0)
+                {
+                    <div class="small text-danger fw-medium">Only @Model.SpotsLeft spot(s) remaining!</div>
+                }
+                else
+                {
+                    <div class="small text-muted">@Model.SpotsLeft spot(s) available</div>
+                }
+
+            </div>
+        </div>
+
+        <!-- Note about status flow -->
+        <div class="alert alert-info border-0 mb-4">
+            <strong>Note:</strong> Your enrollment will initially be in <em>Enrolled</em> status.
+            A coordinator will confirm it shortly.
+        </div>
+
+        <!-- Confirm / Cancel actions -->
+        <div class="d-flex gap-2">
+            <form asp-action="EnrollConfirm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="sessionId" value="@Model.SessionId" />
+                <button type="submit" class="btn btn-primary px-4">
+                    Confirm Enrollment
+                </button>
+            </form>
+            <a asp-controller="Session" asp-action="Index" class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </div>
+
+    </div>
+</div>

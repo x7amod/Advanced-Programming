@@ -1,0 +1,138 @@
+@model MVC_Frontend.Models.AllEnrollmentsViewModel
+@{
+    ViewData["Title"] = "All Enrollments";
+
+    string BadgeClass(string status) => status switch
+    {
+        "Enrolled"  => "bg-primary",
+        "Confirmed" => "bg-success",
+        "Attending" => "bg-info text-dark",
+        "Completed" => "bg-secondary",
+        "Dropped"   => "bg-danger",
+        _           => "bg-light text-dark"
+    };
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-semibold mb-1">All Enrollments</h2>
+        <p class="text-muted mb-0">Monitor and manage every enrollment across all sessions.</p>
+    </div>
+    <a asp-action="ManualEnroll" class="btn btn-primary">
+        + Manual Enroll
+    </a>
+</div>
+
+<!-- Filter bar -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-sm-3">
+                <label class="form-label fw-medium small">Session</label>
+                <select name="sessionId" asp-items="Model.Sessions" class="form-select form-select-sm">
+                    <option value="">All sessions</option>
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label fw-medium small">Trainee</label>
+                <select name="traineeId" asp-items="Model.Trainees" class="form-select form-select-sm">
+                    <option value="">All trainees</option>
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label fw-medium small">Status</label>
+                <select name="statusId" asp-items="Model.Statuses" class="form-select form-select-sm">
+                    <option value="">All statuses</option>
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label fw-medium small">From</label>
+                <input type="date" name="dateFrom" value="@Model.FilterDateFrom" class="form-control form-control-sm" />
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label fw-medium small">To</label>
+                <input type="date" name="dateTo" value="@Model.FilterDateTo" class="form-control form-control-sm" />
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary">Apply Filters</button>
+                <a asp-action="AllEnrollments" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary chips -->
+<div class="d-flex gap-2 flex-wrap mb-3">
+    <span class="badge bg-light text-dark border px-3 py-2">
+        Total: <strong>@Model.Enrollments.Count</strong>
+    </span>
+    @foreach (var grp in Model.Enrollments.GroupBy(e => e.StatusName))
+    {
+        <span class="badge @BadgeClass(grp.Key) px-3 py-2">
+            @grp.Key: @grp.Count()
+        </span>
+    }
+</div>
+
+@if (!Model.Enrollments.Any())
+{
+    <div class="card border-0 shadow-sm text-center py-5">
+        <div class="card-body text-muted">
+            <p class="mb-0">No enrollments match the selected filters.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Trainee</th>
+                            <th>Course</th>
+                            <th>Session Date</th>
+                            <th>Enrolled On</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Enrollments)
+                        {
+                            <tr>
+                                <td class="text-muted small">@item.EnrollmentId</td>
+                                <td class="fw-medium">@item.TraineeName</td>
+                                <td>
+                                    <div class="fw-medium">@item.CourseTitle</div>
+                                    <div class="small text-muted">@item.CourseCode</div>
+                                </td>
+                                <td class="small">@item.SessionDate.ToString("dd MMM yyyy")</td>
+                                <td class="small">@item.EnrollmentDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <span class="badge @BadgeClass(item.StatusName) rounded-pill">
+                                        @item.StatusName
+                                    </span>
+                                    @if (!string.IsNullOrWhiteSpace(item.DropReason))
+                                    {
+                                        <div class="small text-muted mt-1" title="@item.DropReason">
+                                            @(item.DropReason.Length > 30
+                                                ? item.DropReason.Substring(0, 30) + "…"
+                                                : item.DropReason)
+                                        </div>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@item.EnrollmentId"
+                                       class="btn btn-sm btn-outline-secondary">Details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

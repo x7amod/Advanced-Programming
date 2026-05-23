@@ -1,0 +1,75 @@
+@model MVC_Frontend.Models.AssessmentDetailsViewModel
+@{
+    ViewData["Title"] = "Delete Assessment";
+
+    string ResultBadge(string result) => result switch
+    {
+        "Pass"    => "bg-success",
+        "Fail"    => "bg-danger",
+        "Pending" => "bg-warning text-dark",
+        _         => "bg-light text-dark"
+    };
+}
+
+<div class="mb-4">
+    <a asp-action="AllAssessments" class="text-decoration-none text-muted small">← All Assessments</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <div class="card border-0 shadow-sm border-danger border-opacity-50">
+            <div class="card-header border-0 bg-danger bg-opacity-10 py-3">
+                <h5 class="fw-semibold mb-0 text-danger">Delete Assessment</h5>
+                <div class="small text-muted">This action cannot be undone</div>
+            </div>
+            <div class="card-body">
+
+                <!-- Assessment summary before confirming deletion -->
+                <div class="mb-3">
+                    <div class="small text-muted fw-medium">Trainee</div>
+                    <div class="fw-semibold">@Model.TraineeName</div>
+                </div>
+                <div class="mb-3">
+                    <div class="small text-muted fw-medium">Course</div>
+                    <div class="fw-medium">@Model.CourseTitle (@Model.CourseCode)</div>
+                    <div class="small text-muted">Session: @Model.SessionDate.ToString("dd MMM yyyy")</div>
+                </div>
+                <div class="mb-3">
+                    <div class="small text-muted fw-medium">Instructor</div>
+                    <div>@Model.InstructorName</div>
+                </div>
+                <div class="mb-3">
+                    <div class="small text-muted fw-medium">Result</div>
+                    <span class="badge @ResultBadge(Model.Result) rounded-pill">@Model.Result</span>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.Remarks))
+                {
+                    <div class="mb-3">
+                        <div class="small text-muted fw-medium">Remarks</div>
+                        <div class="small">@Model.Remarks</div>
+                    </div>
+                }
+                <div class="mb-4">
+                    <div class="small text-muted fw-medium">Assessment Date</div>
+                    <div>@Model.AssessmentDate.ToString("dd MMM yyyy")</div>
+                </div>
+
+                <div class="alert alert-warning border-0 small mb-4">
+                    Are you sure you want to permanently delete this assessment record?
+                </div>
+
+                <div class="d-flex gap-2">
+                    <form asp-action="Delete" asp-route-id="@Model.AssessmentId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger px-4">Delete Assessment</button>
+                    </form>
+                    <a asp-action="Details" asp-route-id="@Model.AssessmentId"
+                       class="btn btn-outline-secondary">Keep It</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
