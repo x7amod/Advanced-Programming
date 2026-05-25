@@ -336,7 +336,7 @@ namespace MVC_Frontend.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            // Ongoing: only classroom change is allowed
+            // Ongoing: classroom and status can be changed
             if (currentStatus == "Ongoing")
             {
                 if (await HasClassroomConflict(vm.ClassroomId, session.SessionDate, session.StartTime, session.EndTime, excludeId: id))
@@ -348,10 +348,11 @@ namespace MVC_Frontend.Controllers
                 }
 
                 session.ClassroomId = vm.ClassroomId;
+                session.StatusId = vm.StatusId;
                 session.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Classroom updated successfully.";
+                TempData["Success"] = "Session updated successfully.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
