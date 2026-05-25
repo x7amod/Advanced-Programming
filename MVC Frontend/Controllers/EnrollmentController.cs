@@ -673,6 +673,43 @@ public class EnrollmentController : Controller
         return RedirectToAction(nameof(Manage));
     }
 
+    // ── Instructor: My Sessions (entry point from sidebar) ───────────────────
+    [Authorize(Roles = AppRoles.Instructor)]
+    public async Task<IActionResult> MySessions()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var instructor = await _context.Instructors.FirstOrDefaultAsync(i => i.UserId == userId);
+        if (instructor == null)
+        {
+            TempData["Error"] = "Instructor profile not found. Please contact the administrator.";
+            return View(new InstructorSessionsViewModel());
+        }
+
+        var sessions = await _context.CourseSessions
+            .Include(s => s.Course)
+            .Include(s => s.Status)
+            .Include(s => s.Enrollments)
+            .Where(s => s.InstructorId == instructor.InstructorId)
+            .OrderByDescending(s => s.SessionDate)
+            .ToListAsync();
+
+        var vm = new InstructorSessionsViewModel
+        {
+            Sessions = sessions.Select(s => new InstructorSessionItemViewModel
+            {
+                SessionId = s.SessionId,
+                CourseTitle = s.Course.Title,
+                SessionDate = s.SessionDate,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                SessionStatus = s.Status.Status,
+                EnrollmentCount = s.Enrollments.Count
+            }).ToList()
+        };
+
+        return View(vm);
+    }
+
     // ── 10. Session Roster (Instructor) ──────────────────────────────────────
     [Authorize(Roles = AppRoles.Instructor)]
     public async Task<IActionResult> SessionRoster(int sessionId)

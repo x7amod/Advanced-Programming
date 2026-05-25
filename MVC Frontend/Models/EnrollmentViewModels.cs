@@ -116,6 +116,24 @@ public class SessionCapacitySummaryViewModel
     public int MaxCapacity { get; set; }
 }
 
+// ── Instructor: My Sessions list ─────────────────────────────────────────────
+
+public class InstructorSessionsViewModel
+{
+    public List<InstructorSessionItemViewModel> Sessions { get; set; } = new();
+}
+
+public class InstructorSessionItemViewModel
+{
+    public int SessionId { get; set; }
+    public string CourseTitle { get; set; } = "";
+    public DateTime SessionDate { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string SessionStatus { get; set; } = "";
+    public int EnrollmentCount { get; set; }
+}
+
 // ── Instructor: Session Roster ───────────────────────────────────────────────
 
 public class SessionRosterViewModel
