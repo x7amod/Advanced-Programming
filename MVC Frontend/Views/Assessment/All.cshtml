@@ -74,10 +74,9 @@
             </div>
             <div class="col-md-1">
                 <label class="form-label fw-semibold">Result</label>
-                <select name="filterResult" class="form-select">
+                <select name="filterResult" class="form-select"
+                        asp-items="@(new SelectList(new[]{ new SelectListItem("Pass","Pass"), new SelectListItem("Fail","Fail") }, "Value", "Text", Model.FilterResult))">
                     <option value="">All</option>
-                    <option value="Pass" @(Model.FilterResult == "Pass" ? "selected" : "")>Pass</option>
-                    <option value="Fail" @(Model.FilterResult == "Fail" ? "selected" : "")>Fail</option>
                 </select>
             </div>
             <div class="col-md-2">

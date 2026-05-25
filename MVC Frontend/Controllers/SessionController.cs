@@ -477,9 +477,9 @@ namespace MVC_Frontend.Controllers
 
             if (session == null) return NotFound();
 
-            if (session.SessionDate.Date >= DateTime.Today)
+            if (session.SessionDate.Date > DateTime.Today)
             {
-                TempData["Error"] = "A session can only be completed after its session date has passed.";
+                TempData["Error"] = "A session can only be completed on or after its session date.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
