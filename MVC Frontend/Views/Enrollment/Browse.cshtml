@@ -18,26 +18,16 @@
         <div class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Subject Area</label>
-                <select name="subjectAreaId" class="form-select">
+                <select name="subjectAreaId" class="form-select"
+                        asp-items="@(new SelectList(Model.SubjectAreas, "Value", "Text", Model.SubjectAreaId?.ToString()))">
                     <option value="">All subject areas</option>
-                    @foreach (var sa in Model.SubjectAreas)
-                    {
-                        <option value="@sa.Value" @(sa.Value == Model.SubjectAreaId?.ToString() ? "selected" : "")>
-                            @sa.Text
-                        </option>
-                    }
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Category</label>
-                <select name="categoryId" class="form-select">
+                <select name="categoryId" class="form-select"
+                        asp-items="@(new SelectList(Model.Categories, "Value", "Text", Model.CategoryId?.ToString()))">
                     <option value="">All categories</option>
-                    @foreach (var cat in Model.Categories)
-                    {
-                        <option value="@cat.Value" @(cat.Value == Model.CategoryId?.ToString() ? "selected" : "")>
-                            @cat.Text
-                        </option>
-                    }
                 </select>
             </div>
             <div class="col-md-2">
