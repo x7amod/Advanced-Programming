@@ -464,6 +464,54 @@ namespace MVC_Frontend.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // POST: Session/Complete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = AppRoles.Coordinator)]
+        public async Task<IActionResult> Complete(int id)
+        {
+            var session = await _context.CourseSessions
+                .Include(s => s.Status)
+                .FirstOrDefaultAsync(s => s.SessionId == id);
+
+            if (session == null) return NotFound();
+
+            if (session.SessionDate.Date >= DateTime.Today)
+            {
+                TempData["Error"] = "A session can only be completed after its session date has passed.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var currentStatus = session.Status?.Status;
+            if (currentStatus != "Attending" && currentStatus != "Scheduled")
+            {
+                TempData["Error"] = "Session must be in 'Attending' or 'Scheduled' status to be marked as completed.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var completedStatus = await _context.CourseSessionStatuses
+                .FirstOrDefaultAsync(s => s.Status == "Completed");
+            if (completedStatus == null)
+            {
+                TempData["Error"] = "Status configuration error. Please contact the administrator.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            try
+            {
+                session.StatusId = completedStatus.StatusId;
+                session.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Session marked as Completed. The instructor can now record assessments.";
+            }
+            catch
+            {
+                TempData["Error"] = "An error occurred while completing the session. Please try again.";
+            }
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         // ── Helpers ──────────────────────────────────────────────────────────────
 
         private async Task<SessionFormViewModel> PopulateDropdowns(SessionFormViewModel vm)

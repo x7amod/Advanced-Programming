@@ -1,0 +1,172 @@
+@model MVC_Frontend.Models.BrowseSessionsViewModel
+@{
+    ViewData["Title"] = "Browse Sessions";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var isTrainee       = User.IsInRole("Trainee");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Available Sessions</h1>
+        <p class="text-muted mb-0">Browse and enroll in upcoming training sessions.</p>
+    </div>
+</div>
+
+<!-- Filter form -->
+<form method="get" class="card mb-4 border-0 shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Subject Area</label>
+                <select name="subjectAreaId" class="form-select">
+                    <option value="">All subject areas</option>
+                    @foreach (var sa in Model.SubjectAreas)
+                    {
+                        <option value="@sa.Value" @(sa.Value == Model.SubjectAreaId?.ToString() ? "selected" : "")>
+                            @sa.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Category</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">All categories</option>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <option value="@cat.Value" @(cat.Value == Model.CategoryId?.ToString() ? "selected" : "")>
+                            @cat.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">From</label>
+                <input type="date" name="dateFrom" class="form-control" value="@Model.DateFrom" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">To</label>
+                <input type="date" name="dateTo" class="form-control" value="@Model.DateTo" />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
+                <a asp-action="Browse" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (!Model.Sessions.Any())
+{
+    <div class="text-center py-5">
+        <p class="text-muted fs-5">No sessions match your filters.</p>
+        <a asp-action="Browse" class="btn btn-outline-primary">Clear filters</a>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        @foreach (var s in Model.Sessions)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0" id="session-card-@s.SessionId">
+                    <div class="card-body d-flex flex-column">
+
+                        <!-- Course title + fee -->
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0 me-2">@s.CourseTitle</h5>
+                            <span class="badge bg-primary fs-6 text-nowrap">
+                                @s.EnrollmentFee.ToString("C")
+                            </span>
+                        </div>
+
+                        <!-- Session meta -->
+                        <ul class="list-unstyled text-muted small mb-3">
+                            <li>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                    <rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>
+                                </svg>
+                                @s.SessionDate.ToString("dddd, MMMM dd, yyyy")
+                            </li>
+                            <li>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                    <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+                                </svg>
+                                @s.StartTime.ToString("hh:mm tt") – @s.EndTime.ToString("hh:mm tt")
+                            </li>
+                            <li>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                    <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
+                                </svg>
+                                @s.InstructorName
+                            </li>
+                            <li>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                    <rect x="2" y="3" width="20" height="16" rx="2"/>
+                                </svg>
+                                @s.ClassroomName
+                            </li>
+                        </ul>
+
+                        <!-- Spots indicator -->
+                        <div class="mb-3" id="spots-@s.SessionId">
+                            @if (s.IsFull)
+                            {
+                                <span class="badge bg-danger">Full</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    @s.RemainingSpots of @s.MaxCapacity spot@(s.RemainingSpots == 1 ? "" : "s") available
+                                </span>
+                            }
+                        </div>
+
+                        <div class="mt-auto" id="action-@s.SessionId">
+                            @if (!isAuthenticated)
+                            {
+                                <!-- Read-only for unauthenticated users -->
+                                <a asp-controller="Account" asp-action="Login"
+                                   class="btn btn-outline-primary btn-sm w-100">
+                                    Login to Enroll
+                                </a>
+                            }
+                            else if (!isTrainee)
+                            {
+                                <!-- Non-trainee roles: read-only -->
+                                <span class="text-muted small">Enrollment available to trainees only.</span>
+                            }
+                            else if (s.IsAlreadyEnrolled)
+                            {
+                                <span class="badge bg-info text-dark fs-6 w-100 py-2">Already Enrolled</span>
+                            }
+                            else if (s.IsWaitlisted)
+                            {
+                                <span class="badge bg-warning text-dark fs-6 w-100 py-2">On Waitlist</span>
+                            }
+                            else if (s.IsFull)
+                            {
+                                <form asp-action="Waitlist" asp-route-sessionId="@s.SessionId" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-warning btn-sm w-100">
+                                        Full — Join Waitlist
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Enroll" asp-route-sessionId="@s.SessionId" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                        Enroll
+                                    </button>
+                                </form>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
