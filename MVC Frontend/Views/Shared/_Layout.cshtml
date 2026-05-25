@@ -44,10 +44,6 @@
                    asp-controller="Enrollment" asp-action="MyEnrollments">
                     @NavIcon("clip") My enrollments
                 </a>
-                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="MyAssessments"?"active":"")"
-                   asp-controller="Assessment" asp-action="MyAssessments">
-                    @NavIcon("bar") My assessments
-                </a>
             </nav>
         }
 
@@ -72,7 +68,7 @@
                 </a>
                 <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MySessions"?"active":"")"
                    asp-controller="Enrollment" asp-action="MySessions">
-                    @NavIcon("clip") Session rosters
+                    @NavIcon("clip") My enrollments
                 </a>
             </nav>
         }
@@ -126,26 +122,6 @@
                 <a class="tl-nav-item @(ctrl=="UserManagement"?"active":"")"
                    asp-controller="UserManagement" asp-action="Index">
                     @NavIcon("user") Users
-                </a>
-
-                <div class="tl-nav-section">Enrollments</div>
-                <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="AllEnrollments"?"active":"")"
-                   asp-controller="Enrollment" asp-action="AllEnrollments">
-                    @NavIcon("clip") All enrollments
-                </a>
-                <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="ManualEnroll"?"active":"")"
-                   asp-controller="Enrollment" asp-action="ManualEnroll">
-                    @NavIcon("plus") Manual enroll
-                </a>
-
-                <div class="tl-nav-section">Assessments</div>
-                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="AllAssessments"?"active":"")"
-                   asp-controller="Assessment" asp-action="AllAssessments">
-                    @NavIcon("bar") All assessments
-                </a>
-                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="Create"?"active":"")"
-                   asp-controller="Assessment" asp-action="Create">
-                    @NavIcon("plus") New assessment
                 </a>
             </nav>
         }
