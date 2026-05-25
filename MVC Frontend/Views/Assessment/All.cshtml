@@ -1,0 +1,148 @@
+@model MVC_Frontend.Models.AllAssessmentsViewModel
+@{
+    ViewData["Title"] = "All Assessments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">All Assessments</h1>
+        <p class="text-muted mb-0">Assessment results across all sessions.</p>
+    </div>
+</div>
+
+<!-- Pass Rate Summary -->
+@if (Model.PassRates.Any())
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header fw-semibold bg-light">Pass Rate by Session</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Course</th>
+                            <th>Session Date</th>
+                            <th>Pass Rate</th>
+                            <th style="min-width:160px;">Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pr in Model.PassRates)
+                        {
+                            var pct = pr.Total > 0 ? (int)Math.Round((double)pr.Passed / pr.Total * 100) : 0;
+                            var barClass = pct >= 80 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-danger";
+                            <tr>
+                                <td class="fw-semibold">@pr.CourseTitle</td>
+                                <td>@pr.SessionDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <span class="badge @(pct >= 80 ? "bg-success" : pct >= 50 ? "bg-warning text-dark" : "bg-danger")">
+                                        @pr.Summary
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height:8px;">
+                                        <div class="progress-bar @barClass" style="width:@pct%"></div>
+                                    </div>
+                                    <span class="text-muted" style="font-size:.75rem;">@pct%</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Filters -->
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Course</label>
+                <select name="filterCourseId" class="form-select"
+                        asp-items="@(new SelectList(Model.Courses, "Value", "Text", Model.FilterCourseId?.ToString()))">
+                    <option value="">All courses</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Instructor</label>
+                <select name="filterInstructorId" class="form-select"
+                        asp-items="@(new SelectList(Model.Instructors, "Value", "Text", Model.FilterInstructorId?.ToString()))">
+                    <option value="">All instructors</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label fw-semibold">Result</label>
+                <select name="filterResult" class="form-select">
+                    <option value="">All</option>
+                    <option value="Pass" @(Model.FilterResult == "Pass" ? "selected" : "")>Pass</option>
+                    <option value="Fail" @(Model.FilterResult == "Fail" ? "selected" : "")>Fail</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">From</label>
+                <input type="date" name="dateFrom" class="form-control" value="@Model.DateFrom" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">To</label>
+                <input type="date" name="dateTo" class="form-control" value="@Model.DateTo" />
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary">Go</button>
+                <a asp-action="All" class="btn btn-outline-secondary">✕</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Results Table -->
+@if (!Model.Assessments.Any())
+{
+    <div class="alert alert-light border">No assessments match your filters.</div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Trainee</th>
+                            <th>Course</th>
+                            <th>Session Date</th>
+                            <th>Instructor</th>
+                            <th>Result</th>
+                            <th>Remarks</th>
+                            <th>Assessed On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Assessments)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@a.TraineeName</td>
+                                <td>@a.CourseTitle</td>
+                                <td>@a.SessionDate.ToString("MMM dd, yyyy")</td>
+                                <td>@a.InstructorName</td>
+                                <td>
+                                    <span class="badge @(a.Result == "Pass" ? "bg-success" : "bg-danger")">
+                                        @a.Result
+                                    </span>
+                                </td>
+                                <td class="text-muted small">
+                                    @(string.IsNullOrWhiteSpace(a.Remarks) ? "—" : a.Remarks)
+                                </td>
+                                <td>@a.AssessmentDate.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            Showing @Model.Assessments.Count result(s).
+        </div>
+    </div>
+}

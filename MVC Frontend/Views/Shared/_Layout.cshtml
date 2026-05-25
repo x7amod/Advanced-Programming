@@ -44,6 +44,10 @@
                    asp-controller="Enrollment" asp-action="MyEnrollments">
                     @NavIcon("clip") My enrollments
                 </a>
+                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="MyResults"?"active":"")"
+                   asp-controller="Assessment" asp-action="MyResults">
+                    @NavIcon("bar") My results
+                </a>
             </nav>
         }
 
@@ -68,7 +72,11 @@
                 </a>
                 <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MySessions"?"active":"")"
                    asp-controller="Enrollment" asp-action="MySessions">
-                    @NavIcon("clip") My enrollments
+                    @NavIcon("clip") My sessions
+                </a>
+                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="MyAssessments"?"active":"")"
+                   asp-controller="Assessment" asp-action="MyAssessments">
+                    @NavIcon("bar") My assessments
                 </a>
             </nav>
         }
@@ -104,6 +112,16 @@
                 <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
                    asp-controller="Session" asp-action="Schedule">
                     @NavIcon("bar") Calendar view
+                </a>
+
+                <div class="tl-nav-section">Enrollments &amp; Assessments</div>
+                <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="Manage"?"active":"")"
+                   asp-controller="Enrollment" asp-action="Manage">
+                    @NavIcon("clip") Manage enrollments
+                </a>
+                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="All"?"active":"")"
+                   asp-controller="Assessment" asp-action="All">
+                    @NavIcon("bar") All assessments
                 </a>
 
                 <div class="tl-nav-section">Manage</div>
