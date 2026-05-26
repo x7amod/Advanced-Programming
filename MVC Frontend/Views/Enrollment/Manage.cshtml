@@ -1,0 +1,177 @@
+@model MVC_Frontend.Models.ManageEnrollmentsViewModel
+@{
+    ViewData["Title"] = "Manage Enrollments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Manage Enrollments</h1>
+        <p class="text-muted mb-0">View and manage all enrollments across sessions.</p>
+    </div>
+</div>
+
+<!-- ── Capacity Summary ───────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header fw-semibold bg-light">Session Capacity Overview</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Enrolled / Capacity</th>
+                        <th>Fill</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.SessionSummaries)
+                    {
+                        var pct = s.MaxCapacity > 0
+                            ? (int)Math.Round((double)s.CurrentEnrollment / s.MaxCapacity * 100)
+                            : 0;
+                        var barClass = pct >= 100 ? "bg-danger" : pct >= 75 ? "bg-warning" : "bg-success";
+                        <tr>
+                            <td class="fw-semibold">@s.CourseTitle</td>
+                            <td>@s.SessionDate.ToString("MMM dd, yyyy")</td>
+                            <td>@s.CurrentEnrollment / @s.MaxCapacity</td>
+                            <td style="min-width:120px;">
+                                <div class="progress" style="height:8px;">
+                                    <div class="progress-bar @barClass" style="width:@pct%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <!-- Mark Attending: only useful on session day -->
+                                <form asp-action="MarkAttending" asp-route-sessionId="@s.SessionId"
+                                      method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-warning"
+                                            onclick="return confirm('Mark all Confirmed enrollments as Attending for this session?')">
+                                        Mark Attending
+                                    </button>
+                                </form>
+                                <!-- Mark Completed -->
+                                <form asp-controller="Session" asp-action="Complete" asp-route-id="@s.SessionId"
+                                      method="post" class="d-inline ms-1">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-success"
+                                            onclick="return confirm('Mark this session as Completed?')">
+                                        Complete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ── Filters ────────────────────────────────────────────────────────────── -->
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Session</label>
+                <select name="filterSessionId" class="form-select"
+                        asp-items="@(new SelectList(Model.Sessions, "Value", "Text", Model.FilterSessionId?.ToString()))">
+                    <option value="">All sessions</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Status</label>
+                <select name="filterStatusId" class="form-select"
+                        asp-items="@(new SelectList(Model.Statuses, "Value", "Text", Model.FilterStatusId?.ToString()))">
+                    <option value="">All statuses</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Trainee name</label>
+                <input type="text" name="filterTraineeName" class="form-control"
+                       value="@Model.FilterTraineeName" placeholder="Search…" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">From</label>
+                <input type="date" name="dateFrom" class="form-control" value="@Model.DateFrom" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">To</label>
+                <input type="date" name="dateTo" class="form-control" value="@Model.DateTo" />
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary">Go</button>
+                <a asp-action="Manage" class="btn btn-outline-secondary">✕</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- ── Enrollments table ──────────────────────────────────────────────────── -->
+@if (!Model.Enrollments.Any())
+{
+    <div class="alert alert-light border">No enrollments match your filters.</div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Trainee</th>
+                            <th>Course</th>
+                            <th>Session Date</th>
+                            <th>Enrolled On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in Model.Enrollments)
+                        {
+                            <tr>
+                                <td>@e.TraineeName</td>
+                                <td class="fw-semibold">@e.CourseTitle</td>
+                                <td>@e.SessionDate.ToString("MMM dd, yyyy")</td>
+                                <td>@e.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                                <td>@StatusBadge(e.Status)</td>
+                                <td>
+                                    @if (e.CanConfirm)
+                                    {
+                                        <form asp-action="Confirm" asp-route-enrollmentId="@e.EnrollmentId"
+                                              method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            Showing @Model.Enrollments.Count enrollment(s).
+        </div>
+    </div>
+}
+
+@functions {
+    Microsoft.AspNetCore.Html.IHtmlContent StatusBadge(string status)
+    {
+        var (cls, label) = status switch
+        {
+            "Enrolled"  => ("bg-primary",          "Enrolled"),
+            "Confirmed" => ("bg-info text-dark",    "Confirmed"),
+            "Attending" => ("bg-warning text-dark", "Attending"),
+            "Completed" => ("bg-success",           "Completed"),
+            "Dropped"   => ("bg-secondary",         "Dropped"),
+            _           => ("bg-light text-dark border", status)
+        };
+        return new Microsoft.AspNetCore.Html.HtmlString($"<span class='badge {cls}'>{label}</span>");
+    }
+}

@@ -1,0 +1,81 @@
+@model MVC_Frontend.Models.InstructorSessionsViewModel
+@{
+    ViewData["Title"] = "My Sessions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">My Sessions</h1>
+        <p class="text-muted mb-0">View your assigned sessions and access each session's roster.</p>
+    </div>
+</div>
+
+@if (!Model.Sessions.Any())
+{
+    <div class="alert alert-light border">No sessions are assigned to you yet.</div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Course</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Enrolled</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.Sessions)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@s.CourseTitle</td>
+                                <td>@s.SessionDate.ToString("MMM dd, yyyy")</td>
+                                <td>@s.StartTime.ToString("hh:mm tt") – @s.EndTime.ToString("hh:mm tt")</td>
+                                <td>@StatusBadge(s.SessionStatus)</td>
+                                <td>@s.EnrollmentCount</td>
+                                <td>
+                                    <a asp-action="SessionRoster" asp-route-sessionId="@s.SessionId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View Roster
+                                    </a>
+                                    @if (s.SessionStatus == "Completed")
+                                    {
+                                        <a asp-controller="Assessment" asp-action="Record"
+                                           asp-route-sessionId="@s.SessionId"
+                                           class="btn btn-sm btn-success ms-1">
+                                            Record Assessments
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            @Model.Sessions.Count session(s) assigned to you.
+        </div>
+    </div>
+}
+
+@functions {
+    Microsoft.AspNetCore.Html.IHtmlContent StatusBadge(string status)
+    {
+        var (cls, label) = status switch
+        {
+            "Scheduled"  => ("bg-primary",          "Scheduled"),
+            "Ongoing"    => ("bg-warning text-dark", "Ongoing"),
+            "Completed"  => ("bg-success",           "Completed"),
+            "Cancelled"  => ("bg-secondary",         "Cancelled"),
+            _            => ("bg-light text-dark border", status)
+        };
+        return new Microsoft.AspNetCore.Html.HtmlString($"<span class='badge {cls}'>{label}</span>");
+    }
+}
