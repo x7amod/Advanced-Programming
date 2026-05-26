@@ -37,11 +37,11 @@ public class AssessmentController : Controller
         if (session.InstructorId != instructor.InstructorId) return Forbid();
         if (session.Status.Status != "Completed") return Forbid();
 
-        // Show all active trainees (Enrolled / Confirmed / Attending) who have no assessment yet.
-        // Exclude Dropped and already-Completed enrollments.
-        var excludedStatuses = new[] { "Dropped", "Completed" };
+        // Only trainees who were Confirmed or Attending (i.e. the coordinator approved them).
+        // Exclude plain "Enrolled" (not yet confirmed) and already Dropped / Completed.
+        var assessableStatuses = new[] { "Confirmed", "Attending" };
         var eligible = session.Enrollments
-            .Where(e => !excludedStatuses.Contains(e.EnrollmentStatus.Status) && !e.Assessments.Any())
+            .Where(e => assessableStatuses.Contains(e.EnrollmentStatus.Status) && !e.Assessments.Any())
             .ToList();
 
         if (!eligible.Any())

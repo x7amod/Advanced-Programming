@@ -25,8 +25,8 @@
 @if (!Model.Trainees.Any())
 {
     <div class="alert alert-info">
-        No eligible trainees found. Trainees who are Dropped, already Completed,
-        or have an existing assessment are excluded.
+        No eligible trainees found. Only trainees in <strong>Confirmed</strong> or
+        <strong>Attending</strong> status who have no existing assessment are shown here.
     </div>
 }
 else
