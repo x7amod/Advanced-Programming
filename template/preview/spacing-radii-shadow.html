@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Spacing · Radii & shadow</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  h4 { margin: 0 0 12px; font: var(--tl-eyebrow); text-transform: uppercase; letter-spacing: 0.06em; color: var(--tl-text-2); }
+  .row { display: flex; gap: 14px; margin-bottom: 18px; }
+  .item { flex: 1; text-align: center; }
+  .box { background: var(--tl-surface); border: 1px solid var(--tl-border); height: 56px; display: flex; align-items: center; justify-content: center; font: var(--tl-micro); color: var(--tl-text-2); margin-bottom: 6px; }
+  .lbl { font: var(--tl-micro); color: var(--tl-text-3); font-variant-numeric: tabular-nums; }
+  .shadow .box { border: 0; }
+  .s-xs { box-shadow: var(--tl-shadow-xs); }
+  .s-sm { box-shadow: var(--tl-shadow-sm); }
+  .s-md { box-shadow: var(--tl-shadow-md); }
+  .s-lg { box-shadow: var(--tl-shadow-lg); }
+</style>
+</head>
+<body>
+  <h4>Radius</h4>
+  <div class="row">
+    <div class="item"><div class="box" style="border-radius:4px;">xs</div><div class="lbl">4px · input</div></div>
+    <div class="item"><div class="box" style="border-radius:8px;">sm</div><div class="lbl">8px · button</div></div>
+    <div class="item"><div class="box" style="border-radius:12px;">md</div><div class="lbl">12px · card</div></div>
+    <div class="item"><div class="box" style="border-radius:9999px;">pill</div><div class="lbl">∞ · avatar</div></div>
+  </div>
+  <h4>Shadow / elevation</h4>
+  <div class="row shadow">
+    <div class="item"><div class="box s-xs" style="border-radius:8px;">xs</div><div class="lbl">card</div></div>
+    <div class="item"><div class="box s-sm" style="border-radius:8px;">sm</div><div class="lbl">tile hover</div></div>
+    <div class="item"><div class="box s-md" style="border-radius:8px;">md</div><div class="lbl">popover</div></div>
+    <div class="item"><div class="box s-lg" style="border-radius:8px;">lg</div><div class="lbl">modal</div></div>
+  </div>
+</body>
+</html>

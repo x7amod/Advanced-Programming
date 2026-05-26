@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="1.5" fill="rgba(255,255,255,0.10)"></circle>
+    </pattern>
+    <pattern id="arabesque" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1">
+        <path d="M60 0 L120 60 L60 120 L0 60 Z"></path>
+        <circle cx="60" cy="60" r="40"></circle>
+        <circle cx="60" cy="60" r="20"></circle>
+        <path d="M60 20 L100 60 L60 100 L20 60 Z"></path>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="600" height="800" fill="#0D9488"></rect>
+  <rect width="600" height="800" fill="url(#arabesque)"></rect>
+  <rect width="600" height="800" fill="url(#dots)"></rect>
+  <g opacity="0.18">
+    <circle cx="500" cy="120" r="220" fill="none" stroke="#FFFFFF" stroke-width="1"></circle>
+    <circle cx="500" cy="120" r="160" fill="none" stroke="#FFFFFF" stroke-width="1"></circle>
+    <circle cx="100" cy="680" r="200" fill="none" stroke="#FFFFFF" stroke-width="1"></circle>
+  </g>
+</svg>

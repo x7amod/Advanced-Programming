@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Taalam · Web App UI Kit</title>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<style>
+  body { margin: 0; background: var(--tl-bg); }
+  .role-switcher { position: fixed; bottom: 12px; right: 12px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(229,231,235,0.8); border-radius: 9999px; padding: 4px; display: flex; gap: 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); z-index: 100; opacity: 0.55; transition: opacity 150ms; }
+  .role-switcher:hover { opacity: 1; }
+  .role-switcher::before { content: 'demo'; font: 600 9px/14px Inter, sans-serif; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 8px 0 10px; align-self: center; }
+  .role-switcher button { padding: 4px 10px; border-radius: 9999px; border: 0; cursor: pointer; font: 500 11px/14px Inter, sans-serif; background: transparent; color: #6B7280; }
+  .role-switcher button.active { background: #0D9488; color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="Components.jsx"></script>
+<script type="text/babel" src="Shell.jsx"></script>
+<script type="text/babel" src="AuthScreens.jsx"></script>
+<script type="text/babel" src="TraineeScreens.jsx"></script>
+<script type="text/babel" src="InstructorScreens.jsx"></script>
+<script type="text/babel" src="CoordinatorScreens.jsx"></script>
+<script type="text/babel" src="CoordinatorMgmtScreens.jsx"></script>
+<script type="text/babel" src="SharedScreens.jsx"></script>
+<script type="text/babel" src="PublicScreens.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+
+const USERS = {
+  Trainee: { name: 'Abdulla Alansari', role: 'Trainee' },
+  Instructor: { name: 'Abdulla Alansari', role: 'Instructor' },
+  Coordinator: { name: 'Abdulla Alansari', role: 'Coordinator' },
+};
+
+const TITLES = {
+  Trainee: { dashboard:'Dashboard', browse:'Browse courses', course:'Course detail', enrollments:'My enrollments', certifications:'My certifications', payments:'My payments', results:'My results', notifications:'Notifications', profile:'My profile' },
+  Instructor: { dashboard:'Dashboard', sessions:'My sessions', session:'Session detail', assess:'Record assessment', notifications:'Notifications', profile:'My profile' },
+  Coordinator: { dashboard:'Dashboard', users:'Users', courses:'Courses', classrooms:'Classrooms', sessions:'Sessions', enrollments:'Enrollments', payments:'Payments', tracks:'Certification tracks', reports:'Reports', notifications:'Notifications', profile:'My profile' },
+};
+
+function App() {
+  const [view, setView] = useState('landing'); // landing | login | register | lookup | denied | app
+  const [role, setRole] = useState('Trainee');
+  const [screen, setScreen] = useState('dashboard');
+  const [course, setCourse] = useState(null);
+
+  if (view === 'landing') return <Landing onLogin={()=>setView('login')} onRegister={()=>setView('register')} onLookup={()=>setView('lookup')}/>;
+  if (view === 'lookup') return <CertLookup onBack={()=>setView('landing')}/>;
+  if (view === 'denied') return <AccessDenied onDashboard={()=>{ setScreen('dashboard'); setView('app'); }} onSignOut={()=>setView('landing')}/>;
+  if (view === 'login') return <Login onLogin={(r) => {
+    if (r === 'register') { setView('register'); return; }
+    setRole(r); setScreen('dashboard'); setView('app');
+  }} />;
+  if (view === 'register') return <Register onLogin={(r) => { setRole(r); setScreen('dashboard'); setView('app'); }} onBack={() => setView('login')} />;
+
+  const goto = (s) => setScreen(s);
+
+  let body = null;
+  if (role === 'Trainee') {
+    if (screen==='dashboard') body = <TraineeDashboard goto={goto}/>;
+    else if (screen==='browse') body = <BrowseCourses goto={goto} setCourse={setCourse}/>;
+    else if (screen==='course') body = <CourseDetail course={course || {code:'PMP-100', area:'Business', title:'Project Management Fundamentals', fee:120, hrs:24, capacity:20}} goto={goto}/>;
+    else if (screen==='enrollments') body = <MyEnrollments/>;
+    else if (screen==='certifications') body = <MyCertifications/>;
+    else if (screen==='payments') body = <MyPayments/>;
+    else if (screen==='results') body = <MyResults/>;
+    else if (screen==='notifications') body = <Notifications role="Trainee"/>;
+    else if (screen==='profile') body = <Profile role="Trainee"/>;
+  } else if (role === 'Instructor') {
+    if (screen==='dashboard') body = <InstructorDashboard goto={goto}/>;
+    else if (screen==='sessions') body = <MySessions goto={goto}/>;
+    else if (screen==='session') body = <SessionDetail goto={goto}/>;
+    else if (screen==='assess') body = <RecordAssessment goto={goto}/>;
+    else if (screen==='notifications') body = <Notifications role="Instructor"/>;
+    else if (screen==='profile') body = <Profile role="Instructor"/>;
+  } else {
+    if (screen==='dashboard') body = <CoordinatorDashboard goto={goto}/>;
+    else if (screen==='users') body = <Users/>;
+    else if (screen==='courses') body = <CourseMgmt/>;
+    else if (screen==='classrooms') body = <ClassroomMgmt/>;
+    else if (screen==='sessions') body = <SessionsMgmt/>;
+    else if (screen==='enrollments') body = <EnrollmentMgmt/>;
+    else if (screen==='payments') body = <PaymentsMgmt/>;
+    else if (screen==='tracks') body = <TrackMgmt/>;
+    else if (screen==='reports') body = <Reports/>;
+    else if (screen==='notifications') body = <Notifications role="Coordinator"/>;
+    else if (screen==='profile') body = <Profile role="Coordinator"/>;
+    else body = <CoordinatorDashboard goto={goto}/>;
+  }
+
+  const title = (TITLES[role] && TITLES[role][screen]) || 'Taalam';
+
+  return (
+    <>
+      <Shell role={role} user={USERS[role]} screen={screen} setScreen={setScreen} title={title}
+             onLogout={() => setView('login')}>
+        <div data-screen-label={`${role} · ${title}`}>{body}</div>
+      </Shell>
+      <div className="role-switcher" title="Demo · switch role">
+        {['Trainee','Instructor','Coordinator'].map(r => (
+          <button key={r} className={role===r?'active':''} onClick={() => { setRole(r); setScreen('dashboard'); }}>{r}</button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

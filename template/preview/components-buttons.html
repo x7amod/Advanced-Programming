@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Components · Buttons</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  h4 { margin: 0 0 10px; font: var(--tl-eyebrow); text-transform: uppercase; letter-spacing: 0.06em; color: var(--tl-text-2); }
+  .row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .btn { font: var(--tl-body-strong); padding: 9px 16px; border-radius: var(--tl-r-sm); border: 1px solid transparent; cursor: pointer; transition: background var(--tl-dur-base) var(--tl-ease), border-color var(--tl-dur-base) var(--tl-ease); }
+  .btn-primary { background: var(--tl-primary); color: #fff; }
+  .btn-primary.hover { background: var(--tl-primary-hover); }
+  .btn-primary.press { background: var(--tl-primary-press); }
+  .btn-secondary { background: var(--tl-surface); color: var(--tl-primary); border-color: var(--tl-primary); }
+  .btn-secondary.hover { background: var(--tl-primary-tint); }
+  .btn-ghost { background: transparent; color: var(--tl-text-1); }
+  .btn-ghost.hover { background: var(--tl-surface-2); }
+  .btn-danger { background: var(--tl-danger); color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .lbl { font: var(--tl-micro); color: var(--tl-text-3); width: 80px; }
+</style>
+</head>
+<body>
+  <h4>Primary · states</h4>
+  <div class="row">
+    <button class="btn btn-primary">Save changes</button>
+    <button class="btn btn-primary hover">Hover</button>
+    <button class="btn btn-primary press">Pressed</button>
+    <button class="btn btn-primary" disabled style="opacity:0.5; cursor:not-allowed;">Disabled</button>
+  </div>
+  <h4>Secondary · ghost · danger</h4>
+  <div class="row">
+    <button class="btn btn-secondary">Cancel</button>
+    <button class="btn btn-secondary hover">Hover</button>
+    <button class="btn btn-ghost">Discard</button>
+    <button class="btn btn-danger">Delete</button>
+  </div>
+  <h4>Sizes</h4>
+  <div class="row">
+    <button class="btn btn-primary btn-sm">Small</button>
+    <button class="btn btn-primary">Default</button>
+  </div>
+</body>
+</html>

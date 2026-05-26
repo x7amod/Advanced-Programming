@@ -23,7 +23,7 @@
             <span class="badge bg-success">Active</span>
         }
     </div>
-    @if (User.IsInRole("Coordinator"))
+    @if (User.IsInRole("Training Coordinator"))
     {
         <div class="d-flex gap-2">
             <a asp-action="Edit" asp-route-id="@Model.CourseId" class="btn btn-outline-secondary">Edit</a>
@@ -121,15 +121,41 @@
                     <ul class="list-group list-group-flush">
                         @foreach (var session in upcoming)
                         {
+                            var seatsLeft = session.MaxCapacity - session.CurrentEnrollment;
                             <li class="list-group-item px-0">
                                 <div class="fw-semibold">@session.SessionDate.ToString("ddd, dd MMM yyyy")</div>
-                                <div class="small text-muted">
+                                <div class="small text-muted mb-1">
                                     @session.StartTime.ToString("HH:mm") – @session.EndTime.ToString("HH:mm")
                                 </div>
-                                <div class="small">
-                                    Seats: @(session.MaxCapacity - session.CurrentEnrollment) / @session.MaxCapacity remaining
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        @if (seatsLeft <= 0)
+                                        {
+                                            <span class="badge bg-danger">Full</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">@seatsLeft seats left</span>
+                                        }
+                                        <span class="badge bg-light text-dark border ms-1">@session.Status?.Status</span>
+                                    </div>
+                                    @if (User.IsInRole("Trainee"))
+                                    {
+                                        <a asp-controller="Enrollment" asp-action="Enroll"
+                                           asp-route-sessionId="@session.SessionId"
+                                           class="btn btn-sm @(seatsLeft > 0 ? "btn-outline-primary" : "btn-outline-warning")">
+                                            @(seatsLeft > 0 ? "Enroll" : "Waitlist")
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Training Coordinator") || User.IsInRole("Instructor"))
+                                    {
+                                        <a asp-controller="Enrollment" asp-action="SessionEnrollments"
+                                           asp-route-sessionId="@session.SessionId"
+                                           class="btn btn-sm btn-outline-secondary">
+                                            View (@session.CurrentEnrollment)
+                                        </a>
+                                    }
                                 </div>
-                                <span class="badge bg-light text-dark border">@session.Status?.ToString()</span>
                             </li>
                         }
                     </ul>

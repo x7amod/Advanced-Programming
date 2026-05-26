@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Type · Display & headings</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); color: var(--tl-text-1); }
+  .row { display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px dashed var(--tl-divider); }
+  .row:last-child { border: 0; }
+  .meta { width: 110px; flex: none; font: var(--tl-micro); color: var(--tl-text-2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .spec { width: 80px; flex: none; font: var(--tl-micro); color: var(--tl-text-3); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+  <div class="row"><span class="meta">Display</span><span class="spec">32 / 700</span><span style="font:var(--tl-display); letter-spacing:-0.01em;">Browse courses</span></div>
+  <div class="row"><span class="meta">H1</span><span class="spec">24 / 600</span><span style="font:var(--tl-h1);">Project Management Fundamentals</span></div>
+  <div class="row"><span class="meta">H2</span><span class="spec">20 / 600</span><span style="font:var(--tl-h2);">Upcoming sessions</span></div>
+  <div class="row"><span class="meta">H3</span><span class="spec">16 / 600</span><span style="font:var(--tl-h3);">Enrollment summary</span></div>
+</body>
+</html>

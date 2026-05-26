@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Type · Body & UI</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 24px; background: var(--tl-bg); }
+  .row { display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px dashed var(--tl-divider); }
+  .row:last-child { border: 0; }
+  .meta { width: 110px; flex: none; font: var(--tl-micro); color: var(--tl-text-2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .spec { width: 80px; flex: none; font: var(--tl-micro); color: var(--tl-text-3); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+  <div class="row"><span class="meta">Body lg</span><span class="spec">16 / 400</span><span style="font:var(--tl-body-lg);">Manage your enrollments and track progress.</span></div>
+  <div class="row"><span class="meta">Body</span><span class="spec">14 / 400</span><span style="font:var(--tl-body);">Default body. Used for most paragraph and table cell text.</span></div>
+  <div class="row"><span class="meta">Body strong</span><span class="spec">14 / 500</span><span style="font:var(--tl-body-strong);">Emphasised body or row primary value.</span></div>
+  <div class="row"><span class="meta">Small</span><span class="spec">13 / 400</span><span style="font:var(--tl-small); color:var(--tl-text-2);">Helper text, captions, table secondary cells.</span></div>
+  <div class="row"><span class="meta">Micro</span><span class="spec">12 / 500</span><span style="font:var(--tl-micro); color:var(--tl-text-2);">Badges, eyebrows, table headers.</span></div>
+  <div class="row"><span class="meta">Eyebrow</span><span class="spec">11 / 600</span><span class="tl-eyebrow">SECTION LABEL · UPPERCASE</span></div>
+  <div class="row"><span class="meta">Tabular</span><span class="spec">14 / 500</span><span style="font:var(--tl-body-strong); font-variant-numeric: tabular-nums;">BHD 1,240.000 · 14:00 – 17:00</span></div>
+</body>
+</html>

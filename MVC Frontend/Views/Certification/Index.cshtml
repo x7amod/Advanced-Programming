@@ -1,0 +1,102 @@
+@model IEnumerable<Web_API.Models.CertificationTrack>
+@{
+    ViewData["Title"] = "Certification Tracks";
+    bool isCoordinator = User.IsInRole("Training Coordinator");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Certification Tracks</h2>
+    @if (isCoordinator)
+    {
+        <a asp-action="Create" class="btn btn-primary">+ New Track</a>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No certification tracks available.</div>
+}
+else if (isCoordinator)
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Track Name</th>
+                    <th>Required Courses</th>
+                    <th>Certifications Issued</th>
+                    <th>Validity</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var track in Model)
+                {
+                    int issued = track.TraineeCertifications.Count;
+                    int courses = track.CertificationRequiredCourses.Count;
+                    <tr>
+                        <td><strong>@track.Name</strong>
+                            @if (!string.IsNullOrEmpty(track.Description))
+                            {
+                                <div class="text-muted small text-truncate" style="max-width:300px;">@track.Description</div>
+                            }
+                        </td>
+                        <td>@courses</td>
+                        <td>@issued</td>
+                        <td>
+                            @(track.ValidityPeriod.HasValue ? $"{track.ValidityPeriod} months" : "No expiry")
+                        </td>
+                        <td>
+                            @if (track.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@track.CertificationTrackId"
+                               class="btn btn-sm btn-outline-primary me-1">Details</a>
+                            <a asp-action="Edit" asp-route-id="@track.CertificationTrackId"
+                               class="btn btn-sm btn-outline-secondary">Edit</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    @* Trainee: card grid with progress *@
+    <div class="row g-3">
+        @foreach (var track in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@track.Name</h5>
+                        @if (!string.IsNullOrEmpty(track.Description))
+                        {
+                            <p class="card-text text-muted small">@track.Description</p>
+                        }
+                        <div class="text-muted small mb-3">
+                            @track.CertificationRequiredCourses.Count required course(s)
+                            @if (track.ValidityPeriod.HasValue)
+                            {
+                                <span class="ms-2">· valid @track.ValidityPeriod months</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a asp-action="Progress" asp-route-id="@track.CertificationTrackId"
+                           class="btn btn-sm btn-primary w-100">View My Progress</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

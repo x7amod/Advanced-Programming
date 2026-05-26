@@ -1,0 +1,140 @@
+/* =============================================================
+   Taalam Design System — colors_and_type.css
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---------- Color · Brand ---------- */
+  --tl-teal-50:  #F0FDFA;
+  --tl-teal-100: #CCFBF1;
+  --tl-teal-200: #99F6E4;
+  --tl-teal-300: #5EEAD4;
+  --tl-teal-400: #2DD4BF;
+  --tl-teal-500: #14B8A6;
+  --tl-teal-600: #0D9488; /* primary */
+  --tl-teal-700: #0F766E; /* primary dark / hover */
+  --tl-teal-800: #115E59; /* press */
+  --tl-teal-900: #134E4A;
+
+  --tl-primary:        var(--tl-teal-600);
+  --tl-primary-hover:  var(--tl-teal-700);
+  --tl-primary-press:  var(--tl-teal-800);
+  --tl-primary-tint:   rgba(13, 148, 136, 0.08);
+
+  /* ---------- Color · Neutral / surface ---------- */
+  --tl-bg:        #F8F9FA; /* page */
+  --tl-surface:   #FFFFFF; /* card */
+  --tl-surface-2: #F3F4F6; /* sunken / hovered row */
+
+  --tl-border:        #E5E7EB;
+  --tl-border-strong: #D1D5DB;
+  --tl-divider:       #EEF0F2;
+
+  /* ---------- Color · Text ---------- */
+  --tl-text-1: #1A1A2E; /* primary */
+  --tl-text-2: #6B7280; /* secondary */
+  --tl-text-3: #9CA3AF; /* tertiary / placeholder */
+  --tl-text-inverse: #FFFFFF;
+
+  /* ---------- Color · Semantic ---------- */
+  --tl-success:    #10B981;
+  --tl-success-bg: #D1FAE5;
+  --tl-success-fg: #065F46;
+
+  --tl-warning:    #F59E0B;
+  --tl-warning-bg: #FEF3C7;
+  --tl-warning-fg: #92400E;
+
+  --tl-danger:     #EF4444;
+  --tl-danger-bg:  #FEE2E2;
+  --tl-danger-fg:  #991B1B;
+
+  --tl-info:       #3B82F6;
+  --tl-info-bg:    #DBEAFE;
+  --tl-info-fg:    #1E40AF;
+
+  --tl-neutral-bg: #F3F4F6;
+  --tl-neutral-fg: #374151;
+
+  /* ---------- Type · families ---------- */
+  --tl-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tl-font-mono: 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
+
+  /* ---------- Type · roles ---------- */
+  --tl-display: 700 32px/40px var(--tl-font-sans);
+  --tl-h1:      600 24px/32px var(--tl-font-sans);
+  --tl-h2:      600 20px/28px var(--tl-font-sans);
+  --tl-h3:      600 16px/24px var(--tl-font-sans);
+  --tl-body-lg: 400 16px/24px var(--tl-font-sans);
+  --tl-body:    400 14px/22px var(--tl-font-sans);
+  --tl-body-strong: 500 14px/22px var(--tl-font-sans);
+  --tl-small:   400 13px/20px var(--tl-font-sans);
+  --tl-micro:   500 12px/16px var(--tl-font-sans);
+  --tl-eyebrow: 600 11px/14px var(--tl-font-sans); /* uppercase, +0.06em */
+
+  /* ---------- Spacing (4px base) ---------- */
+  --tl-s-1: 4px;
+  --tl-s-2: 8px;
+  --tl-s-3: 12px;
+  --tl-s-4: 16px;
+  --tl-s-5: 20px;
+  --tl-s-6: 24px;
+  --tl-s-7: 32px;
+  --tl-s-8: 40px;
+  --tl-s-9: 48px;
+  --tl-s-10: 64px;
+
+  /* ---------- Radius ---------- */
+  --tl-r-xs: 4px;   /* inputs, badges */
+  --tl-r-sm: 8px;   /* buttons, dropdowns */
+  --tl-r-md: 12px;  /* cards, modals, panels */
+  --tl-r-lg: 16px;
+  --tl-r-pill: 9999px;
+
+  /* ---------- Shadow / elevation ---------- */
+  --tl-shadow-xs: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --tl-shadow-sm: 0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --tl-shadow-md: 0 8px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);
+  --tl-shadow-lg: 0 20px 40px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+  --tl-focus-ring: 0 0 0 2px #fff, 0 0 0 4px var(--tl-primary);
+
+  /* ---------- Motion ---------- */
+  --tl-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --tl-dur-fast: 120ms;
+  --tl-dur-base: 150ms;
+  --tl-dur-slow: 250ms;
+
+  /* ---------- Layout ---------- */
+  --tl-sidebar-w: 240px;
+  --tl-sidebar-collapsed-w: 64px;
+  --tl-topbar-h: 64px;
+  --tl-content-max: 1280px;
+}
+
+/* ============= Base ============= */
+html, body {
+  background: var(--tl-bg);
+  color: var(--tl-text-1);
+  font: var(--tl-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+* { box-sizing: border-box; }
+
+/* ============= Type semantic helpers ============= */
+.tl-display { font: var(--tl-display); letter-spacing: -0.01em; }
+.tl-h1      { font: var(--tl-h1); letter-spacing: -0.005em; }
+.tl-h2      { font: var(--tl-h2); }
+.tl-h3      { font: var(--tl-h3); }
+.tl-body-lg { font: var(--tl-body-lg); }
+.tl-body    { font: var(--tl-body); }
+.tl-small   { font: var(--tl-small); color: var(--tl-text-2); }
+.tl-micro   { font: var(--tl-micro); color: var(--tl-text-2); }
+.tl-eyebrow {
+  font: var(--tl-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tl-text-2);
+}
+.tl-num { font-variant-numeric: tabular-nums; }
