@@ -1,0 +1,325 @@
+@model MVC_Frontend.Models.CertificateViewModel
+@{
+    ViewData["Title"] = "Certificate";
+    Layout = null; // Full-page standalone — no sidebar/navbar
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Certificate — @Model.CertificateNumber</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px;
+            min-height: 100vh;
+        }
+
+        /* ── Action bar (hidden on print) ─── */
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: system-ui, sans-serif;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: #6366f1; color: #fff; }
+        .btn-primary:hover { background: #4f46e5; }
+        .btn-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+        .btn-secondary:hover { background: #f9fafb; }
+
+        /* ── Certificate card ──────────────── */
+        .cert-page {
+            width: 860px;
+            max-width: 100%;
+            background: #fff;
+            padding: 60px 72px;
+            position: relative;
+            box-shadow: 0 8px 40px rgba(0,0,0,.15);
+        }
+
+        /* Decorative double border */
+        .cert-page::before {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            border: 3px solid #6366f1;
+            pointer-events: none;
+        }
+        .cert-page::after {
+            content: '';
+            position: absolute;
+            inset: 26px;
+            border: 1px solid #c7d2fe;
+            pointer-events: none;
+        }
+
+        /* ── Header ───────────────────────── */
+        .cert-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .cert-logo {
+            font-family: system-ui, sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #6366f1;
+            margin-bottom: 8px;
+        }
+        .cert-title {
+            font-size: 38px;
+            font-weight: 700;
+            color: #1e1b4b;
+            letter-spacing: 2px;
+            line-height: 1.1;
+        }
+        .cert-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        /* ── Divider ──────────────────────── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 28px 0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #c7d2fe);
+        }
+        .divider::after {
+            background: linear-gradient(to left, transparent, #c7d2fe);
+        }
+        .divider-diamond {
+            width: 10px;
+            height: 10px;
+            background: #6366f1;
+            transform: rotate(45deg);
+        }
+
+        /* ── Body text ────────────────────── */
+        .cert-presented {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .cert-name {
+            text-align: center;
+            font-size: 42px;
+            font-style: italic;
+            color: #1e1b4b;
+            border-bottom: 2px solid #e0e7ff;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .cert-body {
+            text-align: center;
+            font-size: 15px;
+            color: #374151;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+        .cert-track {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: #4338ca;
+            margin: 8px 0 4px;
+        }
+        .cert-track-desc {
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        /* ── Courses list ─────────────────── */
+        .courses-section {
+            background: #f5f3ff;
+            border-radius: 8px;
+            padding: 16px 24px;
+            margin: 20px 0;
+        }
+        .courses-title {
+            font-family: system-ui, sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #6366f1;
+            margin-bottom: 10px;
+        }
+        .courses-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .courses-list li {
+            font-family: system-ui, sans-serif;
+            font-size: 12px;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 12px;
+            border-radius: 999px;
+        }
+
+        /* ── Footer ───────────────────────── */
+        .cert-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 40px;
+        }
+        .cert-field {
+            text-align: center;
+        }
+        .cert-field-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            border-top: 1px solid #9ca3af;
+            padding-top: 6px;
+            min-width: 160px;
+        }
+        .cert-field-label {
+            font-family: system-ui, sans-serif;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        .cert-seal {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-align: center;
+            text-transform: uppercase;
+            padding: 10px;
+            line-height: 1.3;
+        }
+
+        /* ── Print styles ─────────────────── */
+        @@media print {
+            body { background: #fff; padding: 0; }
+            .action-bar { display: none !important; }
+            .cert-page { box-shadow: none; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Action bar -->
+    <div class="action-bar">
+        <button class="btn btn-primary" onclick="window.print()">
+            ⬇ Download as PDF
+        </button>
+    </div>
+
+    <!-- Certificate -->
+    <div class="cert-page">
+
+        <!-- Header -->
+        <div class="cert-header">
+            <div class="cert-logo">Taalam Training Institute</div>
+            <div class="cert-title">Certificate</div>
+            <div class="cert-subtitle">of Completion</div>
+        </div>
+
+        <div class="divider"><div class="divider-diamond"></div></div>
+
+        <!-- Recipient -->
+        <p class="cert-presented">This certifies that</p>
+        <p class="cert-name">@Model.TraineeName</p>
+
+        <p class="cert-body">
+            has successfully completed all requirements for the certification track
+        </p>
+        <p class="cert-track">@Model.TrackName</p>
+        @if (!string.IsNullOrWhiteSpace(Model.TrackDescription))
+        {
+            <p class="cert-track-desc">@Model.TrackDescription</p>
+        }
+
+        <!-- Completed courses -->
+        @if (Model.CompletedCourses.Any())
+        {
+            <div class="courses-section">
+                <div class="courses-title">Courses Completed</div>
+                <ul class="courses-list">
+                    @foreach (var course in Model.CompletedCourses)
+                    {
+                        <li>@course</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="divider"><div class="divider-diamond"></div></div>
+
+        <!-- Footer -->
+        <div class="cert-footer">
+            <div class="cert-field">
+                <div class="cert-field-value">@Model.IssuedDate.ToString("dd MMMM yyyy")</div>
+                <div class="cert-field-label">Date Issued</div>
+            </div>
+
+            <div class="cert-seal">Officially<br/>Certified</div>
+
+            <div class="cert-field">
+                <div class="cert-field-value">@Model.CertificateNumber</div>
+                <div class="cert-field-label">Certificate No.</div>
+            </div>
+        </div>
+
+        @if (Model.ExpiryDate.HasValue)
+        {
+            <p style="text-align:center; font-family:system-ui,sans-serif; font-size:11px; color:#9ca3af; margin-top:16px;">
+                Valid until @Model.ExpiryDate.Value.ToString("dd MMMM yyyy")
+            </p>
+        }
+
+    </div>
+
+</body>
+</html>

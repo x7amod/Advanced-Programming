@@ -105,6 +105,8 @@ public class ManageEnrollmentItemViewModel
     public string Status { get; set; } = "";
     public DateTime EnrollmentDate { get; set; }
     public bool CanConfirm { get; set; }
+    public bool HasPaymentRecord { get; set; }
+    public int? PaymentRecordId { get; set; }
 }
 
 public class SessionCapacitySummaryViewModel

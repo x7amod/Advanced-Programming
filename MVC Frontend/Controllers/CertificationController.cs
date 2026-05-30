@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MVC_Frontend.Helpers;
 using MVC_Frontend.Models;
 using Web_API.Models;
 
@@ -69,7 +70,7 @@ namespace MVC_Frontend.Controllers
                 summaries.Add(new TrackEnrollmentSummaryViewModel
                 {
                     TraineeId = cert.TraineeId,
-                    TraineeName = user?.Email ?? $"Trainee {cert.TraineeId}",
+                    TraineeName = user?.UserName ?? $"Trainee {cert.TraineeId}",
                     CompletedMandatory = completedCount,
                     TotalMandatory = totalMandatory,
                     Certification = cert
@@ -493,6 +494,16 @@ namespace MVC_Frontend.Controllers
 
             await _context.SaveChangesAsync();
 
+            // Notify the trainee
+            var trainee = await _context.Trainees.FirstOrDefaultAsync(t => t.TraineeId == traineeId);
+            if (trainee != null)
+            {
+                await NotificationHelper.CreateAsync(_context, trainee.UserId,
+                    "Certificate Issued",
+                    $"Congratulations! Your certificate for \"{track.Name}\" has been issued. Certificate number: {cert.CertificateNumber}.",
+                    "Certification", "TraineeCertification");
+            }
+
             TempData["Success"] = $"Certificate {cert.CertificateNumber} issued successfully.";
             return RedirectToAction(nameof(Details), new { id = trackId });
         }
@@ -514,6 +525,50 @@ namespace MVC_Frontend.Controllers
                 .ToListAsync();
 
             return View(certs);
+        }
+
+        // GET: Certification/Certificate/5 — printable/downloadable certificate
+        [Authorize(Roles = AppRoles.Trainee)]
+        public async Task<IActionResult> Certificate(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var trainee = await _context.Trainees.FirstOrDefaultAsync(t => t.UserId == userId);
+            if (trainee == null) return Forbid();
+
+            var cert = await _context.TraineeCertifications
+                .Include(tc => tc.CertificationTrack)
+                    .ThenInclude(t => t.CertificationRequiredCourses)
+                        .ThenInclude(rc => rc.Course)
+                .Include(tc => tc.Status)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(tc => tc.TraineeCertId == id && tc.TraineeId == trainee.TraineeId);
+
+            if (cert == null) return NotFound();
+            if (cert.Status.Status != "Issued")
+            {
+                TempData["Error"] = "Certificate has not been issued yet.";
+                return RedirectToAction(nameof(MyCertificates));
+            }
+
+            var traineeUser = await _context.Users.FindAsync(trainee.UserId);
+
+            var completedCourses = cert.CertificationTrack.CertificationRequiredCourses
+                .Where(rc => rc.IsMandatory)
+                .Select(rc => rc.Course.Title)
+                .ToList();
+
+            var vm = new CertificateViewModel
+            {
+                TraineeName = traineeUser?.UserName ?? $"Trainee {trainee.TraineeId}",
+                TrackName = cert.CertificationTrack.Name,
+                TrackDescription = cert.CertificationTrack.Description,
+                CertificateNumber = cert.CertificateNumber ?? "—",
+                IssuedDate = cert.CertificateIssuedDate ?? DateTime.Now,
+                ExpiryDate = cert.ExpiryDate,
+                CompletedCourses = completedCourses
+            };
+
+            return View(vm);
         }
     }
 }

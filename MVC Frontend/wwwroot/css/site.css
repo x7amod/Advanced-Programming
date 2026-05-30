@@ -280,13 +280,21 @@ html, body {
 
 .tl-notif-dot {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 8px;
-  height: 8px;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
   border-radius: 999px;
   background: #EF4444;
-  box-shadow: 0 0 0 2px var(--tl-surface-2);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--tl-bg);
+  pointer-events: none;
 }
 
 /* User profile button */

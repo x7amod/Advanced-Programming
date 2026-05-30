@@ -22,49 +22,35 @@ namespace MVC_Frontend.Controllers
         // GET: UserManagement
         public async Task<IActionResult> Index()
         {
-            var instructorData = await _context.Instructors.ToListAsync();
-            var traineeData = await _context.Trainees.ToListAsync();
+            var instructors = await _context.Instructors
+                .Select(i => new UserListViewModel
+                {
+                    UserId    = i.UserId,
+                    Username  = i.User.Email ?? "",
+                    Email     = i.User.Email ?? "",
+                    Phone     = i.User.PhoneNumber ?? "",
+                    Role      = AppRoles.Instructor,
+                    ProfileId = i.InstructorId
+                })
+                .ToListAsync();
 
-            var allUserIds = instructorData.Select(i => i.UserId)
-                .Concat(traineeData.Select(t => t.UserId))
-                .Distinct()
+            var trainees = await _context.Trainees
+                .Select(t => new UserListViewModel
+                {
+                    UserId    = t.UserId,
+                    Username  = t.User.Email ?? "",
+                    Email     = t.User.Email ?? "",
+                    Phone     = t.User.PhoneNumber ?? "",
+                    Role      = AppRoles.Trainee,
+                    ProfileId = t.TraineeId
+                })
+                .ToListAsync();
+
+            var users = instructors.Concat(trainees)
+                .OrderBy(u => u.Role).ThenBy(u => u.Username)
                 .ToList();
 
-            var identityUserMap = await _context.Users
-                .Where(u => allUserIds.Contains(u.Id))
-                .ToDictionaryAsync(u => u.Id);
-
-            var users = new List<UserListViewModel>();
-
-            foreach (var instructor in instructorData)
-            {
-                if (!identityUserMap.TryGetValue(instructor.UserId, out var user)) continue;
-                users.Add(new UserListViewModel
-                {
-                    UserId = user.Id,
-                    Username = user.Email ?? "",
-                    Email = user.Email ?? "",
-                    Phone = user.PhoneNumber ?? "",
-                    Role = AppRoles.Instructor,
-                    ProfileId = instructor.InstructorId
-                });
-            }
-
-            foreach (var trainee in traineeData)
-            {
-                if (!identityUserMap.TryGetValue(trainee.UserId, out var user)) continue;
-                users.Add(new UserListViewModel
-                {
-                    UserId = user.Id,
-                    Username = user.Email ?? "",
-                    Email = user.Email ?? "",
-                    Phone = user.PhoneNumber ?? "",
-                    Role = AppRoles.Trainee,
-                    ProfileId = trainee.TraineeId
-                });
-            }
-
-            return View(users.OrderBy(u => u.Role).ThenBy(u => u.Username).ToList());
+            return View(users);
         }
 
         // ─── Instructor ─────────────────────────────────────────────
@@ -425,9 +411,17 @@ namespace MVC_Frontend.Controllers
 
             if (currentRole == AppRoles.Instructor && vm.NewRole == AppRoles.Trainee)
             {
-                var instructor = await _context.Instructors.FirstOrDefaultAsync(i => i.UserId == user.Id);
+                var instructor = await _context.Instructors
+                    .Include(i => i.CourseSessions)
+                    .Include(i => i.Assessments)
+                    .FirstOrDefaultAsync(i => i.UserId == user.Id);
                 if (instructor != null)
                 {
+                    if (instructor.CourseSessions?.Any() == true || instructor.Assessments?.Any() == true)
+                    {
+                        TempData["Error"] = "Cannot change role: this instructor is assigned to sessions or has assessments on record.";
+                        return RedirectToAction(nameof(Index));
+                    }
                     _context.Instructors.Remove(instructor);
                     await _context.SaveChangesAsync();
                 }

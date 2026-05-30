@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MVC_Frontend.Helpers;
 using MVC_Frontend.Models;
 using Web_API.Models;
 
@@ -75,9 +76,10 @@ namespace MVC_Frontend.Controllers
             {
                 var allInstructors = await _context.Instructors.ToListAsync();
                 var iUserIds = allInstructors.Select(i => i.UserId).ToList();
-                var iUsers = await _context.Users
+                var iUsersAll = await _context.Users.ToListAsync();
+                var iUsers = iUsersAll
                     .Where(u => iUserIds.Contains(u.Id))
-                    .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+                    .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
                 var instructorItems = allInstructors
                     .Select(i => new SelectListItem
                     {
@@ -99,13 +101,15 @@ namespace MVC_Frontend.Controllers
 
             // Build a map of instructorId -> display name for the list view
             var instructorIds = sessions.Select(s => s.InstructorId).Distinct().ToList();
-            var sessionInstructors = await _context.Instructors
+            var allInstructorsForMap = await _context.Instructors.ToListAsync();
+            var sessionInstructors = allInstructorsForMap
                 .Where(i => instructorIds.Contains(i.InstructorId))
-                .ToListAsync();
+                .ToList();
             var sessionUserIds = sessionInstructors.Select(i => i.UserId).ToList();
-            var sessionUsers = await _context.Users
+            var sessionUsersAll = await _context.Users.ToListAsync();
+            var sessionUsers = sessionUsersAll
                 .Where(u => sessionUserIds.Contains(u.Id))
-                .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+                .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
             var nameMap = sessionInstructors.ToDictionary(
                 i => i.InstructorId,
                 i => sessionUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}");
@@ -473,6 +477,8 @@ namespace MVC_Frontend.Controllers
         {
             var session = await _context.CourseSessions
                 .Include(s => s.Status)
+                .Include(s => s.Course)
+                .Include(s => s.Instructor)
                 .FirstOrDefaultAsync(s => s.SessionId == id);
 
             if (session == null) return NotFound();
@@ -503,6 +509,13 @@ namespace MVC_Frontend.Controllers
                 session.StatusId = completedStatus.StatusId;
                 session.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
+
+                // Notify the instructor they can now record assessments
+                await NotificationHelper.CreateAsync(_context, session.Instructor.UserId,
+                    "Session Completed — Record Assessments",
+                    $"The session for {session.Course.Title} on {session.SessionDate:MMM dd, yyyy} has been marked as completed. You can now record assessment results.",
+                    "Assessment", "CourseSession");
+
                 TempData["Success"] = "Session marked as Completed. The instructor can now record assessments.";
             }
             catch
@@ -529,9 +542,10 @@ namespace MVC_Frontend.Controllers
 
             var dropdownInstructors = await _context.Instructors.ToListAsync();
             var dropdownUserIds = dropdownInstructors.Select(i => i.UserId).ToList();
-            var dropdownUsers = await _context.Users
+            var dropdownUsersAll = await _context.Users.ToListAsync();
+            var dropdownUsers = dropdownUsersAll
                 .Where(u => dropdownUserIds.Contains(u.Id))
-                .ToDictionaryAsync(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+                .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
             vm.Instructors = dropdownInstructors
                 .Select(i => new SelectListItem
                 {
