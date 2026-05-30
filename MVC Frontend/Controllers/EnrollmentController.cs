@@ -436,69 +436,44 @@ public class EnrollmentController : Controller
             return View(new MyEnrollmentsViewModel());
         }
 
-        var enrollments = await _context.Enrollments
-            .Include(e => e.EnrollmentStatus)
-            .Include(e => e.Session).ThenInclude(s => s.Course)
-            .Include(e => e.Session).ThenInclude(s => s.Instructor)
-            .Include(e => e.Assessments)
-            .Where(e => e.TraineeId == trainee.TraineeId)
-            .AsSplitQuery()
-            .ToListAsync();
-
-        // Resolve instructor display names
-        var instructorIds = enrollments.Select(e => e.Session.InstructorId).Distinct().ToList();
-        var instructors = await _context.Instructors
-            .Where(i => instructorIds.Contains(i.InstructorId)).ToListAsync();
-        var iUserIds = instructors.Select(i => i.UserId).ToList();
-        var iUsers = await _context.Users
-            .Where(u => iUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
-        var instructorNames = instructors.ToDictionary(
-            i => i.InstructorId,
-            i => iUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}");
-
         var today = DateTime.Today;
 
-        EnrollmentItemViewModel Map(Enrollment e) => new()
-        {
-            EnrollmentId = e.EnrollmentId,
-            SessionId = e.SessionId,
-            CourseTitle = e.Session.Course.Title,
-            InstructorName = instructorNames.TryGetValue(e.Session.InstructorId, out var n)
-                ? n : $"Instructor {e.Session.InstructorId}",
-            SessionDate = e.Session.SessionDate,
-            StartTime = e.Session.StartTime,
-            Status = e.EnrollmentStatus.Status,
-            AssessmentResult = e.Assessments.FirstOrDefault()?.Result,
-            CanDrop = e.EnrollmentStatus.Status == "Enrolled" || e.EnrollmentStatus.Status == "Confirmed"
-        };
+        var items = await _context.Enrollments
+            .Where(e => e.TraineeId == trainee.TraineeId)
+            .Select(e => new EnrollmentItemViewModel
+            {
+                EnrollmentId     = e.EnrollmentId,
+                SessionId        = e.SessionId,
+                CourseTitle      = e.Session.Course.Title,
+                InstructorName   = e.Session.Instructor.User.UserName ?? $"Instructor {e.Session.InstructorId}",
+                SessionDate      = e.Session.SessionDate,
+                StartTime        = e.Session.StartTime,
+                Status           = e.EnrollmentStatus.Status,
+                AssessmentResult = e.Assessments.Select(a => a.Result).FirstOrDefault(),
+                CanDrop          = e.EnrollmentStatus.Status == "Enrolled" || e.EnrollmentStatus.Status == "Confirmed"
+            })
+            .ToListAsync();
 
         var waitlistEntries = await _context.Waitlists
-            .Include(w => w.Session).ThenInclude(s => s.Course)
             .Where(w => w.TraineeId == trainee.TraineeId && w.Status != "Expired")
             .OrderBy(w => w.Position)
+            .Select(w => new WaitlistItemViewModel
+            {
+                WaitlistId  = w.WaitlistId,
+                SessionId   = w.SessionId,
+                CourseTitle = w.Session.Course.Title,
+                SessionDate = w.Session.SessionDate,
+                Position    = w.Position,
+                Status      = w.Status
+            })
             .ToListAsync();
 
         var vm = new MyEnrollmentsViewModel
         {
-            UpcomingEnrollments = enrollments
-                .Where(e => e.EnrollmentStatus.Status != "Dropped" && e.Session.SessionDate >= today)
-                .Select(Map).ToList(),
-            PastEnrollments = enrollments
-                .Where(e => e.EnrollmentStatus.Status != "Dropped" && e.Session.SessionDate < today)
-                .Select(Map).ToList(),
-            DroppedEnrollments = enrollments
-                .Where(e => e.EnrollmentStatus.Status == "Dropped")
-                .Select(Map).ToList(),
-            WaitlistEntries = waitlistEntries.Select(w => new WaitlistItemViewModel
-            {
-                WaitlistId = w.WaitlistId,
-                SessionId = w.SessionId,
-                CourseTitle = w.Session.Course.Title,
-                SessionDate = w.Session.SessionDate,
-                Position = w.Position,
-                Status = w.Status
-            }).ToList()
+            UpcomingEnrollments = items.Where(e => e.Status != "Dropped" && e.SessionDate >= today).ToList(),
+            PastEnrollments     = items.Where(e => e.Status != "Dropped" && e.SessionDate < today).ToList(),
+            DroppedEnrollments  = items.Where(e => e.Status == "Dropped").ToList(),
+            WaitlistEntries     = waitlistEntries
         };
 
         return View(vm);
