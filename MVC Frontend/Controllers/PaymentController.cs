@@ -23,54 +23,36 @@ public class PaymentController : Controller
     [Authorize(Roles = AppRoles.Coordinator)]
     public async Task<IActionResult> Index(string? filterStatus)
     {
-        IQueryable<PaymentRecord> query = _context.PaymentRecords
-            .Include(p => p.Enrollment).ThenInclude(e => e.Trainee)
-            .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
-            .Include(p => p.PaymentTransactions)
-            .Include(p => p.Status);
+        var today = DateTime.Today;
 
-        if (!string.IsNullOrWhiteSpace(filterStatus))
-            query = query.Where(p => p.Status.Status == filterStatus);
-
-        var records = await query
+        var rows = await _context.PaymentRecords
+            .Where(p => string.IsNullOrWhiteSpace(filterStatus) || p.Status.Status == filterStatus)
             .OrderByDescending(p => p.DueDate)
-            .AsSplitQuery()
+            .Select(p => new PaymentRecordRowViewModel
+            {
+                PaymentRecordId  = p.PaymentRecordId,
+                TraineeName      = p.Enrollment.Trainee.User.UserName ?? $"Trainee {p.Enrollment.TraineeId}",
+                CourseTitle      = p.Enrollment.Session.Course.Title,
+                SessionDate      = p.Enrollment.Session.SessionDate,
+                TotalAmount      = p.TotalAmount,
+                PaidAmount       = p.PaymentTransactions.Sum(t => t.Amount),
+                Status           = p.Status.Status,
+                DueDate          = p.DueDate,
+                IsOverdue        = p.Status.Status != "Paid" && p.DueDate < today
+            })
             .ToListAsync();
-
-        var traineeUserIds = records.Select(p => p.Enrollment.Trainee.UserId).Distinct().ToList();
-        var users = await _context.Users
-            .Where(u => traineeUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
 
         var statuses = await _context.PaymentStatuses
             .Select(s => new SelectListItem { Value = s.Status, Text = s.Status })
             .ToListAsync();
 
-        var rows = records.Select(p =>
-        {
-            var paid = p.PaymentTransactions.Sum(t => t.Amount);
-            return new PaymentRecordRowViewModel
-            {
-                PaymentRecordId = p.PaymentRecordId,
-                TraineeName = users.TryGetValue(p.Enrollment.Trainee.UserId, out var n)
-                    ? n : $"Trainee {p.Enrollment.TraineeId}",
-                CourseTitle = p.Enrollment.Session.Course.Title,
-                SessionDate = p.Enrollment.Session.SessionDate,
-                TotalAmount = p.TotalAmount,
-                PaidAmount = paid,
-                Status = p.Status.Status,
-                DueDate = p.DueDate,
-                IsOverdue = p.Status.Status != "Paid" && p.DueDate.Date < DateTime.Today
-            };
-        }).ToList();
-
         return View(new PaymentIndexViewModel
         {
-            Records = rows,
-            FilterStatus = filterStatus,
-            Statuses = statuses,
+            Records        = rows,
+            FilterStatus   = filterStatus,
+            Statuses       = statuses,
             TotalOutstanding = rows.Sum(r => r.OutstandingAmount),
-            TotalCollected = rows.Sum(r => r.PaidAmount)
+            TotalCollected   = rows.Sum(r => r.PaidAmount)
         });
     }
 
@@ -78,83 +60,82 @@ public class PaymentController : Controller
     [Authorize(Roles = AppRoles.Coordinator)]
     public async Task<IActionResult> Details(int id)
     {
-        var record = await _context.PaymentRecords
-            .Include(p => p.Enrollment).ThenInclude(e => e.Trainee)
-            .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
-            .Include(p => p.PaymentTransactions).ThenInclude(t => t.PaymentMethodNavigation)
-            .Include(p => p.Status)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.PaymentRecordId == id);
+        var today = DateTime.Today;
 
-        if (record == null) return NotFound();
+        var vm = await _context.PaymentRecords
+            .Where(p => p.PaymentRecordId == id)
+            .Select(p => new PaymentDetailsViewModel
+            {
+                PaymentRecordId = p.PaymentRecordId,
+                TraineeName     = p.Enrollment.Trainee.User.UserName ?? $"Trainee {p.Enrollment.TraineeId}",
+                CourseTitle     = p.Enrollment.Session.Course.Title,
+                SessionDate     = p.Enrollment.Session.SessionDate,
+                TotalAmount     = p.TotalAmount,
+                PaidAmount      = p.PaymentTransactions.Sum(t => t.Amount),
+                Status          = p.Status.Status,
+                DueDate         = p.DueDate,
+                IssuedDate      = p.IssuedDate,
+                IsOverdue       = p.Status.Status != "Paid" && p.DueDate < today,
+                Transactions    = p.PaymentTransactions
+                    .OrderByDescending(t => t.PaymentDate)
+                    .Select(t => new PaymentTransactionRowViewModel
+                    {
+                        TransactionId  = t.TransactionId,
+                        Amount         = t.Amount,
+                        PaymentMethod  = t.PaymentMethodNavigation.PaymentMethod1,
+                        PaymentDate    = t.PaymentDate,
+                        Notes          = t.Notes
+                    }).ToList()
+            })
+            .FirstOrDefaultAsync();
 
-        var traineeUser = await _context.Users.FindAsync(record.Enrollment.Trainee.UserId);
-        var paid = record.PaymentTransactions.Sum(t => t.Amount);
-
-        return View(new PaymentDetailsViewModel
-        {
-            PaymentRecordId = record.PaymentRecordId,
-            TraineeName = traineeUser?.UserName ?? $"Trainee {record.Enrollment.TraineeId}",
-            CourseTitle = record.Enrollment.Session.Course.Title,
-            SessionDate = record.Enrollment.Session.SessionDate,
-            TotalAmount = record.TotalAmount,
-            PaidAmount = paid,
-            Status = record.Status.Status,
-            DueDate = record.DueDate,
-            IssuedDate = record.IssuedDate,
-            IsOverdue = record.Status.Status != "Paid" && record.DueDate.Date < DateTime.Today,
-            Transactions = record.PaymentTransactions
-                .OrderByDescending(t => t.PaymentDate)
-                .Select(t => new PaymentTransactionRowViewModel
-                {
-                    TransactionId = t.TransactionId,
-                    Amount = t.Amount,
-                    PaymentMethod = t.PaymentMethodNavigation.PaymentMethod1,
-                    PaymentDate = t.PaymentDate,
-                    Notes = t.Notes
-                }).ToList()
-        });
+        if (vm == null) return NotFound();
+        return View(vm);
     }
 
-    // ── 3. Create Payment Record (Coordinator) ────────────────────────────────
+    // ── 3. Create Payment Record GET (Coordinator) ────────────────────────────
     [Authorize(Roles = AppRoles.Coordinator)]
     public async Task<IActionResult> Create(int enrollmentId)
     {
-        var existing = await _context.PaymentRecords
-            .FirstOrDefaultAsync(p => p.EnrollmentId == enrollmentId);
-        if (existing != null)
+        var existing = await _context.PaymentRecords.AnyAsync(p => p.EnrollmentId == enrollmentId);
+        if (existing)
         {
             TempData["Error"] = "A payment record already exists for this enrollment.";
             return RedirectToAction(nameof(Index));
         }
 
-        var enrollment = await _context.Enrollments
-            .Include(e => e.Trainee)
-            .Include(e => e.EnrollmentStatus)
-            .Include(e => e.Session).ThenInclude(s => s.Course)
-            .FirstOrDefaultAsync(e => e.EnrollmentId == enrollmentId);
+        var data = await _context.Enrollments
+            .Where(e => e.EnrollmentId == enrollmentId)
+            .Select(e => new
+            {
+                StatusName    = e.EnrollmentStatus.Status,
+                TraineeName   = e.Trainee.User.UserName ?? $"Trainee {e.TraineeId}",
+                CourseTitle   = e.Session.Course.Title,
+                SessionDate   = e.Session.SessionDate,
+                EnrollmentFee = e.Session.Course.EnrollmentFee
+            })
+            .FirstOrDefaultAsync();
 
-        if (enrollment == null) return NotFound();
+        if (data == null) return NotFound();
 
-        if (enrollment.EnrollmentStatus.Status == "Dropped")
+        if (data.StatusName == "Dropped")
         {
             TempData["Error"] = "Cannot create an invoice for a dropped enrollment.";
             return RedirectToAction(nameof(Index));
         }
 
-        var traineeUser = await _context.Users.FindAsync(enrollment.Trainee.UserId);
-
         return View(new CreatePaymentRecordViewModel
         {
             EnrollmentId = enrollmentId,
-            TraineeName = traineeUser?.UserName ?? $"Trainee {enrollment.TraineeId}",
-            CourseTitle = enrollment.Session.Course.Title,
-            SessionDate = enrollment.Session.SessionDate,
-            TotalAmount = enrollment.Session.Course.EnrollmentFee,
-            DueDate = DateTime.Today.AddDays(14)
+            TraineeName  = data.TraineeName,
+            CourseTitle  = data.CourseTitle,
+            SessionDate  = data.SessionDate,
+            TotalAmount  = data.EnrollmentFee,
+            DueDate      = DateTime.Today.AddDays(14)
         });
     }
 
+    // ── 3. Create Payment Record POST (Coordinator) ───────────────────────────
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = AppRoles.Coordinator)]
@@ -162,9 +143,8 @@ public class PaymentController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var existing = await _context.PaymentRecords
-            .FirstOrDefaultAsync(p => p.EnrollmentId == vm.EnrollmentId);
-        if (existing != null)
+        var existing = await _context.PaymentRecords.AnyAsync(p => p.EnrollmentId == vm.EnrollmentId);
+        if (existing)
         {
             TempData["Error"] = "A payment record already exists for this enrollment.";
             return RedirectToAction(nameof(Index));
@@ -175,38 +155,34 @@ public class PaymentController : Controller
         if (coordinator == null) return Forbid();
 
         var unpaidStatus = await _context.PaymentStatuses.FirstOrDefaultAsync(s => s.Status == "Unpaid");
-        if (unpaidStatus == null)
-        {
-            TempData["Error"] = "Payment status configuration error.";
-            return View(vm);
-        }
+        if (unpaidStatus == null) { TempData["Error"] = "Payment status configuration error."; return View(vm); }
 
         var now = DateTime.Now;
         var record = new PaymentRecord
         {
-            EnrollmentId = vm.EnrollmentId,
+            EnrollmentId  = vm.EnrollmentId,
             CoordinatorId = coordinator.CoordinatorId,
-            StatusId = unpaidStatus.StatusId,
-            TotalAmount = vm.TotalAmount,
-            DueDate = vm.DueDate,
-            IssuedDate = now,
-            CreatedAt = now,
-            UpdatedAt = now
+            StatusId      = unpaidStatus.StatusId,
+            TotalAmount   = vm.TotalAmount,
+            DueDate       = vm.DueDate,
+            IssuedDate    = now,
+            CreatedAt     = now,
+            UpdatedAt     = now
         };
         _context.PaymentRecords.Add(record);
         await _context.SaveChangesAsync();
 
         // Notify the trainee
-        var enrollment = await _context.Enrollments
-            .Include(e => e.Trainee)
-            .Include(e => e.Session).ThenInclude(s => s.Course)
-            .FirstOrDefaultAsync(e => e.EnrollmentId == vm.EnrollmentId);
+        var traineeInfo = await _context.Enrollments
+            .Where(e => e.EnrollmentId == vm.EnrollmentId)
+            .Select(e => new { e.Trainee.UserId, CourseTitle = e.Session.Course.Title })
+            .FirstOrDefaultAsync();
 
-        if (enrollment != null)
+        if (traineeInfo != null)
         {
-            await NotificationHelper.CreateAsync(_context, enrollment.Trainee.UserId,
+            await NotificationHelper.CreateAsync(_context, traineeInfo.UserId,
                 "Payment Invoice Created",
-                $"An invoice of {vm.TotalAmount:C} has been issued for {enrollment.Session.Course.Title}. Due by {vm.DueDate:MMM dd, yyyy}.",
+                $"An invoice of {vm.TotalAmount:C} has been issued for {traineeInfo.CourseTitle}. Due by {vm.DueDate:MMM dd, yyyy}.",
                 "Payment", "PaymentRecord");
         }
 
@@ -214,77 +190,69 @@ public class PaymentController : Controller
         return RedirectToAction(nameof(Details), new { id = record.PaymentRecordId });
     }
 
-    // ── 4. Record a Payment Transaction (Coordinator) ─────────────────────────
+    // ── 4. Record Transaction GET (Coordinator) ───────────────────────────────
     [Authorize(Roles = AppRoles.Coordinator)]
     public async Task<IActionResult> RecordTransaction(int paymentRecordId)
     {
-        var record = await _context.PaymentRecords
-            .Include(p => p.Enrollment).ThenInclude(e => e.Trainee)
-            .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
-            .Include(p => p.PaymentTransactions)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.PaymentRecordId == paymentRecordId);
+        var data = await _context.PaymentRecords
+            .Where(p => p.PaymentRecordId == paymentRecordId)
+            .Select(p => new
+            {
+                p.TotalAmount,
+                TraineeName = p.Enrollment.Trainee.User.UserName ?? $"Trainee {p.Enrollment.TraineeId}",
+                CourseTitle = p.Enrollment.Session.Course.Title,
+                PaidSoFar   = p.PaymentTransactions.Sum(t => t.Amount)
+            })
+            .FirstOrDefaultAsync();
 
-        if (record == null) return NotFound();
-
-        var traineeUser = await _context.Users.FindAsync(record.Enrollment.Trainee.UserId);
-        var paid = record.PaymentTransactions.Sum(t => t.Amount);
+        if (data == null) return NotFound();
 
         var methods = await _context.PaymentMethods
-            .Select(m => new SelectListItem
-            {
-                Value = m.PaymentMethodId.ToString(),
-                Text = m.PaymentMethod1
-            })
+            .Select(m => new SelectListItem { Value = m.PaymentMethodId.ToString(), Text = m.PaymentMethod1 })
             .ToListAsync();
 
         return View(new RecordTransactionViewModel
         {
             PaymentRecordId = paymentRecordId,
-            TraineeName = traineeUser?.UserName ?? $"Trainee {record.Enrollment.TraineeId}",
-            CourseTitle = record.Enrollment.Session.Course.Title,
-            TotalAmount = record.TotalAmount,
-            PaidSoFar = paid,
-            PaymentMethods = methods
+            TraineeName     = data.TraineeName,
+            CourseTitle     = data.CourseTitle,
+            TotalAmount     = data.TotalAmount,
+            PaidSoFar       = data.PaidSoFar,
+            PaymentMethods  = methods
         });
     }
 
+    // ── 4. Record Transaction POST (Coordinator) ──────────────────────────────
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = AppRoles.Coordinator)]
     public async Task<IActionResult> RecordTransaction(RecordTransactionViewModel vm)
     {
-        // Re-populate dropdown on invalid model
         if (!ModelState.IsValid)
         {
             vm.PaymentMethods = await _context.PaymentMethods
-                .Select(m => new SelectListItem
-                {
-                    Value = m.PaymentMethodId.ToString(),
-                    Text = m.PaymentMethod1
-                }).ToListAsync();
+                .Select(m => new SelectListItem { Value = m.PaymentMethodId.ToString(), Text = m.PaymentMethod1 })
+                .ToListAsync();
             return View(vm);
         }
 
-        var record = await _context.PaymentRecords
-            .Include(p => p.Enrollment).ThenInclude(e => e.Trainee)
-            .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
-            .Include(p => p.PaymentTransactions)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.PaymentRecordId == vm.PaymentRecordId);
-
+        // Fetch only what we need to save — no collection includes
+        var record = await _context.PaymentRecords.FindAsync(vm.PaymentRecordId);
         if (record == null) return NotFound();
 
-        var outstanding = record.TotalAmount - record.PaymentTransactions.Sum(t => t.Amount);
+        var paidSoFar = await _context.PaymentTransactions
+            .Where(t => t.PaymentRecordId == vm.PaymentRecordId)
+            .SumAsync(t => t.Amount);
+
+        var outstanding = record.TotalAmount - paidSoFar;
         if (vm.Amount > outstanding)
         {
-            ModelState.AddModelError(nameof(vm.Amount),
-                $"Amount cannot exceed the outstanding balance of {outstanding:C}.");
+            ModelState.AddModelError(nameof(vm.Amount), $"Amount cannot exceed the outstanding balance of {outstanding:C}.");
             vm.PaymentMethods = await _context.PaymentMethods
                 .Select(m => new SelectListItem { Value = m.PaymentMethodId.ToString(), Text = m.PaymentMethod1 })
                 .ToListAsync();
             vm.TotalAmount = record.TotalAmount;
-            vm.PaidSoFar = record.PaymentTransactions.Sum(t => t.Amount);
+            vm.PaidSoFar   = paidSoFar;
             return View(vm);
         }
 
@@ -302,48 +270,44 @@ public class PaymentController : Controller
             return View(vm);
         }
 
-        var now = DateTime.Now;
+        var now       = DateTime.Now;
+        var totalPaid = paidSoFar + vm.Amount;
+
         _context.PaymentTransactions.Add(new PaymentTransaction
         {
             PaymentRecordId = vm.PaymentRecordId,
-            CoordinatorId = coordinator.CoordinatorId,
+            CoordinatorId   = coordinator.CoordinatorId,
             PaymentMethodId = vm.PaymentMethodId,
-            PaymentMethod = method.PaymentMethod1,
-            Amount = vm.Amount,
-            PaymentDate = now,
-            Notes = string.IsNullOrWhiteSpace(vm.Notes) ? null : vm.Notes.Trim(),
-            CreatedAt = now
+            PaymentMethod   = method.PaymentMethod1,
+            Amount          = vm.Amount,
+            PaymentDate     = now,
+            Notes           = string.IsNullOrWhiteSpace(vm.Notes) ? null : vm.Notes.Trim(),
+            CreatedAt       = now
         });
 
-        // Recalculate status
-        var totalPaid = record.PaymentTransactions.Sum(t => t.Amount) + vm.Amount;
-        string newStatusName;
-        if (totalPaid >= record.TotalAmount)
-            newStatusName = "Paid";
-        else if (totalPaid > 0)
-            newStatusName = "Partial";
-        else
-            newStatusName = "Unpaid";
-
+        // Update status
+        var newStatusName = totalPaid >= record.TotalAmount ? "Paid"
+                          : totalPaid > 0                   ? "Partial"
+                          : "Unpaid";
         var newStatus = await _context.PaymentStatuses.FirstOrDefaultAsync(s => s.Status == newStatusName);
-        if (newStatus != null)
-        {
-            record.StatusId = newStatus.StatusId;
-            record.UpdatedAt = now;
-        }
+        if (newStatus != null) { record.StatusId = newStatus.StatusId; record.UpdatedAt = now; }
 
         await _context.SaveChangesAsync();
 
-        // Notify the trainee
-        var traineeUser = await _context.Users.FindAsync(record.Enrollment.Trainee.UserId);
-        if (traineeUser != null)
+        // Notify trainee
+        var traineeInfo = await _context.Enrollments
+            .Where(e => e.EnrollmentId == record.EnrollmentId)
+            .Select(e => new { e.Trainee.UserId, CourseTitle = e.Session.Course.Title })
+            .FirstOrDefaultAsync();
+
+        if (traineeInfo != null)
         {
             var remaining = record.TotalAmount - totalPaid;
             var msg = totalPaid >= record.TotalAmount
-                ? $"Your payment of {vm.Amount:C} for {record.Enrollment.Session.Course.Title} has been received. Your balance is fully settled."
-                : $"Your payment of {vm.Amount:C} for {record.Enrollment.Session.Course.Title} has been received. Remaining balance: {remaining:C}.";
+                ? $"Your payment of {vm.Amount:C} for {traineeInfo.CourseTitle} has been received. Your balance is fully settled."
+                : $"Your payment of {vm.Amount:C} for {traineeInfo.CourseTitle} has been received. Remaining balance: {remaining:C}.";
 
-            await NotificationHelper.CreateAsync(_context, record.Enrollment.Trainee.UserId,
+            await NotificationHelper.CreateAsync(_context, traineeInfo.UserId,
                 "Payment Received", msg, "Payment", "PaymentRecord");
         }
 
@@ -363,40 +327,30 @@ public class PaymentController : Controller
             return View(new MyPaymentsViewModel());
         }
 
-        var records = await _context.PaymentRecords
-            .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
-            .Include(p => p.PaymentTransactions)
-            .Include(p => p.Status)
+        var today = DateTime.Today;
+
+        var rows = await _context.PaymentRecords
             .Where(p => p.Enrollment.TraineeId == trainee.TraineeId)
-            .AsSplitQuery()
             .OrderByDescending(p => p.DueDate)
-            .ToListAsync();
-
-        var traineeUser = await _context.Users.FindAsync(userId);
-        var name = traineeUser?.UserName ?? $"Trainee {trainee.TraineeId}";
-
-        var rows = records.Select(p =>
-        {
-            var paid = p.PaymentTransactions.Sum(t => t.Amount);
-            return new PaymentRecordRowViewModel
+            .Select(p => new PaymentRecordRowViewModel
             {
                 PaymentRecordId = p.PaymentRecordId,
-                TraineeName = name,
-                CourseTitle = p.Enrollment.Session.Course.Title,
-                SessionDate = p.Enrollment.Session.SessionDate,
-                TotalAmount = p.TotalAmount,
-                PaidAmount = paid,
-                Status = p.Status.Status,
-                DueDate = p.DueDate,
-                IsOverdue = p.Status.Status != "Paid" && p.DueDate.Date < DateTime.Today
-            };
-        }).ToList();
+                TraineeName     = p.Enrollment.Trainee.User.UserName ?? $"Trainee {p.Enrollment.TraineeId}",
+                CourseTitle     = p.Enrollment.Session.Course.Title,
+                SessionDate     = p.Enrollment.Session.SessionDate,
+                TotalAmount     = p.TotalAmount,
+                PaidAmount      = p.PaymentTransactions.Sum(t => t.Amount),
+                Status          = p.Status.Status,
+                DueDate         = p.DueDate,
+                IsOverdue       = p.Status.Status != "Paid" && p.DueDate < today
+            })
+            .ToListAsync();
 
         return View(new MyPaymentsViewModel
         {
-            Records = rows,
-            TotalOwed = rows.Sum(r => r.TotalAmount),
-            TotalPaid = rows.Sum(r => r.PaidAmount)
+            Records    = rows,
+            TotalOwed  = rows.Sum(r => r.TotalAmount),
+            TotalPaid  = rows.Sum(r => r.PaidAmount)
         });
     }
 }
