@@ -80,4 +80,15 @@ namespace MVC_Frontend.Models
         public bool IsEligible => TotalMandatory > 0 && CompletedMandatory >= TotalMandatory;
         public Web_API.Models.TraineeCertification? Certification { get; set; }
     }
+
+    public class CertificateViewModel
+    {
+        public string TraineeName { get; set; } = "";
+        public string TrackName { get; set; } = "";
+        public string? TrackDescription { get; set; }
+        public string CertificateNumber { get; set; } = "";
+        public DateTime IssuedDate { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public List<string> CompletedCourses { get; set; } = new();
+    }
 }

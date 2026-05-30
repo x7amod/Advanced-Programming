@@ -23,18 +23,19 @@ public class PaymentController : Controller
     [Authorize(Roles = AppRoles.Coordinator)]
     public async Task<IActionResult> Index(string? filterStatus)
     {
-        var query = _context.PaymentRecords
+        IQueryable<PaymentRecord> query = _context.PaymentRecords
             .Include(p => p.Enrollment).ThenInclude(e => e.Trainee)
             .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
             .Include(p => p.PaymentTransactions)
-            .Include(p => p.Status)
-            .AsSplitQuery()
-            .AsQueryable();
+            .Include(p => p.Status);
 
         if (!string.IsNullOrWhiteSpace(filterStatus))
             query = query.Where(p => p.Status.Status == filterStatus);
 
-        var records = await query.OrderByDescending(p => p.DueDate).ToListAsync();
+        var records = await query
+            .OrderByDescending(p => p.DueDate)
+            .AsSplitQuery()
+            .ToListAsync();
 
         var traineeUserIds = records.Select(p => p.Enrollment.Trainee.UserId).Distinct().ToList();
         var users = await _context.Users

@@ -57,9 +57,15 @@ else
                             </dd>
                         </dl>
                     </div>
-                    <div class="card-footer bg-transparent">
+                    <div class="card-footer bg-transparent d-flex gap-2">
                         <a asp-action="Progress" asp-route-id="@cert.CertificationTrackId"
-                           class="btn btn-sm btn-outline-primary w-100">View Track Progress</a>
+                           class="btn btn-sm btn-outline-primary flex-fill">View Progress</a>
+                        @if (cert.Status?.Status == "Issued")
+                        {
+                            <a asp-action="Certificate" asp-route-id="@cert.TraineeCertId"
+                               target="_blank"
+                               class="btn btn-sm btn-success flex-fill">⬇ Download</a>
+                        }
                     </div>
                 </div>
             </div>
