@@ -1,0 +1,93 @@
+@model MVC_Frontend.Models.MyAssessmentsViewModel
+@{
+    ViewData["Title"] = "My Assessments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">My Assessments</h1>
+        <p class="text-muted mb-0">All assessment results you have submitted.</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Session</label>
+                <select name="filterSessionId" class="form-select"
+                        asp-items="@(new SelectList(Model.Sessions, "Value", "Text", Model.FilterSessionId?.ToString()))">
+                    <option value="">All sessions</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Result</label>
+                <select name="filterResult" class="form-select"
+                        asp-items="@(new SelectList(new[]{ new SelectListItem("Pass","Pass"), new SelectListItem("Fail","Fail") }, "Value", "Text", Model.FilterResult))">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">From</label>
+                <input type="date" name="dateFrom" class="form-control" value="@Model.DateFrom" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">To</label>
+                <input type="date" name="dateTo" class="form-control" value="@Model.DateTo" />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
+                <a asp-action="MyAssessments" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (!Model.Assessments.Any())
+{
+    <div class="alert alert-light border">No assessments match your filters.</div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Trainee</th>
+                            <th>Course</th>
+                            <th>Session Date</th>
+                            <th>Result</th>
+                            <th>Remarks</th>
+                            <th>Assessed On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Assessments)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@a.TraineeName</td>
+                                <td>@a.CourseTitle</td>
+                                <td>@a.SessionDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <span class="badge @(a.Result == "Pass" ? "bg-success" : "bg-danger")">
+                                        @a.Result
+                                    </span>
+                                </td>
+                                <td class="text-muted small">
+                                    @(string.IsNullOrWhiteSpace(a.Remarks) ? "—" : a.Remarks)
+                                </td>
+                                <td>@a.AssessmentDate.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            Showing @Model.Assessments.Count result(s).
+        </div>
+    </div>
+}

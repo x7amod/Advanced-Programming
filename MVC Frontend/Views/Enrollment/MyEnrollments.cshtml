@@ -1,0 +1,192 @@
+@model MVC_Frontend.Models.MyEnrollmentsViewModel
+@{
+    ViewData["Title"] = "My Enrollments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">My Enrollments</h1>
+        <p class="text-muted mb-0">Track your upcoming, past, and dropped sessions.</p>
+    </div>
+    <a asp-action="Browse" class="btn btn-primary">Browse Sessions</a>
+</div>
+
+<!-- ── Upcoming ──────────────────────────────────────────────────────────── -->
+<h5 class="fw-semibold mb-3">Upcoming</h5>
+@if (!Model.UpcomingEnrollments.Any())
+{
+    <div class="alert alert-light border mb-4">No upcoming enrollments.</div>
+}
+else
+{
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Course</th>
+                    <th>Instructor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.UpcomingEnrollments)
+                {
+                    <tr>
+                        <td class="fw-semibold">@e.CourseTitle</td>
+                        <td>@e.InstructorName</td>
+                        <td>@e.SessionDate.ToString("MMM dd, yyyy")</td>
+                        <td>@e.StartTime.ToString("hh:mm tt")</td>
+                        <td>@StatusBadge(e.Status)</td>
+                        <td>
+                            @if (e.CanDrop)
+                            {
+                                <a asp-action="Drop" asp-route-enrollmentId="@e.EnrollmentId"
+                                   class="btn btn-outline-danger btn-sm">Drop</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- ── Past ───────────────────────────────────────────────────────────────── -->
+<h5 class="fw-semibold mb-3">Past</h5>
+@if (!Model.PastEnrollments.Any())
+{
+    <div class="alert alert-light border mb-4">No past enrollments.</div>
+}
+else
+{
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Course</th>
+                    <th>Instructor</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.PastEnrollments)
+                {
+                    <tr>
+                        <td class="fw-semibold">@e.CourseTitle</td>
+                        <td>@e.InstructorName</td>
+                        <td>@e.SessionDate.ToString("MMM dd, yyyy")</td>
+                        <td>@StatusBadge(e.Status)</td>
+                        <td>
+                            @if (e.Status == "Completed" && e.AssessmentResult != null)
+                            {
+                                <span class="badge @(e.AssessmentResult == "Pass" ? "bg-success" : "bg-danger")">
+                                    @e.AssessmentResult
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- ── Dropped ───────────────────────────────────────────────────────────── -->
+<h5 class="fw-semibold mb-3">Dropped</h5>
+@if (!Model.DroppedEnrollments.Any())
+{
+    <div class="alert alert-light border mb-4">No dropped enrollments.</div>
+}
+else
+{
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Course</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.DroppedEnrollments)
+                {
+                    <tr class="table-secondary">
+                        <td class="fw-semibold">@e.CourseTitle</td>
+                        <td>@e.SessionDate.ToString("MMM dd, yyyy")</td>
+                        <td>@StatusBadge(e.Status)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- ── Waitlist ───────────────────────────────────────────────────────────── -->
+<h5 class="fw-semibold mb-3">Waitlist</h5>
+@if (!Model.WaitlistEntries.Any())
+{
+    <div class="alert alert-light border">You are not on any waitlists.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Course</th>
+                    <th>Session Date</th>
+                    <th>Position</th>
+                    <th>Waitlist Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var w in Model.WaitlistEntries)
+                {
+                    <tr>
+                        <td class="fw-semibold">@w.CourseTitle</td>
+                        <td>@w.SessionDate.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            <span class="badge bg-secondary">#@w.Position</span>
+                        </td>
+                        <td>
+                            @if (w.Status == "SpotAvailable")
+                            {
+                                <span class="badge bg-warning text-dark">Spot Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-dark border">@w.Status</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@functions {
+    Microsoft.AspNetCore.Html.IHtmlContent StatusBadge(string status)
+    {
+        var (cls, label) = status switch
+        {
+            "Enrolled"  => ("bg-primary",          "Enrolled"),
+            "Confirmed" => ("bg-info text-dark",    "Confirmed"),
+            "Attending" => ("bg-warning text-dark", "Attending"),
+            "Completed" => ("bg-success",           "Completed"),
+            "Dropped"   => ("bg-secondary",         "Dropped"),
+            _           => ("bg-light text-dark border", status)
+        };
+        return new Microsoft.AspNetCore.Html.HtmlString($"<span class='badge {cls}'>{label}</span>");
+    }
+}

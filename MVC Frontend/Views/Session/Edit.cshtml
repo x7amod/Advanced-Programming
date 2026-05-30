@@ -33,8 +33,8 @@
         </svg>
         <div>
             <strong>Session is Ongoing.</strong>
-            Only the <strong>classroom</strong> can be changed while the session is in progress.
-            Instructor, date, time, capacity, and status are locked.
+            Only the <strong>classroom</strong> and <strong>status</strong> can be changed while the session is in progress.
+            Instructor, date, time, and capacity are locked.
         </div>
     </div>
 }
@@ -144,21 +144,22 @@
                 <div class="card-body">
                     <h5 class="card-title">
                         Status
-                        @if (isOngoing) { <span class="badge bg-secondary ms-2 fw-normal" style="font-size:.7rem;">locked</span> }
+                        @if (isOngoing) { <span class="badge bg-success ms-2 fw-normal" style="font-size:.7rem;">editable</span> }
                     </h5>
                     <div class="col-md-4">
                         <label asp-for="StatusId" class="form-label"></label>
-                        <select asp-for="StatusId" asp-items="Model.Statuses" class="form-select" disabled="@isOngoing"></select>
-                        @if (isOngoing) { <input type="hidden" asp-for="StatusId" /> }
+                        <select asp-for="StatusId" asp-items="Model.Statuses" class="form-select"></select>
                         <span asp-validation-for="StatusId" class="text-danger small"></span>
+                        @if (isOngoing)
+                        {
+                            <div class="form-text text-success small">✓ This field can be changed.</div>
+                        }
                     </div>
                 </div>
             </div>
 
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
-                    @(isOngoing ? "Update Classroom" : "Save Changes")
-                </button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
                 <a asp-action="Details" asp-route-id="@Model.SessionId" class="btn btn-secondary">Cancel</a>
                 @if (isScheduled)
                 {

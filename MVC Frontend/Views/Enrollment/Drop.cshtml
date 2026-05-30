@@ -1,0 +1,52 @@
+@model MVC_Frontend.Models.DropEnrollmentViewModel
+@{
+    ViewData["Title"] = "Drop Enrollment";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Drop Enrollment</h5>
+            </div>
+            <div class="card-body">
+
+                <p class="mb-1"><strong>Course:</strong> @Model.CourseTitle</p>
+                <p class="mb-4"><strong>Session date:</strong> @Model.SessionDate.ToString("dddd, MMMM dd, yyyy")</p>
+
+                <div class="alert alert-warning">
+                    <strong>This action cannot be undone.</strong> Once dropped, you will need to re-enroll
+                    (subject to availability and prerequisites).
+                </div>
+
+                <form asp-action="Drop" asp-route-enrollmentId="@Model.EnrollmentId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="EnrollmentId" />
+                    <input type="hidden" asp-for="CourseTitle" />
+                    <input type="hidden" asp-for="SessionDate" />
+
+                    <div class="mb-4">
+                        <label asp-for="DropReason" class="form-label fw-semibold">
+                            Reason for dropping <span class="text-danger">*</span>
+                        </label>
+                        <textarea asp-for="DropReason" class="form-control" rows="4"
+                                  placeholder="Please explain why you are dropping this session…"></textarea>
+                        <span asp-validation-for="DropReason" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">Confirm Drop</button>
+                        <a asp-action="MyEnrollments" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
