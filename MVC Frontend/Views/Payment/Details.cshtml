@@ -1,0 +1,113 @@
+@model MVC_Frontend.Models.PaymentDetailsViewModel
+@{
+    ViewData["Title"] = "Payment Details";
+    var badgeClass = Model.Status switch
+    {
+        "Paid"    => "bg-success",
+        "Partial" => "bg-warning text-dark",
+        "Overdue" => "bg-danger",
+        _         => "bg-secondary"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Payment Record #@Model.PaymentRecordId</h1>
+        <p class="text-muted mb-0">@Model.TraineeName — @Model.CourseTitle</p>
+    </div>
+    <div>
+        @if (Model.Status != "Paid")
+        {
+            <a asp-action="RecordTransaction" asp-route-paymentRecordId="@Model.PaymentRecordId"
+               class="btn btn-success me-2">Record Payment</a>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
+
+<!-- ── Summary ────────────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header fw-semibold bg-light">Invoice Summary</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-sm-4">
+                <p class="text-muted small mb-1">Trainee</p>
+                <p class="fw-semibold mb-0">@Model.TraineeName</p>
+            </div>
+            <div class="col-sm-4">
+                <p class="text-muted small mb-1">Course</p>
+                <p class="fw-semibold mb-0">@Model.CourseTitle</p>
+            </div>
+            <div class="col-sm-4">
+                <p class="text-muted small mb-1">Session Date</p>
+                <p class="fw-semibold mb-0">@Model.SessionDate.ToString("MMM dd, yyyy")</p>
+            </div>
+            <div class="col-sm-3">
+                <p class="text-muted small mb-1">Total Amount</p>
+                <p class="fw-semibold mb-0">@Model.TotalAmount.ToString("C")</p>
+            </div>
+            <div class="col-sm-3">
+                <p class="text-muted small mb-1">Amount Paid</p>
+                <p class="fw-semibold mb-0 text-success">@Model.PaidAmount.ToString("C")</p>
+            </div>
+            <div class="col-sm-3">
+                <p class="text-muted small mb-1">Outstanding</p>
+                <p class="fw-semibold mb-0 @(Model.OutstandingAmount > 0 ? "text-danger" : "text-success")">
+                    @Model.OutstandingAmount.ToString("C")
+                </p>
+            </div>
+            <div class="col-sm-3">
+                <p class="text-muted small mb-1">Status</p>
+                <span class="badge @badgeClass">@Model.Status</span>
+                @if (Model.IsOverdue)
+                {
+                    <span class="badge bg-danger ms-1">Overdue</span>
+                }
+            </div>
+            <div class="col-sm-4">
+                <p class="text-muted small mb-1">Due Date</p>
+                <p class="fw-semibold mb-0">@Model.DueDate.ToString("MMM dd, yyyy")</p>
+            </div>
+            <div class="col-sm-4">
+                <p class="text-muted small mb-1">Issued On</p>
+                <p class="fw-semibold mb-0">@Model.IssuedDate.ToString("MMM dd, yyyy")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Transactions ───────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header fw-semibold bg-light">Payment Transactions</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Transactions.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-3">No transactions recorded yet.</td></tr>
+                    }
+                    @foreach (var t in Model.Transactions)
+                    {
+                        <tr>
+                            <td>@t.TransactionId</td>
+                            <td>@t.PaymentDate.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td class="text-success fw-semibold">@t.Amount.ToString("C")</td>
+                            <td>@t.PaymentMethod</td>
+                            <td class="text-muted">@(t.Notes ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

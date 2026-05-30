@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MVC_Frontend.Helpers;
 using MVC_Frontend.Models;
 using Web_API.Models;
 
@@ -492,6 +493,16 @@ namespace MVC_Frontend.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            // Notify the trainee
+            var trainee = await _context.Trainees.FirstOrDefaultAsync(t => t.TraineeId == traineeId);
+            if (trainee != null)
+            {
+                await NotificationHelper.CreateAsync(_context, trainee.UserId,
+                    "Certificate Issued",
+                    $"Congratulations! Your certificate for \"{track.Name}\" has been issued. Certificate number: {cert.CertificateNumber}.",
+                    "Certification", "TraineeCertification");
+            }
 
             TempData["Success"] = $"Certificate {cert.CertificateNumber} issued successfully.";
             return RedirectToAction(nameof(Details), new { id = trackId });

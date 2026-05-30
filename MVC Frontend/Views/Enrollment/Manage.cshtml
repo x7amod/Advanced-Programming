@@ -147,6 +147,21 @@ else
                                             <button type="submit" class="btn btn-sm btn-success">Confirm</button>
                                         </form>
                                     }
+                                    @if (!e.HasPaymentRecord)
+                                    {
+                                        <a asp-controller="Payment" asp-action="Create"
+                                           asp-route-enrollmentId="@e.EnrollmentId"
+                                           class="btn btn-sm btn-outline-warning ms-1">
+                                            Create Invoice
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Payment" asp-action="Index"
+                                           class="btn btn-sm btn-outline-secondary ms-1">
+                                            View Invoice
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }

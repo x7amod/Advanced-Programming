@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MVC_Frontend.Helpers;
 using MVC_Frontend.Models;
 using Web_API.Models;
 
@@ -166,6 +167,24 @@ public class AssessmentController : Controller
             }
 
             await _context.SaveChangesAsync();
+
+            // Notify each trainee of their result
+            var traineeIds = vm.Trainees.Select(t => t.TraineeId).ToList();
+            var trainees = await _context.Trainees
+                .Where(t => traineeIds.Contains(t.TraineeId))
+                .ToListAsync();
+            var traineeUserIdMap = trainees.ToDictionary(t => t.TraineeId, t => t.UserId);
+
+            foreach (var row in vm.Trainees)
+            {
+                if (traineeUserIdMap.TryGetValue(row.TraineeId, out var tUserId))
+                {
+                    await NotificationHelper.CreateAsync(_context, tUserId,
+                        "Assessment Result Available",
+                        $"Your result for {vm.CourseTitle} ({vm.SessionDate:MMM dd, yyyy}): {row.Result}.",
+                        "Assessment", "Assessment");
+                }
+            }
 
             TempData["Success"] = "Assessment results submitted successfully.";
             return RedirectToAction(nameof(MyAssessments));

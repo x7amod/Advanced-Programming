@@ -57,6 +57,10 @@
                    asp-controller="Assessment" asp-action="MyResults">
                     @NavIcon("bar") My results
                 </a>
+                <a class="tl-nav-item @(ctrl=="Payment"&&action=="MyPayments"?"active":"")"
+                   asp-controller="Payment" asp-action="MyPayments">
+                    @NavIcon("clip") My payments
+                </a>
             </nav>
         }
 
@@ -131,6 +135,10 @@
                 <a class="tl-nav-item @(ctrl=="Assessment"&&action=="All"?"active":"")"
                    asp-controller="Assessment" asp-action="All">
                     @NavIcon("bar") All assessments
+                </a>
+                <a class="tl-nav-item @(ctrl=="Payment"&&action=="Index"?"active":"")"
+                   asp-controller="Payment" asp-action="Index">
+                    @NavIcon("clip") Payments
                 </a>
 
                 <div class="tl-nav-section">Manage</div>
@@ -234,12 +242,37 @@
             <div class="tl-topbar-actions">
 
                 <!-- Notification bell -->
-                <button class="tl-icon-btn" type="button" title="Notifications">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 16h12l-1.4-2V11a4.6 4.6 0 0 0-9.2 0v3z"/><path d="M10 19a2 2 0 0 0 4 0"/>
-                    </svg>
-                    <span class="tl-notif-dot"></span>
-                </button>
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <div class="position-relative" id="notif-wrapper">
+                        <button class="tl-icon-btn" type="button" id="notif-bell" title="Notifications"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 16h12l-1.4-2V11a4.6 4.6 0 0 0-9.2 0v3z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+                            </svg>
+                            <span class="tl-notif-dot d-none" id="notif-dot"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow p-0" id="notif-dropdown"
+                             style="min-width:320px; max-width:360px;">
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                                <span class="fw-semibold small">Notifications</span>
+                                <a asp-controller="Notification" asp-action="Index"
+                                   class="small text-decoration-none">View all</a>
+                            </div>
+                            <div id="notif-list" style="max-height:320px; overflow-y:auto;">
+                                <div class="text-center text-muted py-3 small">Loading…</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <button class="tl-icon-btn" type="button" title="Notifications">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 16h12l-1.4-2V11a4.6 4.6 0 0 0-9.2 0v3z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+                        </svg>
+                    </button>
+                }
 
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
@@ -313,6 +346,65 @@
     function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
     btn.addEventListener('click', function () { sidebar.classList.contains('open') ? close() : open(); });
     overlay.addEventListener('click', close);
+})();
+
+// ── Notification bell ──────────────────────────────────────────────────────
+(function () {
+    var bell = document.getElementById('notif-bell');
+    if (!bell) return;
+
+    function loadNotifications() {
+        fetch('/Notification/GetUnread', { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var dot  = document.getElementById('notif-dot');
+                var list = document.getElementById('notif-list');
+                if (!dot || !list) return;
+
+                if (data.unreadCount > 0) {
+                    dot.classList.remove('d-none');
+                    dot.textContent = data.unreadCount > 9 ? '9+' : data.unreadCount;
+                } else {
+                    dot.classList.add('d-none');
+                }
+
+                if (data.recent.length === 0) {
+                    list.innerHTML = '<div class="text-center text-muted py-3 small">No notifications.</div>';
+                    return;
+                }
+
+                var html = '';
+                data.recent.forEach(function (n) {
+                    var icon = { Enrollment: '📋', Assessment: '📝', Certification: '🎓', Payment: '💳' }[n.type] || '🔔';
+                    var bg   = n.isRead ? '' : 'background:#f8f9ff;';
+                    html += '<div class="d-flex gap-2 px-3 py-2 border-bottom" style="' + bg + '">'
+                          +   '<span style="font-size:1.1rem;">' + icon + '</span>'
+                          +   '<div class="flex-grow-1" style="min-width:0;">'
+                          +     '<div class="d-flex justify-content-between">'
+                          +       '<span class="small fw-semibold text-truncate">' + escHtml(n.title) + '</span>'
+                          +       '<span class="small text-muted ms-2 text-nowrap">' + escHtml(n.timeAgo) + '</span>'
+                          +     '</div>'
+                          +     '<p class="small text-muted mb-0" style="white-space:normal;">' + escHtml(n.message) + '</p>'
+                          +   '</div>'
+                          + '</div>';
+                });
+                list.innerHTML = html;
+            })
+            .catch(function () {});
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Load on page ready then refresh every 60 s
+    loadNotifications();
+    setInterval(loadNotifications, 60000);
+
+    // Also reload when dropdown opens
+    bell.addEventListener('show.bs.dropdown', loadNotifications);
 })();
 </script>
 </body>

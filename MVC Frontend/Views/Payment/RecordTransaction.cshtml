@@ -1,0 +1,88 @@
+@model MVC_Frontend.Models.RecordTransactionViewModel
+@{
+    ViewData["Title"] = "Record Payment";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Record Payment</h1>
+        <p class="text-muted mb-0">@Model.TraineeName — @Model.CourseTitle</p>
+    </div>
+    <a asp-action="Details" asp-route-id="@Model.PaymentRecordId" class="btn btn-outline-secondary">Cancel</a>
+</div>
+
+<!-- ── Balance summary ────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted small mb-1">Total Invoice</p>
+                <h5 class="mb-0">@Model.TotalAmount.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted small mb-1">Already Paid</p>
+                <h5 class="mb-0 text-success">@Model.PaidSoFar.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted small mb-1">Outstanding</p>
+                <h5 class="mb-0 text-danger">@Model.Outstanding.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Form ───────────────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm" style="max-width:480px;">
+    <div class="card-body">
+        <form asp-action="RecordTransaction" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PaymentRecordId" />
+            <input type="hidden" asp-for="TraineeName" />
+            <input type="hidden" asp-for="CourseTitle" />
+            <input type="hidden" asp-for="TotalAmount" />
+            <input type="hidden" asp-for="PaidSoFar" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Amount" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text">BHD</span>
+                    <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01"
+                           max="@Model.Outstanding.ToString("F2")" />
+                </div>
+                <span asp-validation-for="Amount" class="text-danger small"></span>
+                <div class="form-text">Maximum outstanding: @Model.Outstanding.ToString("C")</div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PaymentMethodId" class="form-label"></label>
+                <select asp-for="PaymentMethodId" asp-items="Model.PaymentMethods"
+                        class="form-select">
+                    <option value="">— Select Method —</option>
+                </select>
+                <span asp-validation-for="PaymentMethodId" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Notes" class="form-label">Notes <span class="text-muted small">(optional)</span></label>
+                <textarea asp-for="Notes" class="form-control" rows="2" maxlength="300"></textarea>
+                <span asp-validation-for="Notes" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success">Confirm Payment</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

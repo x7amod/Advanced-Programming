@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MVC_Frontend.Helpers;
 using MVC_Frontend.Models;
 using Web_API.Models;
 
@@ -519,6 +520,13 @@ public class EnrollmentController : Controller
             .Where(u => traineeUserIds.Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
 
+        // Check which enrollments already have a payment record
+        var enrollmentIds = enrollments.Select(e => e.EnrollmentId).ToList();
+        var paidEnrollmentIds = await _context.PaymentRecords
+            .Where(p => enrollmentIds.Contains(p.EnrollmentId))
+            .Select(p => p.EnrollmentId)
+            .ToHashSetAsync();
+
         var items = enrollments.Select(e => new ManageEnrollmentItemViewModel
         {
             EnrollmentId = e.EnrollmentId,
@@ -528,7 +536,8 @@ public class EnrollmentController : Controller
             SessionId = e.SessionId,
             Status = e.EnrollmentStatus.Status,
             EnrollmentDate = e.EnrollmentDate,
-            CanConfirm = e.EnrollmentStatus.Status == "Enrolled"
+            CanConfirm = e.EnrollmentStatus.Status == "Enrolled",
+            HasPaymentRecord = paidEnrollmentIds.Contains(e.EnrollmentId)
         }).ToList();
 
         // Trainee name filter is applied in-memory (name lives in Identity, not in EF)
@@ -609,6 +618,19 @@ public class EnrollmentController : Controller
             enrollment.StatusChangedAt = DateTime.Now;
             enrollment.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
+
+            // Notify the trainee
+            var trainee = await _context.Trainees
+                .Include(t => t.Enrollments).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
+                .FirstOrDefaultAsync(t => t.TraineeId == enrollment.TraineeId);
+            if (trainee != null)
+            {
+                await NotificationHelper.CreateAsync(_context, trainee.UserId,
+                    "Enrollment Confirmed",
+                    $"Your enrollment in {enrollment.Session.Course.Title} on {enrollment.Session.SessionDate:MMM dd, yyyy} has been confirmed.",
+                    "Enrollment", "Enrollment");
+            }
+
             TempData["Success"] = "Enrollment confirmed successfully.";
         }
         catch
