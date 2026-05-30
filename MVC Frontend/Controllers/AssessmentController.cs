@@ -36,13 +36,23 @@ public class AssessmentController : Controller
 
         if (session == null) return NotFound();
         if (session.InstructorId != instructor.InstructorId) return Forbid();
+
         if (session.Status.Status != "Completed") return Forbid();
 
-        // Only trainees who were Confirmed or Attending (i.e. the coordinator approved them).
-        // Exclude plain "Enrolled" (not yet confirmed) and already Dropped / Completed.
-        var assessableStatuses = new[] { "Confirmed", "Attending" };
+        // Eligible: Confirmed or Attending with no final result yet,
+        // OR has a Pending placeholder (enrollment status Confirmed/Attending/Completed)
+        // with no final result yet. Plain "Enrolled" is never eligible.
+        var normalStatuses = new[] { "Confirmed", "Attending" };
+        var fixStatuses    = new[] { "Confirmed", "Attending", "Completed" };
+
         var eligible = session.Enrollments
-            .Where(e => assessableStatuses.Contains(e.EnrollmentStatus.Status) && !e.Assessments.Any())
+            .Where(e => !e.Assessments.Any(a => a.Result == "Pass" || a.Result == "Fail")
+                        && (
+                            normalStatuses.Contains(e.EnrollmentStatus.Status)
+                            ||
+                            (e.Assessments.Any(a => a.Result != "Pass" && a.Result != "Fail")
+                             && fixStatuses.Contains(e.EnrollmentStatus.Status))
+                        ))
             .ToList();
 
         if (!eligible.Any())
@@ -107,17 +117,18 @@ public class AssessmentController : Controller
             return View(vm);
         }
 
-        // Prevent duplicate submissions
+        // Prevent duplicate submissions — only block if a final (Pass/Fail) result already exists.
         var enrollmentIds = vm.Trainees.Select(t => t.EnrollmentId).ToList();
-        var alreadyAssessed = await _context.Assessments
-            .Where(a => enrollmentIds.Contains(a.EnrollmentId))
+        var alreadyFinalised = await _context.Assessments
+            .Where(a => enrollmentIds.Contains(a.EnrollmentId)
+                        && (a.Result == "Pass" || a.Result == "Fail"))
             .Select(a => a.EnrollmentId)
             .ToListAsync();
 
-        if (alreadyAssessed.Any())
+        if (alreadyFinalised.Any())
         {
             ModelState.AddModelError(string.Empty,
-                "Some assessments have already been submitted. Please refresh the page and try again.");
+                "Some assessments have already been finalised. Please refresh the page and try again.");
             return View(vm);
         }
 
@@ -135,16 +146,30 @@ public class AssessmentController : Controller
 
             foreach (var row in vm.Trainees)
             {
-                // a) Create Assessment record
-                _context.Assessments.Add(new Assessment
+                // a) Create or update Assessment record.
+                // If a "Pending" placeholder already exists, update it in place.
+                var existing = await _context.Assessments
+                    .FirstOrDefaultAsync(a => a.EnrollmentId == row.EnrollmentId
+                                              && a.Result != "Pass" && a.Result != "Fail");
+                if (existing != null)
                 {
-                    EnrollmentId = row.EnrollmentId,
-                    InstructorId = instructor.InstructorId,
-                    Result = row.Result!,
-                    Remarks = string.IsNullOrWhiteSpace(row.Remarks) ? null : row.Remarks.Trim(),
-                    AssessmentDate = today,
-                    CreatedAt = DateTime.Now
-                });
+                    existing.Result = row.Result!;
+                    existing.Remarks = string.IsNullOrWhiteSpace(row.Remarks) ? null : row.Remarks.Trim();
+                    existing.AssessmentDate = today;
+                    existing.InstructorId = instructor.InstructorId;
+                }
+                else
+                {
+                    _context.Assessments.Add(new Assessment
+                    {
+                        EnrollmentId = row.EnrollmentId,
+                        InstructorId = instructor.InstructorId,
+                        Result = row.Result!,
+                        Remarks = string.IsNullOrWhiteSpace(row.Remarks) ? null : row.Remarks.Trim(),
+                        AssessmentDate = today,
+                        CreatedAt = DateTime.Now
+                    });
+                }
 
                 // b) Update Enrollment status to Completed
                 var enrollment = await _context.Enrollments.FindAsync(row.EnrollmentId);
@@ -155,15 +180,25 @@ public class AssessmentController : Controller
                     enrollment.UpdatedAt = DateTime.Now;
                 }
 
-                // c) Create TraineeCourseCompletion
-                _context.TraineeCourseCompletions.Add(new TraineeCourseCompletion
+                // c) Create or update TraineeCourseCompletion (avoid duplicates from prior Pending state)
+                var existingCompletion = await _context.TraineeCourseCompletions
+                    .FirstOrDefaultAsync(c => c.TraineeId == row.TraineeId && c.SessionId == sessionId);
+                if (existingCompletion != null)
                 {
-                    TraineeId = row.TraineeId,
-                    CourseId = session.CourseId,
-                    SessionId = sessionId,
-                    CompletionDate = today,
-                    Result = row.Result!
-                });
+                    existingCompletion.Result = row.Result!;
+                    existingCompletion.CompletionDate = today;
+                }
+                else
+                {
+                    _context.TraineeCourseCompletions.Add(new TraineeCourseCompletion
+                    {
+                        TraineeId = row.TraineeId,
+                        CourseId = session.CourseId,
+                        SessionId = sessionId,
+                        CompletionDate = today,
+                        Result = row.Result!
+                    });
+                }
             }
 
             await _context.SaveChangesAsync();

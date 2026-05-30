@@ -40,6 +40,10 @@ else
                             <th>#</th>
                             <th>Trainee Name</th>
                             <th>Enrollment Status</th>
+                            @if (isCompleted)
+                            {
+                                <th>Assessment Result</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -50,6 +54,23 @@ else
                                 <td class="text-muted">@(row++)</td>
                                 <td class="fw-semibold">@t.TraineeName</td>
                                 <td>@StatusBadge(t.EnrollmentStatus)</td>
+                                @if (isCompleted)
+                                {
+                                    <td>
+                                        @if (t.AssessmentResult == "Pass")
+                                        {
+                                            <span class="badge bg-success">Pass</span>
+                                        }
+                                        else if (t.AssessmentResult == "Fail")
+                                        {
+                                            <span class="badge bg-danger">Fail</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Not yet assessed</span>
+                                        }
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>
