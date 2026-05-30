@@ -485,10 +485,26 @@ public class EnrollmentController : Controller
         int? filterSessionId, int? filterStatusId,
         string? filterTraineeName, string? dateFrom, string? dateTo)
     {
+        // Step 1: get the "Cancelled" status ID from the lookup table (no navigation).
+        // Step 2: get all session IDs with that status (plain FK comparison).
+        // This mirrors the exact pattern used in SessionController.Index and is
+        // the most reliable way to exclude cancelled sessions in EF Core.
+        var cancelledCssStatus = await _context.CourseSessionStatuses
+            .FirstOrDefaultAsync(s => s.Status == "Cancelled");
+
+        var cancelledSessionIds = cancelledCssStatus != null
+            ? await _context.CourseSessions
+                .Where(s => s.StatusId == cancelledCssStatus.StatusId)
+                .Select(s => s.SessionId)
+                .ToListAsync()
+            : new List<int>();
+
         var query = _context.Enrollments
             .Include(e => e.EnrollmentStatus)
             .Include(e => e.Session).ThenInclude(s => s.Course)
+            .Include(e => e.Session).ThenInclude(s => s.Status)
             .Include(e => e.Trainee)
+            .Where(e => !cancelledSessionIds.Contains(e.SessionId))
             .AsQueryable();
 
         if (filterSessionId.HasValue)
@@ -524,7 +540,9 @@ public class EnrollmentController : Controller
             SessionId = e.SessionId,
             Status = e.EnrollmentStatus.Status,
             EnrollmentDate = e.EnrollmentDate,
-            CanConfirm = e.EnrollmentStatus.Status == "Enrolled",
+            CanConfirm = e.EnrollmentStatus.Status == "Enrolled"
+                         && !cancelledSessionIds.Contains(e.SessionId)
+                         && e.Session.Status?.Status != "Completed",
             HasPaymentRecord = paidEnrollmentIds.Contains(e.EnrollmentId),
             PaymentRecordId = paymentRecordMap.TryGetValue(e.EnrollmentId, out var prId) ? prId : null
         }).ToList();
@@ -535,6 +553,8 @@ public class EnrollmentController : Controller
 
         var sessions = await _context.CourseSessions
             .Include(s => s.Course)
+            .Include(s => s.Status)
+            .Where(s => !cancelledSessionIds.Contains(s.SessionId))
             .OrderBy(s => s.SessionDate)
             .ToListAsync();
 
@@ -699,7 +719,7 @@ public class EnrollmentController : Controller
         var sessions = await _context.CourseSessions
             .Include(s => s.Course)
             .Include(s => s.Status)
-            .Include(s => s.Enrollments)
+            .Include(s => s.Enrollments).ThenInclude(e => e.Assessments)
             .Where(s => s.InstructorId == instructor.InstructorId)
             .OrderByDescending(s => s.SessionDate)
             .ToListAsync();
@@ -714,7 +734,9 @@ public class EnrollmentController : Controller
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 SessionStatus = s.Status.Status,
-                EnrollmentCount = s.Enrollments.Count
+                EnrollmentCount = s.Enrollments.Count,
+                HasPendingAssessments = s.Enrollments.Any(e =>
+                    e.Assessments.Any(a => a.Result != "Pass" && a.Result != "Fail"))
             }).ToList()
         };
 
@@ -734,6 +756,7 @@ public class EnrollmentController : Controller
             .Include(s => s.Status)
             .Include(s => s.Enrollments).ThenInclude(e => e.EnrollmentStatus)
             .Include(s => s.Enrollments).ThenInclude(e => e.Trainee)
+            .Include(s => s.Enrollments).ThenInclude(e => e.Assessments)
             .FirstOrDefaultAsync(s => s.SessionId == sessionId);
 
         if (session == null) return NotFound();
@@ -756,7 +779,8 @@ public class EnrollmentController : Controller
                     EnrollmentId = e.EnrollmentId,
                     TraineeName = traineeUsers.TryGetValue(e.Trainee.UserId, out var n)
                         ? n : $"Trainee {e.TraineeId}",
-                    EnrollmentStatus = e.EnrollmentStatus.Status
+                    EnrollmentStatus = e.EnrollmentStatus.Status,
+                    AssessmentResult = e.Assessments.FirstOrDefault()?.Result
                 })
                 .OrderBy(t => t.TraineeName)
                 .ToList()

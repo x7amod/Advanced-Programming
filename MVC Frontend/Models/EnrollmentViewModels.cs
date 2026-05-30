@@ -134,6 +134,7 @@ public class InstructorSessionItemViewModel
     public DateTime EndTime { get; set; }
     public string SessionStatus { get; set; } = "";
     public int EnrollmentCount { get; set; }
+    public bool HasPendingAssessments { get; set; }
 }
 
 // ── Instructor: Session Roster ───────────────────────────────────────────────
@@ -152,4 +153,5 @@ public class RosterTraineeViewModel
     public int EnrollmentId { get; set; }
     public string TraineeName { get; set; } = "";
     public string EnrollmentStatus { get; set; } = "";
+    public string? AssessmentResult { get; set; }  // null = not yet assessed
 }
