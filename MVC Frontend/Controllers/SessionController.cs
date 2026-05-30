@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MVC_Frontend.Helpers;
 using MVC_Frontend.Models;
 using Web_API.Models;
 
@@ -476,6 +477,8 @@ namespace MVC_Frontend.Controllers
         {
             var session = await _context.CourseSessions
                 .Include(s => s.Status)
+                .Include(s => s.Course)
+                .Include(s => s.Instructor)
                 .FirstOrDefaultAsync(s => s.SessionId == id);
 
             if (session == null) return NotFound();
@@ -506,6 +509,13 @@ namespace MVC_Frontend.Controllers
                 session.StatusId = completedStatus.StatusId;
                 session.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
+
+                // Notify the instructor they can now record assessments
+                await NotificationHelper.CreateAsync(_context, session.Instructor.UserId,
+                    "Session Completed — Record Assessments",
+                    $"The session for {session.Course.Title} on {session.SessionDate:MMM dd, yyyy} has been marked as completed. You can now record assessment results.",
+                    "Assessment", "CourseSession");
+
                 TempData["Success"] = "Session marked as Completed. The instructor can now record assessments.";
             }
             catch

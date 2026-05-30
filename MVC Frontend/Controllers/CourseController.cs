@@ -131,7 +131,7 @@ namespace MVC_Frontend.Controllers
         }
 
         // GET: Course/Edit/5
-        [Authorize(Roles = "Training Coordinator")]
+        [Authorize(Roles = AppRoles.Coordinator)]
         public async Task<IActionResult> Edit(int id)
         {
             var course = await _context.Courses.FindAsync(id);
@@ -160,7 +160,7 @@ namespace MVC_Frontend.Controllers
         // POST: Course/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Training Coordinator")]
+        [Authorize(Roles = AppRoles.Coordinator)]
         public async Task<IActionResult> Edit(int id, CourseFormViewModel vm)
         {
             if (id != vm.CourseId)
@@ -216,7 +216,7 @@ namespace MVC_Frontend.Controllers
         }
 
         // GET: Course/Deactivate/5 — confirmation page
-        [Authorize(Roles = "Training Coordinator")]
+        [Authorize(Roles = AppRoles.Coordinator)]
         public async Task<IActionResult> Deactivate(int id)
         {
             var course = await _context.Courses
@@ -233,7 +233,7 @@ namespace MVC_Frontend.Controllers
         // POST: Course/Deactivate/5
         [HttpPost, ActionName("Deactivate")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Training Coordinator")]
+        [Authorize(Roles = AppRoles.Coordinator)]
         public async Task<IActionResult> DeactivateConfirmed(int id)
         {
             var course = await _context.Courses.FindAsync(id);

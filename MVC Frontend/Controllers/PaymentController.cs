@@ -127,10 +127,17 @@ public class PaymentController : Controller
 
         var enrollment = await _context.Enrollments
             .Include(e => e.Trainee)
+            .Include(e => e.EnrollmentStatus)
             .Include(e => e.Session).ThenInclude(s => s.Course)
             .FirstOrDefaultAsync(e => e.EnrollmentId == enrollmentId);
 
         if (enrollment == null) return NotFound();
+
+        if (enrollment.EnrollmentStatus.Status == "Dropped")
+        {
+            TempData["Error"] = "Cannot create an invoice for a dropped enrollment.";
+            return RedirectToAction(nameof(Index));
+        }
 
         var traineeUser = await _context.Users.FindAsync(enrollment.Trainee.UserId);
 
@@ -262,6 +269,19 @@ public class PaymentController : Controller
             .FirstOrDefaultAsync(p => p.PaymentRecordId == vm.PaymentRecordId);
 
         if (record == null) return NotFound();
+
+        var outstanding = record.TotalAmount - record.PaymentTransactions.Sum(t => t.Amount);
+        if (vm.Amount > outstanding)
+        {
+            ModelState.AddModelError(nameof(vm.Amount),
+                $"Amount cannot exceed the outstanding balance of {outstanding:C}.");
+            vm.PaymentMethods = await _context.PaymentMethods
+                .Select(m => new SelectListItem { Value = m.PaymentMethodId.ToString(), Text = m.PaymentMethod1 })
+                .ToListAsync();
+            vm.TotalAmount = record.TotalAmount;
+            vm.PaidSoFar = record.PaymentTransactions.Sum(t => t.Amount);
+            return View(vm);
+        }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var coordinator = await _context.Coordinators.FirstOrDefaultAsync(c => c.UserId == userId);

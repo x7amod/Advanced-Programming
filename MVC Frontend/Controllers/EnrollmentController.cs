@@ -262,7 +262,7 @@ public class EnrollmentController : Controller
 
         var enrollment = await _context.Enrollments
             .Include(e => e.EnrollmentStatus)
-            .Include(e => e.Session)
+            .Include(e => e.Session).ThenInclude(s => s.Course)
             .FirstOrDefaultAsync(e => e.EnrollmentId == vm.EnrollmentId);
 
         if (enrollment == null) return NotFound();
@@ -309,6 +309,18 @@ public class EnrollmentController : Controller
             }
 
             await _context.SaveChangesAsync();
+
+            // Notify the coordinator who owns the session
+            var coordinator = await _context.Coordinators
+                .FirstOrDefaultAsync(c => c.CoordinatorId == session.CoordinatorId);
+            if (coordinator != null)
+            {
+                var traineeUser = await _context.Users.FindAsync(trainee.UserId);
+                await NotificationHelper.CreateAsync(_context, coordinator.UserId,
+                    "Enrollment Dropped",
+                    $"{traineeUser?.UserName ?? "A trainee"} has dropped their enrollment in {enrollment.Session.Course.Title} on {session.SessionDate:MMM dd, yyyy}.",
+                    "Enrollment", "Enrollment");
+            }
 
             TempData["Success"] = "Your enrollment has been dropped successfully.";
             return RedirectToAction(nameof(MyEnrollments));
@@ -520,12 +532,12 @@ public class EnrollmentController : Controller
             .Where(u => traineeUserIds.Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
 
-        // Check which enrollments already have a payment record
+        // Check which enrollments already have a payment record (and get their IDs)
         var enrollmentIds = enrollments.Select(e => e.EnrollmentId).ToList();
-        var paidEnrollmentIds = await _context.PaymentRecords
+        var paymentRecordMap = await _context.PaymentRecords
             .Where(p => enrollmentIds.Contains(p.EnrollmentId))
-            .Select(p => p.EnrollmentId)
-            .ToHashSetAsync();
+            .ToDictionaryAsync(p => p.EnrollmentId, p => p.PaymentRecordId);
+        var paidEnrollmentIds = paymentRecordMap.Keys.ToHashSet();
 
         var items = enrollments.Select(e => new ManageEnrollmentItemViewModel
         {
@@ -537,7 +549,8 @@ public class EnrollmentController : Controller
             Status = e.EnrollmentStatus.Status,
             EnrollmentDate = e.EnrollmentDate,
             CanConfirm = e.EnrollmentStatus.Status == "Enrolled",
-            HasPaymentRecord = paidEnrollmentIds.Contains(e.EnrollmentId)
+            HasPaymentRecord = paidEnrollmentIds.Contains(e.EnrollmentId),
+            PaymentRecordId = paymentRecordMap.TryGetValue(e.EnrollmentId, out var prId) ? prId : null
         }).ToList();
 
         // Trainee name filter is applied in-memory (name lives in Identity, not in EF)
@@ -588,6 +601,7 @@ public class EnrollmentController : Controller
         var enrollment = await _context.Enrollments
             .Include(e => e.EnrollmentStatus)
             .Include(e => e.Session).ThenInclude(s => s.Status)
+            .Include(e => e.Session).ThenInclude(s => s.Course)
             .FirstOrDefaultAsync(e => e.EnrollmentId == enrollmentId);
 
         if (enrollment == null) return NotFound();
@@ -621,7 +635,6 @@ public class EnrollmentController : Controller
 
             // Notify the trainee
             var trainee = await _context.Trainees
-                .Include(t => t.Enrollments).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
                 .FirstOrDefaultAsync(t => t.TraineeId == enrollment.TraineeId);
             if (trainee != null)
             {

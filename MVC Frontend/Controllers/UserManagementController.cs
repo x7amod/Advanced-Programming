@@ -30,10 +30,9 @@ namespace MVC_Frontend.Controllers
                 .Distinct()
                 .ToList();
 
-            var allIdentityUsers = await _context.Users.ToListAsync();
-            var identityUserMap = allIdentityUsers
+            var identityUserMap = await _context.Users
                 .Where(u => allUserIds.Contains(u.Id))
-                .ToDictionary(u => u.Id);
+                .ToDictionaryAsync(u => u.Id);
 
             var users = new List<UserListViewModel>();
 

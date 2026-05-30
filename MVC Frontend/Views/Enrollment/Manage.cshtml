@@ -157,7 +157,8 @@ else
                                     }
                                     else
                                     {
-                                        <a asp-controller="Payment" asp-action="Index"
+                                        <a asp-controller="Payment" asp-action="Details"
+                                           asp-route-id="@e.PaymentRecordId"
                                            class="btn btn-sm btn-outline-secondary ms-1">
                                             View Invoice
                                         </a>

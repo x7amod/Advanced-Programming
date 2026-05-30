@@ -70,7 +70,7 @@ namespace MVC_Frontend.Controllers
                 summaries.Add(new TrackEnrollmentSummaryViewModel
                 {
                     TraineeId = cert.TraineeId,
-                    TraineeName = user?.Email ?? $"Trainee {cert.TraineeId}",
+                    TraineeName = user?.UserName ?? $"Trainee {cert.TraineeId}",
                     CompletedMandatory = completedCount,
                     TotalMandatory = totalMandatory,
                     Certification = cert
