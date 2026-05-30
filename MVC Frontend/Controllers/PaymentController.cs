@@ -28,6 +28,7 @@ public class PaymentController : Controller
             .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
             .Include(p => p.PaymentTransactions)
             .Include(p => p.Status)
+            .AsSplitQuery()
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filterStatus))
@@ -81,6 +82,7 @@ public class PaymentController : Controller
             .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
             .Include(p => p.PaymentTransactions).ThenInclude(t => t.PaymentMethodNavigation)
             .Include(p => p.Status)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.PaymentRecordId == id);
 
         if (record == null) return NotFound();
@@ -219,6 +221,7 @@ public class PaymentController : Controller
             .Include(p => p.Enrollment).ThenInclude(e => e.Trainee)
             .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
             .Include(p => p.PaymentTransactions)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.PaymentRecordId == paymentRecordId);
 
         if (record == null) return NotFound();
@@ -266,6 +269,7 @@ public class PaymentController : Controller
             .Include(p => p.Enrollment).ThenInclude(e => e.Trainee)
             .Include(p => p.Enrollment).ThenInclude(e => e.Session).ThenInclude(s => s.Course)
             .Include(p => p.PaymentTransactions)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.PaymentRecordId == vm.PaymentRecordId);
 
         if (record == null) return NotFound();
@@ -363,6 +367,7 @@ public class PaymentController : Controller
             .Include(p => p.PaymentTransactions)
             .Include(p => p.Status)
             .Where(p => p.Enrollment.TraineeId == trainee.TraineeId)
+            .AsSplitQuery()
             .OrderByDescending(p => p.DueDate)
             .ToListAsync();
 

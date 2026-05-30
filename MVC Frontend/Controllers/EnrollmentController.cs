@@ -442,6 +442,7 @@ public class EnrollmentController : Controller
             .Include(e => e.Session).ThenInclude(s => s.Instructor)
             .Include(e => e.Assessments)
             .Where(e => e.TraineeId == trainee.TraineeId)
+            .AsSplitQuery()
             .ToListAsync();
 
         // Resolve instructor display names
