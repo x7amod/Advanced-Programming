@@ -471,6 +471,7 @@ namespace MVC_Frontend.Controllers
                 .Include(s => s.Status)
                 .Include(s => s.Course)
                 .Include(s => s.Instructor)
+                .Include(s => s.Enrollments).ThenInclude(e => e.EnrollmentStatus)
                 .FirstOrDefaultAsync(s => s.SessionId == id);
 
             if (session == null) return NotFound();
@@ -496,10 +497,30 @@ namespace MVC_Frontend.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
+            var droppedEnrollmentStatus = await _context.EnrollmentStatuses
+                .FirstOrDefaultAsync(s => s.Status == "Dropped");
+
             try
             {
                 session.StatusId = completedStatus.StatusId;
                 session.UpdatedAt = DateTime.Now;
+
+                // Auto-decline any trainee still in "Enrolled" (never confirmed by coordinator).
+                if (droppedEnrollmentStatus != null)
+                {
+                    var unconfirmed = session.Enrollments
+                        .Where(e => e.EnrollmentStatus.Status == "Enrolled")
+                        .ToList();
+
+                    foreach (var e in unconfirmed)
+                    {
+                        e.EnrollmentStatusId = droppedEnrollmentStatus.EnrollmentStatusId;
+                        e.DropReason = "Automatically declined — not confirmed by coordinator before session was completed.";
+                        e.StatusChangedAt = DateTime.Now;
+                        e.UpdatedAt = DateTime.Now;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 // Notify the instructor they can now record assessments
