@@ -59,7 +59,8 @@ else
                            class="btn btn-sm btn-outline-secondary">Edit</a>
                         <form asp-action="Delete" asp-route-id="@area.SubjectAreaId" method="post"
                               class="d-inline"
-                              onsubmit="return confirm('Delete subject area \'@area.Name\'?')">
+                              data-confirm="Delete subject area '@area.Name'?"
+                              data-confirm-label="Delete">
                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                         </form>
                     </td>

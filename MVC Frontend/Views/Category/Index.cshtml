@@ -8,20 +8,7 @@
     <a asp-action="Create" class="btn btn-primary">+ Add Category</a>
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+
 
 @if (!Model.Any())
 {
@@ -61,7 +48,8 @@ else
                            class="btn btn-sm btn-outline-secondary">Edit</a>
                         <form asp-action="Delete" asp-route-id="@cat.CategoryId" method="post"
                               class="d-inline"
-                              onsubmit="return confirm('Delete category \'@cat.Name\'?')">
+                              data-confirm="Delete category '@cat.Name'?"
+                              data-confirm-label="Delete">
                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                         </form>
                     </td>

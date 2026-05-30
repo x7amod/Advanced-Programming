@@ -47,7 +47,9 @@
                                       method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-sm btn-outline-warning"
-                                            onclick="return confirm('Mark all Confirmed enrollments as Attending for this session?')">
+                                            data-confirm="Mark all Confirmed enrollments as Attending for this session?"
+                                            data-confirm-ok="btn-warning"
+                                            data-confirm-label="Mark Attending">
                                         Mark Attending
                                     </button>
                                 </form>
@@ -56,7 +58,9 @@
                                       method="post" class="d-inline ms-1">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-sm btn-outline-success"
-                                            onclick="return confirm('Mark this session as Completed?')">
+                                            data-confirm="Mark this session as Completed?"
+                                            data-confirm-ok="btn-success"
+                                            data-confirm-label="Complete">
                                         Complete
                                     </button>
                                 </form>
