@@ -35,10 +35,10 @@
                         <tr>
                             <td class="fw-semibold">@s.CourseTitle</td>
                             <td>@s.SessionDate.ToString("MMM dd, yyyy")</td>
-                            <td>@s.CurrentEnrollment / @s.MaxCapacity</td>
+                            <td id="mgr-count-@s.SessionId">@s.CurrentEnrollment / @s.MaxCapacity</td>
                             <td style="min-width:120px;">
                                 <div class="progress" style="height:8px;">
-                                    <div class="progress-bar @barClass" style="width:@pct%"></div>
+                                    <div id="mgr-bar-@s.SessionId" class="progress-bar @barClass" style="width:@pct%"></div>
                                 </div>
                             </td>
                             <td>
@@ -67,6 +67,11 @@
             </table>
         </div>
     </div>
+</div>
+
+<div id="manage-activity-alert" class="alert alert-info alert-dismissible d-none mb-3" role="alert">
+    <strong>Live update:</strong> Enrollment data changed — <a href="" class="alert-link">refresh</a> to see the latest enrollments.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 
 <!-- ── Filters ────────────────────────────────────────────────────────────── -->
@@ -174,6 +179,34 @@ else
             Showing @Model.Enrollments.Count enrollment(s).
         </div>
     </div>
+}
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script>
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/enrollmentHub")
+    .withAutomaticReconnect()
+    .build();
+
+connection.on("ReceiveEnrollmentUpdate", (sessionId, currentEnrollment, maxCapacity) => {
+    const countEl = document.getElementById(`mgr-count-${sessionId}`);
+    if (countEl) countEl.textContent = `${currentEnrollment} / ${maxCapacity}`;
+
+    const barEl = document.getElementById(`mgr-bar-${sessionId}`);
+    if (barEl) {
+        const pct = maxCapacity > 0 ? Math.round(currentEnrollment / maxCapacity * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.className = 'progress-bar ' +
+            (pct >= 100 ? 'bg-danger' : pct >= 75 ? 'bg-warning' : 'bg-success');
+    }
+
+    const alertEl = document.getElementById('manage-activity-alert');
+    if (alertEl) alertEl.classList.remove('d-none');
+});
+
+connection.start().catch(err => console.error('SignalR connection error:', err));
+</script>
 }
 
 @functions {

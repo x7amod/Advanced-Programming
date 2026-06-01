@@ -5,6 +5,7 @@ using Web_API.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 // Register shared DbContext from Web API project
 builder.Services.AddDbContext<TrainingInstituteDBContext>(options =>
@@ -57,6 +58,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<MVC_Frontend.Hubs.EnrollmentHub>("/enrollmentHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
