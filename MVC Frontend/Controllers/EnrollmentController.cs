@@ -298,27 +298,7 @@ public class EnrollmentController : Controller
             session.CurrentEnrollment = Math.Max(0, session.CurrentEnrollment - 1);
             session.UpdatedAt = DateTime.Now;
 
-            // Flag first waiting trainee on the waitlist (do NOT auto-enroll)
-            var firstWaiting = await _context.Waitlists
-                .Include(w => w.Trainee)
-                .Where(w => w.SessionId == session.SessionId && w.Status == "Waiting")
-                .OrderBy(w => w.Position)
-                .FirstOrDefaultAsync();
-
-            if (firstWaiting != null)
-            {
-                firstWaiting.Status = "SpotAvailable";
-                var spotAvailableWlStatus = await _context.WaitlistStatuses
-                    .FirstOrDefaultAsync(s => s.Status == "SpotAvailable");
-                if (spotAvailableWlStatus != null)
-                    firstWaiting.StatusId = spotAvailableWlStatus.StatusId;
-
-                // Notify the waitlisted trainee that a spot has opened
-                await NotificationHelper.CreateAsync(_context, firstWaiting.Trainee.UserId,
-                    "Spot Available",
-                    $"A spot has opened in {enrollment.Session.Course.Title} on {session.SessionDate:MMM dd, yyyy}. Log in to enroll before it fills up.",
-                    "Enrollment", "Waitlist");
-            }
+            await PromoteFromWaitlistAsync(session, enrollment.Session.Course.Title);
 
             await _context.SaveChangesAsync();
 
@@ -735,6 +715,7 @@ public class EnrollmentController : Controller
         var sessions = await _context.CourseSessions
             .Include(s => s.Course)
             .Include(s => s.Status)
+            .Include(s => s.Enrollments).ThenInclude(e => e.EnrollmentStatus)
             .Include(s => s.Enrollments).ThenInclude(e => e.Assessments)
             .Where(s => s.InstructorId == instructor.InstructorId)
             .OrderByDescending(s => s.SessionDate)
@@ -750,13 +731,62 @@ public class EnrollmentController : Controller
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 SessionStatus = s.Status.Status,
-                EnrollmentCount = s.Enrollments.Count,
+                EnrollmentCount = s.Enrollments.Count(e =>
+                    e.EnrollmentStatus.Status == "Confirmed" ||
+                    e.EnrollmentStatus.Status == "Attending" ||
+                    e.EnrollmentStatus.Status == "Completed"),
                 HasPendingAssessments = s.Enrollments.Any(e =>
-                    e.Assessments.Any(a => a.Result != "Pass" && a.Result != "Fail"))
+                    (e.EnrollmentStatus.Status == "Confirmed" || e.EnrollmentStatus.Status == "Attending")
+                    && !e.Assessments.Any(a => a.Result == "Pass" || a.Result == "Fail"))
             }).ToList()
         };
 
         return View(vm);
+    }
+
+    // ── Waitlist promotion (FIFO) ────────────────────────────────────────────
+    // Called whenever a confirmed/enrolled spot is freed. Finds the earliest-
+    // position "Waiting" entry, creates a real Enrollment for that trainee,
+    // restores CurrentEnrollment (net change = 0 when a spot is filled), removes
+    // the waitlist entry, and notifies the trainee. All pending context changes
+    // (including the caller's drop) are flushed together via NotificationHelper.
+    private async Task PromoteFromWaitlistAsync(CourseSession session, string courseTitle)
+    {
+        var firstWaiting = await _context.Waitlists
+            .Include(w => w.Trainee)
+            .Where(w => w.SessionId == session.SessionId && w.Status == "Waiting")
+            .OrderBy(w => w.Position)
+            .FirstOrDefaultAsync();
+
+        if (firstWaiting == null) return;
+
+        var enrolledStatus = await _context.EnrollmentStatuses
+            .FirstOrDefaultAsync(s => s.Status == "Enrolled");
+        if (enrolledStatus == null) return;
+
+        _context.Enrollments.Add(new Enrollment
+        {
+            SessionId          = session.SessionId,
+            TraineeId          = firstWaiting.TraineeId,
+            EnrollmentStatusId = enrolledStatus.EnrollmentStatusId,
+            EnrollmentDate     = DateTime.Now,
+            StatusChangedAt    = DateTime.Now,
+            CreatedAt          = DateTime.Now,
+            UpdatedAt          = DateTime.Now
+        });
+
+        // Restore the counter decremented by the drop (net effect: 0 change)
+        session.CurrentEnrollment++;
+        session.UpdatedAt = DateTime.Now;
+
+        _context.Waitlists.Remove(firstWaiting);
+
+        // NotificationHelper.CreateAsync calls SaveChangesAsync, flushing all pending changes above
+        await NotificationHelper.CreateAsync(_context, firstWaiting.Trainee.UserId,
+            "Auto-Enrolled",
+            $"A spot opened in {courseTitle} on {session.SessionDate:MMM dd, yyyy}. " +
+            $"You have been automatically enrolled from the waitlist (you were position {firstWaiting.Position}).",
+            "Enrollment", "Waitlist");
     }
 
     // ── 10. Session Roster (Instructor) ──────────────────────────────────────

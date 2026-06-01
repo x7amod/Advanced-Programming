@@ -57,20 +57,7 @@ public class AssessmentController : Controller
 
         if (!eligible.Any())
         {
-            // Distinguish between "all done" and "no one qualifies yet"
-            bool anyFinalAssessments = session.Enrollments
-                .Any(e => e.Assessments.Any(a => a.Result == "Pass" || a.Result == "Fail"));
-
-            bool hasUnconfirmedTrainees = session.Enrollments
-                .Any(e => e.EnrollmentStatus.Status == "Enrolled");
-
-            if (hasUnconfirmedTrainees && !anyFinalAssessments)
-                TempData["Error"] = "No trainees can be assessed yet. " +
-                    "Some trainees are still in 'Enrolled' status — " +
-                    "a coordinator must confirm them before assessments can be recorded.";
-            else
-                TempData["Info"] = "All assessments for this session have already been submitted.";
-
+            TempData["Info"] = "All assessments for this session have already been submitted.";
             return RedirectToAction(nameof(MyAssessments), new { filterSessionId = sessionId });
         }
 

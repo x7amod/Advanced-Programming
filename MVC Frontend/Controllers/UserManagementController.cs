@@ -577,10 +577,6 @@ namespace MVC_Frontend.Controllers
                 return View(vm);
             }
 
-            if (currentRole != null)
-                await _userManager.RemoveFromRoleAsync(user, currentRole);
-            await _userManager.AddToRoleAsync(user, vm.NewRole);
-
             if (currentRole == AppRoles.Instructor && vm.NewRole == AppRoles.Trainee)
             {
                 var instructor = await _context.Instructors
@@ -598,35 +594,67 @@ namespace MVC_Frontend.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                var trainee = new Trainee
+                var trainee = await _context.Trainees.FirstOrDefaultAsync(t => t.UserId == user.Id);
+                if (trainee == null)
                 {
-                    UserId = user.Id,
-                    DateOfBirth = new DateTime(2000, 1, 1),
-                    Address = "Not set",
-                    EmergencyContact = "Not set"
-                };
-                _context.Trainees.Add(trainee);
-                await _context.SaveChangesAsync();
+                    trainee = new Trainee
+                    {
+                        UserId = user.Id,
+                        DateOfBirth = new DateTime(2000, 1, 1),
+                        Address = "Not set",
+                        EmergencyContact = "Not set"
+                    };
+                    _context.Trainees.Add(trainee);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (currentRole != null)
+                    await _userManager.RemoveFromRoleAsync(user, currentRole);
+                await _userManager.AddToRoleAsync(user, vm.NewRole);
 
                 TempData["Info"] = "Role changed to Trainee. Please complete the trainee's details.";
                 return RedirectToAction(nameof(EditTrainee), new { id = trainee.TraineeId });
             }
             else
             {
-                var trainee = await _context.Trainees.FirstOrDefaultAsync(t => t.UserId == user.Id);
+                var trainee = await _context.Trainees
+                    .Include(t => t.TraineeCertifications)
+                    .Include(t => t.Enrollments)
+                        .ThenInclude(e => e.Assessments)
+                    .Include(t => t.Enrollments)
+                        .ThenInclude(e => e.PaymentRecords)
+                            .ThenInclude(pr => pr.PaymentTransactions)
+                    .Include(t => t.TraineeCourseCompletions)
+                    .Include(t => t.Waitlists)
+                    .FirstOrDefaultAsync(t => t.UserId == user.Id);
                 if (trainee != null)
                 {
+                    foreach (var enrollment in trainee.Enrollments)
+                    {
+                        _context.Assessments.RemoveRange(enrollment.Assessments);
+                        foreach (var payment in enrollment.PaymentRecords)
+                            _context.PaymentTransactions.RemoveRange(payment.PaymentTransactions);
+                        _context.PaymentRecords.RemoveRange(enrollment.PaymentRecords);
+                    }
+                    _context.Enrollments.RemoveRange(trainee.Enrollments);
+                    _context.TraineeCertifications.RemoveRange(trainee.TraineeCertifications);
+                    _context.TraineeCourseCompletions.RemoveRange(trainee.TraineeCourseCompletions);
+                    _context.Waitlists.RemoveRange(trainee.Waitlists);
                     _context.Trainees.Remove(trainee);
                     await _context.SaveChangesAsync();
                 }
 
-                var instructor = new Instructor
+                var instructor = await _context.Instructors.FirstOrDefaultAsync(i => i.UserId == user.Id);
+                if (instructor == null)
                 {
-                    UserId = user.Id,
-                    HireDate = DateTime.Today
-                };
-                _context.Instructors.Add(instructor);
-                await _context.SaveChangesAsync();
+                    instructor = new Instructor { UserId = user.Id, HireDate = DateTime.Today };
+                    _context.Instructors.Add(instructor);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (currentRole != null)
+                    await _userManager.RemoveFromRoleAsync(user, currentRole);
+                await _userManager.AddToRoleAsync(user, vm.NewRole);
 
                 TempData["Info"] = "Role changed to Instructor. Please complete the instructor's details.";
                 return RedirectToAction(nameof(EditInstructor), new { id = instructor.InstructorId });

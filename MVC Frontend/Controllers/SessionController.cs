@@ -263,8 +263,9 @@ namespace MVC_Frontend.Controllers
             // Instructor availability check — warn if outside defined availability
             if (!await IsInstructorAvailable(vm.InstructorId, vm.SessionDate, startDt, endDt))
             {
+                var availMsg = await BuildAvailabilityMessage(vm.InstructorId);
                 ModelState.AddModelError(string.Empty,
-                    "This instructor is not available on the selected day or time based on their availability schedule.");
+                    "This instructor is not available on the selected day or time. " + availMsg);
                 return View(await PopulateDropdowns(vm));
             }
 
@@ -427,8 +428,9 @@ namespace MVC_Frontend.Controllers
             if (!await IsInstructorAvailable(vm.InstructorId, vm.SessionDate, startDt, endDt))
             {
                 ViewBag.SessionStatus = currentStatus;
+                var availMsg = await BuildAvailabilityMessage(vm.InstructorId);
                 ModelState.AddModelError(string.Empty,
-                    "This instructor is not available on the selected day or time based on their availability schedule.");
+                    "This instructor is not available on the selected day or time. " + availMsg);
                 return View(await PopulateDropdowns(vm));
             }
 
@@ -709,6 +711,44 @@ namespace MVC_Frontend.Controllers
                 a.EndTime.TimeOfDay >= sessionEnd &&
                 a.EffectiveFrom.Date <= sessionDate.Date &&
                 (a.EffectiveTo == null || a.EffectiveTo.Value.Date >= sessionDate.Date));
+        }
+
+        private async Task<string> BuildAvailabilityMessage(int instructorId)
+        {
+            var dayNames = new[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+            var slots = await _context.InstructorAvailabilities
+                .Where(a => a.InstructorId == instructorId)
+                .OrderBy(a => a.DayOfWeek)
+                .ThenBy(a => a.StartTime)
+                .ToListAsync();
+
+            if (slots.Count == 0)
+                return "No availability schedule is defined, so the instructor should always be available — please check your inputs.";
+
+            var lines = slots.Select(a =>
+                $"{dayNames[a.DayOfWeek]} {a.StartTime.ToString("hh:mm tt")}–{a.EndTime.ToString("hh:mm tt")}");
+            return "Their defined schedule is: " + string.Join(", ", lines) + ".";
+        }
+
+        // GET: Session/InstructorAvailability/5  (JSON, used by the form)
+        [HttpGet]
+        public async Task<IActionResult> InstructorAvailability(int id)
+        {
+            var dayNames = new[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+
+            var slots = await _context.InstructorAvailabilities
+                .Where(a => a.InstructorId == id)
+                .OrderBy(a => a.DayOfWeek)
+                .ThenBy(a => a.StartTime)
+                .Select(a => new
+                {
+                    day = dayNames[a.DayOfWeek],
+                    start = a.StartTime.ToString("hh:mm tt"),
+                    end = a.EndTime.ToString("hh:mm tt")
+                })
+                .ToListAsync();
+
+            return Json(slots);
         }
     }
 }

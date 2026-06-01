@@ -34,12 +34,16 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="InstructorId" class="form-label"></label>
-                            <select asp-for="InstructorId" asp-items="Model.Instructors" class="form-select">
+                            <select asp-for="InstructorId" asp-items="Model.Instructors" class="form-select" id="instructorSelect">
                                 <option value="">— Select instructor —</option>
                             </select>
                             <span asp-validation-for="InstructorId" class="text-danger small"></span>
-                            <div class="form-text text-info small" id="instructorConflictHint" style="display:none;">
-                                ⚠ Check that the instructor is available on the selected date and time.
+                            <div id="availabilityHint" class="mt-2" style="display:none;">
+                                <small class="text-muted fw-semibold">Available times:</small>
+                                <ul id="availabilityList" class="mb-0 mt-1 small text-muted ps-3"></ul>
+                            </div>
+                            <div id="availabilityAllDay" class="form-text text-success small" style="display:none;">
+                                No restrictions — instructor is available any time.
                             </div>
                         </div>
                     </div>
@@ -118,9 +122,13 @@
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script>
     (function () {
-        var startInput = document.querySelector('input[name="StartTime"]');
-        var endInput   = document.querySelector('input[name="EndTime"]');
-        var hint       = document.getElementById('durationHint');
+        var startInput       = document.querySelector('input[name="StartTime"]');
+        var endInput         = document.querySelector('input[name="EndTime"]');
+        var hint             = document.getElementById('durationHint');
+        var instructorSelect = document.getElementById('instructorSelect');
+        var availHint        = document.getElementById('availabilityHint');
+        var availList        = document.getElementById('availabilityList');
+        var availAllDay      = document.getElementById('availabilityAllDay');
 
         function updateDuration() {
             if (!startInput.value || !endInput.value) { hint.textContent = ''; return; }
@@ -137,9 +145,34 @@
             }
         }
 
+        function loadAvailability() {
+            var id = instructorSelect.value;
+            availHint.style.display = 'none';
+            availAllDay.style.display = 'none';
+            availList.innerHTML = '';
+            if (!id) return;
+
+            fetch('/Session/InstructorAvailability/' + id)
+                .then(function (r) { return r.json(); })
+                .then(function (slots) {
+                    if (slots.length === 0) {
+                        availAllDay.style.display = '';
+                    } else {
+                        slots.forEach(function (s) {
+                            var li = document.createElement('li');
+                            li.textContent = s.day + ': ' + s.start + ' – ' + s.end;
+                            availList.appendChild(li);
+                        });
+                        availHint.style.display = '';
+                    }
+                });
+        }
+
         startInput.addEventListener('change', updateDuration);
         endInput.addEventListener('change', updateDuration);
+        instructorSelect.addEventListener('change', loadAvailability);
         updateDuration();
+        loadAvailability();
     })();
     </script>
 }
