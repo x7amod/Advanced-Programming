@@ -159,15 +159,9 @@ public class ClassroomController : Controller
         var classroom = await _context.Classrooms.FindAsync(vm.ClassroomId);
         if (classroom == null) return NotFound();
 
-        // Get next EquipmentId for this classroom (composite PK)
-        var nextId = await _context.ClassroomEquipments
-            .Where(e => e.ClassroomId == vm.ClassroomId)
-            .Select(e => (int?)e.EquipmentId)
-            .MaxAsync() ?? 0;
-
+        // EquipmentId is an IDENTITY column — let the database generate it
         _context.ClassroomEquipments.Add(new ClassroomEquipment
         {
-            EquipmentId = nextId + 1,
             ClassroomId = vm.ClassroomId,
             EquipmentType = vm.EquipmentType.Trim(),
             Quantity = vm.Quantity,
