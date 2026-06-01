@@ -517,9 +517,9 @@ namespace MVC_Frontend.Controllers
             }
 
             var currentStatus = session.Status?.Status;
-            if (currentStatus != "Attending" && currentStatus != "Scheduled")
+            if (currentStatus != "Ongoing" && currentStatus != "Scheduled")
             {
-                TempData["Error"] = "Session must be in 'Attending' or 'Scheduled' status to be marked as completed.";
+                TempData["Error"] = "Session must be in 'Ongoing' or 'Scheduled' status to be marked as completed.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
