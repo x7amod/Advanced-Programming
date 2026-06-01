@@ -731,7 +731,10 @@ public class EnrollmentController : Controller
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 SessionStatus = s.Status.Status,
-                EnrollmentCount = s.Enrollments.Count(e => e.EnrollmentStatus.Status != "Dropped"),
+                EnrollmentCount = s.Enrollments.Count(e =>
+                    e.EnrollmentStatus.Status == "Confirmed" ||
+                    e.EnrollmentStatus.Status == "Attending" ||
+                    e.EnrollmentStatus.Status == "Completed"),
                 HasPendingAssessments = s.Enrollments.Any(e =>
                     (e.EnrollmentStatus.Status == "Confirmed" || e.EnrollmentStatus.Status == "Attending")
                     && !e.Assessments.Any(a => a.Result == "Pass" || a.Result == "Fail"))
