@@ -511,7 +511,7 @@ public class EnrollmentController : Controller
             .Include(e => e.Session).ThenInclude(s => s.Course)
             .Include(e => e.Session).ThenInclude(s => s.Status)
             .Include(e => e.Trainee)
-            .Where(e => !cancelledSessionIds.Contains(e.SessionId))
+            .Where(e => cancelledCssStatus == null || e.Session.StatusId != cancelledCssStatus.StatusId)
             .AsQueryable();
 
         if (filterSessionId.HasValue)
@@ -561,7 +561,7 @@ public class EnrollmentController : Controller
         var sessions = await _context.CourseSessions
             .Include(s => s.Course)
             .Include(s => s.Status)
-            .Where(s => !cancelledSessionIds.Contains(s.SessionId))
+            .Where(s => cancelledCssStatus == null || s.StatusId != cancelledCssStatus.StatusId)
             .OrderBy(s => s.SessionDate)
             .ToListAsync();
 
