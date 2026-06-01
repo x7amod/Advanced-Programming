@@ -29,10 +29,10 @@ public class PaymentController : Controller
         var overdueStatus = await _context.PaymentStatuses.FirstOrDefaultAsync(s => s.Status == "Overdue");
         if (overdueStatus != null)
         {
-            var staleIds = new[] { "Unpaid", "Partial" };
             var toMark = await _context.PaymentRecords
                 .Include(p => p.Status)
-                .Where(p => staleIds.Contains(p.Status.Status) && p.DueDate < today)
+                .Where(p => (p.Status.Status == "Unpaid" || p.Status.Status == "Partial")
+                            && p.DueDate < today)
                 .ToListAsync();
             foreach (var r in toMark)
             {

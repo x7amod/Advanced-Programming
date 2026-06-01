@@ -369,10 +369,11 @@ namespace MVC_Frontend.Controllers
             ViewBag.InstructorId = id;
 
             var usedSubjectAreaIds = instructor.InstructorExpertises.Select(e => e.SubjectAreaId).ToList();
-            ViewBag.AvailableSubjectAreas = await _context.SubjectAreas
+            // Pull all to memory to avoid EF Core 9 CTE generation with NOT IN
+            var allSubjectAreas = await _context.SubjectAreas.OrderBy(s => s.Name).ToListAsync();
+            ViewBag.AvailableSubjectAreas = allSubjectAreas
                 .Where(s => !usedSubjectAreaIds.Contains(s.SubjectAreaId))
-                .OrderBy(s => s.Name)
-                .ToListAsync();
+                .ToList();
 
             return View(instructor.InstructorExpertises.ToList());
         }

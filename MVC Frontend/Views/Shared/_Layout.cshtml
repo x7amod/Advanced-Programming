@@ -346,6 +346,68 @@
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
+
+<!-- Reusable confirmation modal — triggered by data-confirm="message" on any form or button -->
+<div class="modal fade" id="tl-confirm-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body pt-4 pb-2 px-4 text-center">
+                <div class="mb-3" style="font-size:2rem;line-height:1;">⚠️</div>
+                <p class="fw-semibold mb-0" id="tl-confirm-msg">Are you sure?</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
+                <button type="button" class="btn btn-outline-secondary px-4"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger px-4"
+                        id="tl-confirm-ok">Yes, proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    var modal, okBtn, pendingAction;
+    document.addEventListener('DOMContentLoaded', function () {
+        modal  = new bootstrap.Modal(document.getElementById('tl-confirm-modal'));
+        okBtn  = document.getElementById('tl-confirm-ok');
+
+        function ask(msg, action) {
+            document.getElementById('tl-confirm-msg').textContent = msg;
+            pendingAction = action;
+            modal.show();
+        }
+
+        // Intercept form submit
+        document.addEventListener('submit', function (e) {
+            var msg = e.target.getAttribute('data-confirm');
+            if (!msg) return;
+            e.preventDefault();
+            ask(msg, function () {
+                e.target.removeAttribute('data-confirm');
+                e.target.requestSubmit();
+            });
+        }, true);
+
+        // Intercept button click (for buttons that carry data-confirm themselves)
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('button[data-confirm]');
+            if (!btn) return;
+            var form = btn.closest('form');
+            if (!form) return;
+            e.preventDefault();
+            ask(btn.getAttribute('data-confirm'), function () {
+                btn.removeAttribute('data-confirm');
+                form.requestSubmit(btn);
+            });
+        }, true);
+
+        okBtn.addEventListener('click', function () {
+            modal.hide();
+            if (pendingAction) { pendingAction(); pendingAction = null; }
+        });
+    });
+})();
+</script>
 <script>
 (function () {
     var btn     = document.getElementById('tl-hamburger');

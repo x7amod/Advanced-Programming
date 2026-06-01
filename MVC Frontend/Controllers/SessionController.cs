@@ -593,11 +593,13 @@ namespace MVC_Frontend.Controllers
             var dropdownUsers = dropdownUsersAll
                 .Where(u => dropdownUserIds.Contains(u.Id))
                 .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+            // Only include instructors that have a valid linked Identity user
             vm.Instructors = dropdownInstructors
+                .Where(i => dropdownUsers.ContainsKey(i.UserId))
                 .Select(i => new SelectListItem
                 {
                     Value = i.InstructorId.ToString(),
-                    Text = dropdownUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}"
+                    Text = dropdownUsers[i.UserId]
                 })
                 .OrderBy(x => x.Text)
                 .ToList();

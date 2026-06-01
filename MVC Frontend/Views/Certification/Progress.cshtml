@@ -75,7 +75,7 @@
             <div class="d-flex align-items-center gap-3">
                 <span class="text-success fw-semibold">✓ Trainee meets all requirements</span>
                 <form asp-action="IssueCertificate" method="post"
-                      onsubmit="return confirm('Issue certificate for @Model.TraineeName?');">
+                      data-confirm="Issue certificate for @Model.TraineeName?">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="traineeId" value="@Model.TraineeId" />
                     <input type="hidden" name="trackId" value="@Model.Track.CertificationTrackId" />
