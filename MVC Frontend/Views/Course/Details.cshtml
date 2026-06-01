@@ -128,7 +128,7 @@
                                     @session.StartTime.ToString("HH:mm") – @session.EndTime.ToString("HH:mm")
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div id="session-seats-@session.SessionId">
                                         @if (seatsLeft <= 0)
                                         {
                                             <span class="badge bg-danger">Full</span>
@@ -139,35 +139,33 @@
                                         }
                                         <span class="badge bg-light text-dark border ms-1">@session.Status?.Status</span>
                                     </div>
-                                    @if (User.IsInRole("Trainee"))
-                                    {
-                                        if (seatsLeft > 0)
+                                    <div id="session-action-@session.SessionId" style="display:inline">
+                                        @if (User.IsInRole("Trainee"))
                                         {
                                             <form asp-controller="Enrollment" asp-action="Enroll"
                                                   asp-route-sessionId="@session.SessionId"
-                                                  method="post" style="display:inline">
+                                                  method="post" data-enroll-btn style="display:inline"
+                                                  class="@(seatsLeft <= 0 ? "d-none" : "")">
                                                 @Html.AntiForgeryToken()
                                                 <button type="submit" class="btn btn-sm btn-outline-primary">Enroll</button>
                                             </form>
-                                        }
-                                        else
-                                        {
                                             <form asp-controller="Enrollment" asp-action="Waitlist"
                                                   asp-route-sessionId="@session.SessionId"
-                                                  method="post" style="display:inline">
+                                                  method="post" data-waitlist-btn style="display:inline"
+                                                  class="@(seatsLeft > 0 ? "d-none" : "")">
                                                 @Html.AntiForgeryToken()
                                                 <button type="submit" class="btn btn-sm btn-outline-warning">Waitlist</button>
                                             </form>
                                         }
-                                    }
-                                    @if (User.IsInRole("Training Coordinator") || User.IsInRole("Instructor"))
-                                    {
-                                        <a asp-controller="Enrollment" asp-action="SessionEnrollments"
-                                           asp-route-sessionId="@session.SessionId"
-                                           class="btn btn-sm btn-outline-secondary">
-                                            View (@session.CurrentEnrollment)
-                                        </a>
-                                    }
+                                        @if (User.IsInRole("Training Coordinator") || User.IsInRole("Instructor"))
+                                        {
+                                            <a asp-controller="Enrollment" asp-action="SessionEnrollments"
+                                               asp-route-sessionId="@session.SessionId"
+                                               class="btn btn-sm btn-outline-secondary">
+                                                View (@session.CurrentEnrollment)
+                                            </a>
+                                        }
+                                    </div>
                                 </div>
                             </li>
                         }
@@ -181,3 +179,40 @@
 <div class="mt-3">
     <a asp-action="Index" class="btn btn-secondary">Back to Catalog</a>
 </div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script>
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/enrollmentHub")
+    .withAutomaticReconnect()
+    .build();
+
+connection.on("ReceiveEnrollmentUpdate", (sessionId, currentEnrollment, maxCapacity) => {
+    const remaining = maxCapacity - currentEnrollment;
+    const isFull = remaining <= 0;
+
+    const seatsEl = document.getElementById(`session-seats-${sessionId}`);
+    if (seatsEl) {
+        const statusBadge = seatsEl.querySelector('.badge.bg-light');
+        const statusHtml = statusBadge ? statusBadge.outerHTML : '';
+        seatsEl.innerHTML = (isFull
+            ? '<span class="badge bg-danger">Full</span>'
+            : `<span class="badge bg-success">${remaining} seats left</span>`)
+            + (statusHtml ? ' ' + statusHtml : '');
+    }
+
+    const actionEl = document.getElementById(`session-action-${sessionId}`);
+    if (actionEl) {
+        const enrollForm = actionEl.querySelector('[data-enroll-btn]');
+        const waitlistForm = actionEl.querySelector('[data-waitlist-btn]');
+        if (enrollForm && waitlistForm) {
+            enrollForm.classList.toggle('d-none', isFull);
+            waitlistForm.classList.toggle('d-none', !isFull);
+        }
+    }
+});
+
+connection.start().catch(err => console.error('SignalR connection error:', err));
+</script>
+}

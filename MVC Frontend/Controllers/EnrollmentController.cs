@@ -2,8 +2,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MVC_Frontend.Helpers;
+using MVC_Frontend.Hubs;
 using MVC_Frontend.Models;
 using Web_API.Models;
 
@@ -12,10 +14,12 @@ namespace MVC_Frontend.Controllers;
 public class EnrollmentController : Controller
 {
     private readonly TrainingInstituteDBContext _context;
+    private readonly IHubContext<EnrollmentHub> _hubContext;
 
-    public EnrollmentController(TrainingInstituteDBContext context)
+    public EnrollmentController(TrainingInstituteDBContext context, IHubContext<EnrollmentHub> hubContext)
     {
         _context = context;
+        _hubContext = hubContext;
     }
 
     // ── 1. Browse Available Sessions ─────────────────────────────────────────
@@ -205,6 +209,9 @@ public class EnrollmentController : Controller
             session.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
+            await _hubContext.Clients.All.SendAsync("ReceiveEnrollmentUpdate",
+                session.SessionId, session.CurrentEnrollment, session.MaxCapacity);
+
             TempData["Success"] = "You have successfully enrolled in the session.";
             return RedirectToAction(nameof(MyEnrollments));
         }
@@ -314,6 +321,9 @@ public class EnrollmentController : Controller
             }
 
             await _context.SaveChangesAsync();
+
+            await _hubContext.Clients.All.SendAsync("ReceiveEnrollmentUpdate",
+                session.SessionId, session.CurrentEnrollment, session.MaxCapacity);
 
             // Notify the coordinator who owns the session
             var coordinator = await _context.Coordinators

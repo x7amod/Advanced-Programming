@@ -46,6 +46,40 @@
     </div>
 </form>
 
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script>
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/enrollmentHub")
+    .withAutomaticReconnect()
+    .build();
+
+connection.on("ReceiveEnrollmentUpdate", (sessionId, currentEnrollment, maxCapacity) => {
+    const remaining = maxCapacity - currentEnrollment;
+    const isFull = remaining <= 0;
+
+    const spotsEl = document.getElementById(`spots-${sessionId}`);
+    if (spotsEl) {
+        spotsEl.innerHTML = isFull
+            ? '<span class="badge bg-danger">Full</span>'
+            : `<span class="badge bg-success">${remaining} of ${maxCapacity} spot${remaining === 1 ? '' : 's'} available</span>`;
+    }
+
+    const actionEl = document.getElementById(`action-${sessionId}`);
+    if (actionEl) {
+        const enrollForm = actionEl.querySelector('[data-enroll-btn]');
+        const waitlistForm = actionEl.querySelector('[data-waitlist-btn]');
+        if (enrollForm && waitlistForm) {
+            enrollForm.classList.toggle('d-none', isFull);
+            waitlistForm.classList.toggle('d-none', !isFull);
+        }
+    }
+});
+
+connection.start().catch(err => console.error('SignalR connection error:', err));
+</script>
+}
+
 @if (!Model.Sessions.Any())
 {
     <div class="text-center py-5">
@@ -134,21 +168,20 @@ else
                             {
                                 <span class="badge bg-warning text-dark fs-6 w-100 py-2">On Waitlist</span>
                             }
-                            else if (s.IsFull)
-                            {
-                                <form asp-action="Waitlist" asp-route-sessionId="@s.SessionId" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-warning btn-sm w-100">
-                                        Full — Join Waitlist
-                                    </button>
-                                </form>
-                            }
                             else
                             {
-                                <form asp-action="Enroll" asp-route-sessionId="@s.SessionId" method="post">
+                                <form asp-action="Enroll" asp-route-sessionId="@s.SessionId" method="post"
+                                      data-enroll-btn class="@(s.IsFull ? "d-none" : "")">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-primary btn-sm w-100">
                                         Enroll
+                                    </button>
+                                </form>
+                                <form asp-action="Waitlist" asp-route-sessionId="@s.SessionId" method="post"
+                                      data-waitlist-btn class="@(!s.IsFull ? "d-none" : "")">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-warning btn-sm w-100">
+                                        Full — Join Waitlist
                                     </button>
                                 </form>
                             }
