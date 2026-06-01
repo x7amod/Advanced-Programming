@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web_API.Models;
@@ -7,7 +7,8 @@ namespace Web_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Training Coordinator")]
+    [Produces("application/json")]
+    [Authorize(Roles = AppRoles.Coordinator)]
     public class ReportsController : ControllerBase
     {
         private readonly TrainingInstituteDBContext _context;
@@ -19,13 +20,13 @@ namespace Web_API.Controllers
 
         // GET /api/reports/enrollments
         [HttpGet("enrollments")]
-        public async Task<IActionResult> GetEnrollmentStats()
+        [ProducesResponseType(typeof(EnrollmentStatsReportDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<EnrollmentStatsReportDto>> GetEnrollmentStats()
         {
-            var stats = await _context.Enrollments
-                .Include(e => e.Session)
-                    .ThenInclude(s => s.Course)
-                        .ThenInclude(c => c.Category)
-                .Include(e => e.EnrollmentStatus)
+            var byCourse = await _context.Enrollments
+                .AsNoTracking()
                 .GroupBy(e => new
                 {
                     CourseId = e.Session.CourseId,
@@ -43,248 +44,321 @@ namespace Web_API.Controllers
                     Completed = g.Count(e => e.EnrollmentStatus.Status == "Completed"),
                     Dropped = g.Count(e => e.EnrollmentStatus.Status == "Dropped"),
                     Active = g.Count(e => e.EnrollmentStatus.Status != "Completed" && e.EnrollmentStatus.Status != "Dropped"),
-                    CompletionRate = g.Count() == 0 ? 0 :
-                        Math.Round((double)g.Count(e => e.EnrollmentStatus.Status == "Completed") / g.Count() * 100, 1)
+                    CompletionRate = g.Count() == 0
+                        ? 0
+                        : Math.Round((double)g.Count(e => e.EnrollmentStatus.Status == "Completed") / g.Count() * 100, 1)
                 })
                 .OrderByDescending(x => x.TotalEnrollments)
                 .ToListAsync();
 
-            var totalEnrollments = await _context.Enrollments.CountAsync();
-            var totalCompleted = await _context.Enrollments
-                .Include(e => e.EnrollmentStatus)
-                .CountAsync(e => e.EnrollmentStatus.Status == "Completed");
-            var totalDropped = await _context.Enrollments
-                .Include(e => e.EnrollmentStatus)
-                .CountAsync(e => e.EnrollmentStatus.Status == "Dropped");
+            var statusCounts = await _context.Enrollments
+                .AsNoTracking()
+                .GroupBy(e => e.EnrollmentStatus.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
 
-            return Ok(new
+            var totalEnrollments = statusCounts.Sum(x => x.Count);
+            var totalCompleted = statusCounts.FirstOrDefault(x => x.Status == "Completed")?.Count ?? 0;
+            var totalDropped = statusCounts.FirstOrDefault(x => x.Status == "Dropped")?.Count ?? 0;
+
+            var result = new EnrollmentStatsReportDto
             {
-                summary = new
+                Summary = new EnrollmentSummaryDto
                 {
-                    totalEnrollments,
-                    totalCompleted,
-                    totalDropped,
-                    totalActive = totalEnrollments - totalCompleted - totalDropped,
-                    overallCompletionRate = totalEnrollments == 0 ? 0 :
-                        Math.Round((double)totalCompleted / totalEnrollments * 100, 1)
+                    TotalEnrollments = totalEnrollments,
+                    TotalCompleted = totalCompleted,
+                    TotalDropped = totalDropped,
+                    TotalActive = totalEnrollments - totalCompleted - totalDropped,
+                    OverallCompletionRate = totalEnrollments == 0
+                        ? 0
+                        : Math.Round((double)totalCompleted / totalEnrollments * 100, 1)
                 },
-                byCourse = stats
-            });
+                ByCourse = byCourse.Select(x => new EnrollmentByCourseDto
+                {
+                    CourseId = x.CourseId,
+                    CourseTitle = x.CourseTitle,
+                    CourseCode = x.CourseCode,
+                    CategoryName = x.CategoryName,
+                    TotalEnrollments = x.TotalEnrollments,
+                    Completed = x.Completed,
+                    Dropped = x.Dropped,
+                    Active = x.Active,
+                    CompletionRate = x.CompletionRate
+                }).ToList()
+            };
+
+            return Ok(result);
         }
 
         // GET /api/reports/instructors
         [HttpGet("instructors")]
-        public async Task<IActionResult> GetInstructorStats()
+        [ProducesResponseType(typeof(InstructorStatsReportDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<InstructorStatsReportDto>> GetInstructorStats()
         {
             var stats = await _context.Instructors
-                .Include(i => i.User)
-                .Include(i => i.CourseSessions)
-                    .ThenInclude(s => s.Enrollments)
-                        .ThenInclude(e => e.EnrollmentStatus)
-                .Include(i => i.Assessments)
+                .AsNoTracking()
                 .Select(i => new
                 {
                     InstructorId = i.InstructorId,
                     Name = i.User.UserName,
                     Email = i.User.Email,
-                    HireDate = i.HireDate,
                     TotalSessions = i.CourseSessions.Count(),
-                    TotalTrainees = i.CourseSessions
-                        .SelectMany(s => s.Enrollments).Count(),
-                    CompletedSessions = i.CourseSessions
-                        .Count(s => s.Status.Status == "Completed"),
+                    CompletedSessions = i.CourseSessions.Count(s => s.Status.Status == "Completed"),
+                    TotalTrainees = i.CourseSessions.SelectMany(s => s.Enrollments).Count(),
                     TotalAssessments = i.Assessments.Count(),
-                    PassedAssessments = i.Assessments
-                        .Count(a => a.Result == "Pass"),
-                    AvgPassRate = i.Assessments.Count() == 0 ? 0 :
-                        Math.Round((double)i.Assessments.Count(a => a.Result == "Pass") /
-                        i.Assessments.Count() * 100, 1)
+                    PassedAssessments = i.Assessments.Count(a => a.Result == "Pass"),
+                    AvgPassRate = i.Assessments.Count() == 0
+                        ? 0
+                        : Math.Round((double)i.Assessments.Count(a => a.Result == "Pass") / i.Assessments.Count() * 100, 1)
                 })
                 .OrderByDescending(x => x.TotalSessions)
                 .ToListAsync();
 
-            return Ok(new
+            var result = new InstructorStatsReportDto
             {
-                summary = new
+                Summary = new InstructorSummaryDto
                 {
-                    totalInstructors = stats.Count,
-                    avgSessionsPerInstructor = stats.Count == 0 ? 0 :
-                        Math.Round(stats.Average(x => x.TotalSessions), 1),
-                    avgPassRate = stats.Count == 0 ? 0 :
-                        Math.Round(stats.Average(x => x.AvgPassRate), 1)
+                    TotalInstructors = stats.Count,
+                    AvgSessionsPerInstructor = stats.Count == 0
+                        ? 0
+                        : Math.Round(stats.Average(x => x.TotalSessions), 1),
+                    AvgPassRate = stats.Count == 0
+                        ? 0
+                        : Math.Round(stats.Average(x => x.AvgPassRate), 1)
                 },
-                byInstructor = stats
-            });
+                ByInstructor = stats.Select(x => new InstructorDataDto
+                {
+                    InstructorId = x.InstructorId,
+                    Name = x.Name ?? string.Empty,
+                    Email = x.Email ?? string.Empty,
+                    TotalSessions = x.TotalSessions,
+                    CompletedSessions = x.CompletedSessions,
+                    TotalTrainees = x.TotalTrainees,
+                    TotalAssessments = x.TotalAssessments,
+                    PassedAssessments = x.PassedAssessments,
+                    AvgPassRate = x.AvgPassRate
+                }).ToList()
+            };
+
+            return Ok(result);
         }
 
         // GET /api/reports/certifications
         [HttpGet("certifications")]
-        public async Task<IActionResult> GetCertificationStats()
+        [ProducesResponseType(typeof(CertificationStatsReportDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<CertificationStatsReportDto>> GetCertificationStats()
         {
             var stats = await _context.CertificationTracks
-                .Include(ct => ct.TraineeCertifications)
-                    .ThenInclude(tc => tc.Status)
-                .Include(ct => ct.CertificationRequiredCourses)
+                .AsNoTracking()
                 .Select(ct => new
                 {
                     TrackId = ct.CertificationTrackId,
                     TrackName = ct.Name,
                     Description = ct.Description,
-                    ValidityPeriod = ct.ValidityPeriod,
                     RequiredCoursesCount = ct.CertificationRequiredCourses.Count(),
                     TotalEnrolled = ct.TraineeCertifications.Count(),
-                    Issued = ct.TraineeCertifications
-                        .Count(tc => tc.Status.Status == "Issued"),
-                    Eligible = ct.TraineeCertifications
-                        .Count(tc => tc.Status.Status == "Eligible"),
-                    InProgress = ct.TraineeCertifications
-                        .Count(tc => tc.Status.Status == "In Progress"),
-                    Expired = ct.TraineeCertifications
-                        .Count(tc => tc.Status.Status == "Expired"),
-                    CompletionRate = ct.TraineeCertifications.Count() == 0 ? 0 :
-                        Math.Round((double)ct.TraineeCertifications
-                        .Count(tc => tc.Status.Status == "Issued") /
-                        ct.TraineeCertifications.Count() * 100, 1)
+                    Issued = ct.TraineeCertifications.Count(tc => tc.Status.Status == "Issued"),
+                    Eligible = ct.TraineeCertifications.Count(tc => tc.Status.Status == "Eligible"),
+                    InProgress = ct.TraineeCertifications.Count(tc => tc.Status.Status == "In Progress"),
+                    Expired = ct.TraineeCertifications.Count(tc => tc.Status.Status == "Expired"),
+                    CompletionRate = ct.TraineeCertifications.Count() == 0
+                        ? 0
+                        : Math.Round((double)ct.TraineeCertifications.Count(tc => tc.Status.Status == "Issued") /
+                                     ct.TraineeCertifications.Count() * 100, 1)
                 })
                 .OrderByDescending(x => x.TotalEnrolled)
                 .ToListAsync();
 
             var totalIssued = await _context.TraineeCertifications
-                .Include(tc => tc.Status)
+                .AsNoTracking()
                 .CountAsync(tc => tc.Status.Status == "Issued");
 
-            return Ok(new
+            var result = new CertificationStatsReportDto
             {
-                summary = new
+                Summary = new CertificationSummaryDto
                 {
-                    totalTracks = stats.Count,
-                    totalIssued,
-                    totalInProgress = stats.Sum(x => x.InProgress),
-                    totalExpired = stats.Sum(x => x.Expired)
+                    TotalTracks = stats.Count,
+                    TotalIssued = totalIssued,
+                    TotalInProgress = stats.Sum(x => x.InProgress),
+                    TotalExpired = stats.Sum(x => x.Expired)
                 },
-                byTrack = stats
-            });
+                ByTrack = stats.Select(x => new CertificationByTrackDto
+                {
+                    TrackId = x.TrackId,
+                    TrackName = x.TrackName,
+                    Description = x.Description,
+                    RequiredCoursesCount = x.RequiredCoursesCount,
+                    TotalEnrolled = x.TotalEnrolled,
+                    Issued = x.Issued,
+                    Eligible = x.Eligible,
+                    InProgress = x.InProgress,
+                    Expired = x.Expired,
+                    CompletionRate = x.CompletionRate
+                }).ToList()
+            };
+
+            return Ok(result);
         }
 
         // GET /api/reports/revenue
         [HttpGet("revenue")]
-        public async Task<IActionResult> GetRevenueStats()
+        [ProducesResponseType(typeof(RevenueStatsReportDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<RevenueStatsReportDto>> GetRevenueStats()
         {
             var records = await _context.PaymentRecords
-                .Include(pr => pr.Status)
-                .Include(pr => pr.Enrollment)
-                    .ThenInclude(e => e.Session)
-                        .ThenInclude(s => s.Course)
-                .Include(pr => pr.PaymentTransactions)
+                .AsNoTracking()
+                .Select(pr => new
+                {
+                    pr.TotalAmount,
+                    Status = pr.Status.Status,
+                    IssuedYear = pr.IssuedDate.Year,
+                    IssuedMonth = pr.IssuedDate.Month,
+                    CourseId = pr.Enrollment.Session.CourseId,
+                    CourseTitle = pr.Enrollment.Session.Course.Title,
+                    CourseCode = pr.Enrollment.Session.Course.CourseCode,
+                    Collected = pr.PaymentTransactions.Sum(pt => pt.Amount)
+                })
                 .ToListAsync();
 
             var totalRevenue = records.Sum(pr => pr.TotalAmount);
-            var totalCollected = records
-                .SelectMany(pr => pr.PaymentTransactions)
-                .Sum(pt => pt.Amount);
+            var totalCollected = records.Sum(pr => pr.Collected);
             var totalOutstanding = totalRevenue - totalCollected;
-            var overdueCount = records
-                .Count(pr => pr.Status.Status == "Overdue");
+            var overdueCount = records.Count(pr => pr.Status == "Overdue");
 
             var byCourse = records
-                .GroupBy(pr => new
-                {
-                    CourseId = pr.Enrollment.Session.CourseId,
-                    CourseTitle = pr.Enrollment.Session.Course.Title,
-                    CourseCode = pr.Enrollment.Session.Course.CourseCode
-                })
+                .GroupBy(pr => new { pr.CourseId, pr.CourseTitle, pr.CourseCode })
                 .Select(g => new
                 {
                     g.Key.CourseId,
                     g.Key.CourseTitle,
                     g.Key.CourseCode,
                     TotalInvoiced = g.Sum(pr => pr.TotalAmount),
-                    TotalCollected = g.SelectMany(pr => pr.PaymentTransactions)
-                        .Sum(pt => pt.Amount),
-                    Outstanding = g.Sum(pr => pr.TotalAmount) -
-                        g.SelectMany(pr => pr.PaymentTransactions).Sum(pt => pt.Amount),
-                    OverdueCount = g.Count(pr => pr.Status.Status == "Overdue")
+                    TotalCollected = g.Sum(pr => pr.Collected),
+                    Outstanding = g.Sum(pr => pr.TotalAmount) - g.Sum(pr => pr.Collected),
+                    OverdueCount = g.Count(pr => pr.Status == "Overdue")
                 })
                 .OrderByDescending(x => x.TotalInvoiced)
                 .ToList();
 
             var byMonth = records
-                .GroupBy(pr => new
-                {
-                    Year = pr.IssuedDate.Year,
-                    Month = pr.IssuedDate.Month
-                })
+                .GroupBy(pr => new { Year = pr.IssuedYear, Month = pr.IssuedMonth })
                 .Select(g => new
                 {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    MonthName = new DateTime(g.Key.Year, g.Key.Month, 1)
-                        .ToString("MMM yyyy"),
+                    g.Key.Year,
+                    g.Key.Month,
+                    MonthName = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM yyyy"),
                     TotalInvoiced = g.Sum(pr => pr.TotalAmount),
-                    TotalCollected = g.SelectMany(pr => pr.PaymentTransactions)
-                        .Sum(pt => pt.Amount)
+                    TotalCollected = g.Sum(pr => pr.Collected)
                 })
                 .OrderBy(x => x.Year)
                 .ThenBy(x => x.Month)
                 .ToList();
 
-            return Ok(new
+            var result = new RevenueStatsReportDto
             {
-                summary = new
+                Summary = new RevenueSummaryDto
                 {
-                    totalRevenue,
-                    totalCollected,
-                    totalOutstanding,
-                    overdueCount,
-                    collectionRate = totalRevenue == 0 ? 0 :
-                        Math.Round((double)totalCollected / (double)totalRevenue * 100, 1)
+                    TotalRevenue = totalRevenue,
+                    TotalCollected = totalCollected,
+                    TotalOutstanding = totalOutstanding,
+                    OverdueCount = overdueCount,
+                    CollectionRate = totalRevenue == 0
+                        ? 0
+                        : Math.Round((double)totalCollected / (double)totalRevenue * 100, 1)
                 },
-                byCourse,
-                byMonth
-            });
+                ByCourse = byCourse.Select(x => new RevenueByCourseDto
+                {
+                    CourseId = x.CourseId,
+                    CourseTitle = x.CourseTitle,
+                    CourseCode = x.CourseCode,
+                    TotalInvoiced = x.TotalInvoiced,
+                    TotalCollected = x.TotalCollected,
+                    Outstanding = x.Outstanding,
+                    OverdueCount = x.OverdueCount
+                }).ToList(),
+                ByMonth = byMonth.Select(x => new RevenueByMonthDto
+                {
+                    Year = x.Year,
+                    Month = x.Month,
+                    MonthName = x.MonthName,
+                    TotalInvoiced = x.TotalInvoiced,
+                    TotalCollected = x.TotalCollected
+                }).ToList()
+            };
+
+            return Ok(result);
         }
 
         // GET /api/reports/overview
         [HttpGet("overview")]
-        public async Task<IActionResult> GetOverview()
+        [ProducesResponseType(typeof(OverviewReportDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<OverviewReportDto>> GetOverview()
         {
-            var totalTrainees = await _context.Trainees.CountAsync();
-            var totalInstructors = await _context.Instructors.CountAsync();
-            var totalCourses = await _context.Courses.CountAsync(c => c.IsActive);
-            var totalSessions = await _context.CourseSessions.CountAsync();
+            var totalTrainees = await _context.Trainees.AsNoTracking().CountAsync();
+            var totalInstructors = await _context.Instructors.AsNoTracking().CountAsync();
+            var totalCourses = await _context.Courses.AsNoTracking().CountAsync(c => c.IsActive);
+            var totalSessions = await _context.CourseSessions.AsNoTracking().CountAsync();
 
-            var totalEnrollments = await _context.Enrollments.CountAsync();
-            var completedEnrollments = await _context.Enrollments
-                .Include(e => e.EnrollmentStatus)
-                .CountAsync(e => e.EnrollmentStatus.Status == "Completed");
+            var enrollmentCounts = await _context.Enrollments
+                .AsNoTracking()
+                .GroupBy(e => e.EnrollmentStatus.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var totalEnrollments = enrollmentCounts.Sum(x => x.Count);
+            var completedEnrollments = enrollmentCounts.FirstOrDefault(x => x.Status == "Completed")?.Count ?? 0;
 
             var totalCertificationsIssued = await _context.TraineeCertifications
-                .Include(tc => tc.Status)
+                .AsNoTracking()
                 .CountAsync(tc => tc.Status.Status == "Issued");
 
-            var totalRevenue = await _context.PaymentRecords.SumAsync(pr => pr.TotalAmount);
-            var totalCollected = await _context.PaymentTransactions.SumAsync(pt => pt.Amount);
+            var totalRevenue = await _context.PaymentRecords
+                .AsNoTracking()
+                .SumAsync(pr => (decimal?)pr.TotalAmount) ?? 0m;
 
-            var passRate = await _context.Assessments.CountAsync() == 0 ? 0 :
-                Math.Round((double)await _context.Assessments.CountAsync(a => a.Result == "Pass") /
-                await _context.Assessments.CountAsync() * 100, 1);
+            var totalCollected = await _context.PaymentTransactions
+                .AsNoTracking()
+                .SumAsync(pt => (decimal?)pt.Amount) ?? 0m;
 
-            return Ok(new
+            var assessmentCounts = await _context.Assessments
+                .AsNoTracking()
+                .GroupBy(a => a.Result)
+                .Select(g => new { Result = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var totalAssessments = assessmentCounts.Sum(x => x.Count);
+            var passedAssessments = assessmentCounts.FirstOrDefault(x => x.Result == "Pass")?.Count ?? 0;
+            var passRate = totalAssessments == 0
+                ? 0
+                : Math.Round((double)passedAssessments / totalAssessments * 100, 1);
+
+            var result = new OverviewReportDto
             {
-                totalTrainees,
-                totalInstructors,
-                totalCourses,
-                totalSessions,
-                totalEnrollments,
-                completedEnrollments,
-                totalCertificationsIssued,
-                totalRevenue,
-                totalCollected,
-                totalOutstanding = totalRevenue - totalCollected,
-                overallPassRate = passRate,
-                completionRate = totalEnrollments == 0 ? 0 :
-                    Math.Round((double)completedEnrollments / totalEnrollments * 100, 1)
-            });
+                TotalTrainees = totalTrainees,
+                TotalInstructors = totalInstructors,
+                TotalCourses = totalCourses,
+                TotalSessions = totalSessions,
+                TotalEnrollments = totalEnrollments,
+                CompletedEnrollments = completedEnrollments,
+                TotalCertificationsIssued = totalCertificationsIssued,
+                TotalRevenue = totalRevenue,
+                TotalCollected = totalCollected,
+                TotalOutstanding = totalRevenue - totalCollected,
+                OverallPassRate = passRate,
+                CompletionRate = totalEnrollments == 0
+                    ? 0
+                    : Math.Round((double)completedEnrollments / totalEnrollments * 100, 1)
+            };
+
+            return Ok(result);
         }
     }
 }
