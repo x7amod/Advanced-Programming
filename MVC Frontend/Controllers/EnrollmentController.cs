@@ -715,6 +715,7 @@ public class EnrollmentController : Controller
         var sessions = await _context.CourseSessions
             .Include(s => s.Course)
             .Include(s => s.Status)
+            .Include(s => s.Enrollments).ThenInclude(e => e.EnrollmentStatus)
             .Include(s => s.Enrollments).ThenInclude(e => e.Assessments)
             .Where(s => s.InstructorId == instructor.InstructorId)
             .OrderByDescending(s => s.SessionDate)
@@ -730,9 +731,10 @@ public class EnrollmentController : Controller
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 SessionStatus = s.Status.Status,
-                EnrollmentCount = s.Enrollments.Count,
+                EnrollmentCount = s.Enrollments.Count(e => e.EnrollmentStatus.Status != "Dropped"),
                 HasPendingAssessments = s.Enrollments.Any(e =>
-                    e.Assessments.Any(a => a.Result != "Pass" && a.Result != "Fail"))
+                    (e.EnrollmentStatus.Status == "Confirmed" || e.EnrollmentStatus.Status == "Attending")
+                    && !e.Assessments.Any(a => a.Result == "Pass" || a.Result == "Fail"))
             }).ToList()
         };
 
