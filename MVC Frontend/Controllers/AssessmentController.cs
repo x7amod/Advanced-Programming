@@ -74,10 +74,9 @@ public class AssessmentController : Controller
             return RedirectToAction(nameof(MyAssessments), new { filterSessionId = sessionId });
         }
 
+        var allUsers = await _context.Users.ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
         var traineeUserIds = eligible.Select(e => e.Trainee.UserId).Distinct().ToList();
-        var traineeUsers = await _context.Users
-            .Where(u => traineeUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
+        var traineeUsers = allUsers;
 
         var vm = new RecordAssessmentViewModel
         {
@@ -130,13 +129,16 @@ public class AssessmentController : Controller
             return View(vm);
         }
 
-        // Prevent duplicate submissions — only block if a final (Pass/Fail) result already exists.
+        // Prevent duplicate submissions — load session assessments to memory to avoid CTE
         var enrollmentIds = vm.Trainees.Select(t => t.EnrollmentId).ToList();
-        var alreadyFinalised = await _context.Assessments
+        var sessionAssessments = await _context.Assessments
+            .Where(a => a.Enrollment.SessionId == sessionId)
+            .ToListAsync();
+        var alreadyFinalised = sessionAssessments
             .Where(a => enrollmentIds.Contains(a.EnrollmentId)
                         && (a.Result == "Pass" || a.Result == "Fail"))
             .Select(a => a.EnrollmentId)
-            .ToListAsync();
+            .ToList();
 
         if (alreadyFinalised.Any())
         {
@@ -218,9 +220,7 @@ public class AssessmentController : Controller
 
             // Notify each trainee of their result
             var traineeIds = vm.Trainees.Select(t => t.TraineeId).ToList();
-            var trainees = await _context.Trainees
-                .Where(t => traineeIds.Contains(t.TraineeId))
-                .ToListAsync();
+            var trainees = await _context.Trainees.ToListAsync();
             var traineeUserIdMap = trainees.ToDictionary(t => t.TraineeId, t => t.UserId);
 
             foreach (var row in vm.Trainees)
@@ -274,10 +274,7 @@ public class AssessmentController : Controller
 
         var assessments = await query.OrderByDescending(a => a.AssessmentDate).ToListAsync();
 
-        var traineeUserIds = assessments.Select(a => a.Enrollment.Trainee.UserId).Distinct().ToList();
-        var traineeUsers = await _context.Users
-            .Where(u => traineeUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
+        var traineeUsers = await _context.Users.ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
 
         // Session filter dropdown — instructor's sessions only
         var instructorSessions = await _context.CourseSessions
@@ -339,13 +336,8 @@ public class AssessmentController : Controller
 
         var assessments = await query.OrderByDescending(a => a.AssessmentDate).ToListAsync();
 
-        // Collect all user IDs (trainees + instructors) in one DB call
-        var traineeUserIds = assessments.Select(a => a.Enrollment.Trainee.UserId).Distinct().ToList();
-        var instructorUserIds = assessments.Select(a => a.Instructor.UserId).Distinct().ToList();
-        var allUserIds = traineeUserIds.Union(instructorUserIds).Distinct().ToList();
-        var allUsers = await _context.Users
-            .Where(u => allUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
+        // Load all users to memory to avoid CTE generation
+        var allUsers = await _context.Users.ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
 
         // Pass rate summary — calculated from the current filtered results
         var passRates = assessments
@@ -367,10 +359,7 @@ public class AssessmentController : Controller
             .ToListAsync();
 
         var allInstructors = await _context.Instructors.ToListAsync();
-        var iUserIds = allInstructors.Select(i => i.UserId).ToList();
-        var iUsers = await _context.Users
-            .Where(u => iUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
+        var iUsers = await _context.Users.ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
 
         var vm = new AllAssessmentsViewModel
         {
