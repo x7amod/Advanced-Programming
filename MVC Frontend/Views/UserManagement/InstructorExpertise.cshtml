@@ -1,0 +1,112 @@
+@model IEnumerable<Web_API.Models.InstructorExpertise>
+@{
+    ViewData["Title"] = "Instructor Expertise";
+    var instructorId = (int)ViewBag.InstructorId;
+    var instructorName = (string)ViewBag.InstructorName;
+    var available = (List<Web_API.Models.SubjectArea>)ViewBag.AvailableSubjectAreas;
+    var levels = new[] { "Beginner", "Intermediate", "Advanced", "Expert" };
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="h3 mb-1">Expertise — @instructorName</h1>
+        <p class="text-muted mb-0">Manage subject areas this instructor can teach.</p>
+    </div>
+    <a asp-action="EditInstructor" asp-route-id="@instructorId" class="btn btn-outline-secondary btn-sm">
+        Back to Instructor
+    </a>
+</div>
+
+<!-- Current expertise -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">Current Subject Areas</div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <p class="text-muted p-3 mb-0">No subject areas assigned yet.</p>
+        }
+        else
+        {
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Subject Area</th>
+                        <th>Proficiency</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@e.SubjectArea.Name</td>
+                            <td>
+                                @{
+                                    var badgeClass = e.ProficiencyLevel switch
+                                    {
+                                        "Expert" => "bg-primary",
+                                        "Advanced" => "bg-success",
+                                        "Intermediate" => "bg-warning text-dark",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @badgeClass">@e.ProficiencyLevel</span>
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="RemoveExpertise" method="post" class="d-inline"
+                                      onsubmit="return confirm('Remove this expertise?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="expertiseId" value="@e.ExpertiseId" />
+                                    <input type="hidden" name="instructorId" value="@instructorId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- Add expertise form -->
+@if (available.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">Add Subject Area</div>
+        <div class="card-body">
+            <form asp-action="AddExpertise" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="instructorId" value="@instructorId" />
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold">Subject Area</label>
+                        <select name="subjectAreaId" class="form-select" required>
+                            <option value="">— Select —</option>
+                            @foreach (var sa in available)
+                            {
+                                <option value="@sa.SubjectAreaId">@sa.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Proficiency Level</label>
+                        <select name="proficiencyLevel" class="form-select" required>
+                            @foreach (var lvl in levels)
+                            {
+                                <option value="@lvl">@lvl</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">Add Expertise</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">All available subject areas have been assigned to this instructor.</div>
+}

@@ -59,6 +59,13 @@
                 <a asp-action="Index" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
+
+        <div class="mt-4 pt-4 border-top">
+            <h6 class="text-muted mb-2">Subject Area Expertise</h6>
+            <p class="small text-muted">Assign the subject areas this instructor is qualified to teach.</p>
+            <a asp-action="InstructorExpertise" asp-route-id="@Model.InstructorId"
+               class="btn btn-outline-primary btn-sm">Manage Expertise</a>
+        </div>
     </div>
 </div>
 

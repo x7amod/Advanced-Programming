@@ -354,6 +354,77 @@ namespace MVC_Frontend.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ─── Instructor Expertise ────────────────────────────────────
+
+        // GET: UserManagement/InstructorExpertise/5
+        public async Task<IActionResult> InstructorExpertise(int id)
+        {
+            var instructor = await _context.Instructors
+                .Include(i => i.InstructorExpertises).ThenInclude(e => e.SubjectArea)
+                .FirstOrDefaultAsync(i => i.InstructorId == id);
+            if (instructor == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(instructor.UserId);
+            ViewBag.InstructorName = user?.Email ?? $"Instructor {id}";
+            ViewBag.InstructorId = id;
+
+            var usedSubjectAreaIds = instructor.InstructorExpertises.Select(e => e.SubjectAreaId).ToList();
+            ViewBag.AvailableSubjectAreas = await _context.SubjectAreas
+                .Where(s => !usedSubjectAreaIds.Contains(s.SubjectAreaId))
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+
+            return View(instructor.InstructorExpertises.ToList());
+        }
+
+        // POST: UserManagement/AddExpertise
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddExpertise(int instructorId, int subjectAreaId, string proficiencyLevel)
+        {
+            var validLevels = new[] { "Beginner", "Intermediate", "Advanced", "Expert" };
+            if (!validLevels.Contains(proficiencyLevel))
+            {
+                TempData["Error"] = "Invalid proficiency level.";
+                return RedirectToAction(nameof(InstructorExpertise), new { id = instructorId });
+            }
+
+            var exists = await _context.InstructorExpertises
+                .AnyAsync(e => e.InstructorId == instructorId && e.SubjectAreaId == subjectAreaId);
+            if (exists)
+            {
+                TempData["Error"] = "This subject area is already assigned to the instructor.";
+                return RedirectToAction(nameof(InstructorExpertise), new { id = instructorId });
+            }
+
+            _context.InstructorExpertises.Add(new Web_API.Models.InstructorExpertise
+            {
+                InstructorId = instructorId,
+                SubjectAreaId = subjectAreaId,
+                ProficiencyLevel = proficiencyLevel
+            });
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Expertise area added.";
+            return RedirectToAction(nameof(InstructorExpertise), new { id = instructorId });
+        }
+
+        // POST: UserManagement/RemoveExpertise
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveExpertise(int expertiseId, int instructorId)
+        {
+            var expertise = await _context.InstructorExpertises
+                .FirstOrDefaultAsync(e => e.ExpertiseId == expertiseId);
+            if (expertise != null)
+            {
+                _context.InstructorExpertises.Remove(expertise);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Expertise area removed.";
+            }
+            return RedirectToAction(nameof(InstructorExpertise), new { id = instructorId });
+        }
+
         // ─── Change Role ─────────────────────────────────────────────
 
         // GET: UserManagement/ChangeRole?userId=...

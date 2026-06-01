@@ -295,6 +295,7 @@ public class EnrollmentController : Controller
 
             // Flag first waiting trainee on the waitlist (do NOT auto-enroll)
             var firstWaiting = await _context.Waitlists
+                .Include(w => w.Trainee)
                 .Where(w => w.SessionId == session.SessionId && w.Status == "Waiting")
                 .OrderBy(w => w.Position)
                 .FirstOrDefaultAsync();
@@ -306,6 +307,12 @@ public class EnrollmentController : Controller
                     .FirstOrDefaultAsync(s => s.Status == "SpotAvailable");
                 if (spotAvailableWlStatus != null)
                     firstWaiting.StatusId = spotAvailableWlStatus.StatusId;
+
+                // Notify the waitlisted trainee that a spot has opened
+                await NotificationHelper.CreateAsync(_context, firstWaiting.Trainee.UserId,
+                    "Spot Available",
+                    $"A spot has opened in {enrollment.Session.Course.Title} on {session.SessionDate:MMM dd, yyyy}. Log in to enroll before it fills up.",
+                    "Enrollment", "Waitlist");
             }
 
             await _context.SaveChangesAsync();
@@ -663,9 +670,9 @@ public class EnrollmentController : Controller
 
         if (session == null) return NotFound();
 
-        if (session.SessionDate.Date != DateTime.Today)
+        if (session.SessionDate.Date > DateTime.Today)
         {
-            TempData["Error"] = "Attendance can only be marked on the day of the session.";
+            TempData["Error"] = "Attendance can only be marked on or after the session date.";
             return RedirectToAction(nameof(Manage));
         }
 

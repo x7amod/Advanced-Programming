@@ -1,0 +1,121 @@
+@model Web_API.Models.Classroom
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="h3 mb-1">@Model.Name</h1>
+        <p class="text-muted mb-0">@Model.Building, Floor @Model.Floor — @Model.Location</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.ClassroomId" class="btn btn-outline-secondary btn-sm">Edit</a>
+        <form asp-action="Deactivate" asp-route-id="@Model.ClassroomId" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm @(Model.IsActive ? "btn-outline-warning" : "btn-outline-success")">
+                @(Model.IsActive ? "Deactivate" : "Reactivate")
+            </button>
+        </form>
+        <a asp-action="Index" class="btn btn-outline-primary btn-sm">All Classrooms</a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Capacity</p>
+                <p class="fs-4 fw-bold mb-0">@Model.Capacity seats</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Status</p>
+                <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary") fs-6">
+                    @(Model.IsActive ? "Active" : "Inactive")
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Equipment items</p>
+                <p class="fs-4 fw-bold mb-0">@Model.ClassroomEquipments.Count</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Equipment Section -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">Equipment</div>
+    <div class="card-body p-0">
+        @if (!Model.ClassroomEquipments.Any())
+        {
+            <p class="text-muted p-3 mb-0">No equipment recorded for this classroom.</p>
+        }
+        else
+        {
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Type</th>
+                        <th class="text-center">Quantity</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var eq in Model.ClassroomEquipments)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@eq.EquipmentType</td>
+                            <td class="text-center">@eq.Quantity</td>
+                            <td class="text-muted small">@(eq.Description ?? "—")</td>
+                            <td class="text-end">
+                                <form asp-action="RemoveEquipment" method="post" class="d-inline"
+                                      onsubmit="return confirm('Remove this equipment?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="equipmentId" value="@eq.EquipmentId" />
+                                    <input type="hidden" name="classroomId" value="@eq.ClassroomId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- Add Equipment Form -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-semibold">Add Equipment</div>
+    <div class="card-body">
+        <form asp-action="AddEquipment" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ClassroomId" value="@Model.ClassroomId" />
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Equipment Type</label>
+                    <input name="EquipmentType" class="form-control" placeholder="e.g. Projector" required maxlength="50" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Quantity</label>
+                    <input name="Quantity" type="number" class="form-control" value="1" min="1" max="9999" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Description <span class="text-muted fw-normal">(optional)</span></label>
+                    <input name="Description" class="form-control" placeholder="e.g. Ceiling-mounted, HDMI" maxlength="255" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Add</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
