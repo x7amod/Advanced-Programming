@@ -50,17 +50,15 @@ public class EnrollmentController : Controller
 
         var sessions = await query.OrderBy(s => s.SessionDate).ThenBy(s => s.StartTime).ToListAsync();
 
-        // Resolve instructor display names
+        // Resolve instructor display names — pull all users to memory to avoid CTE
         var instructorIds = sessions.Select(s => s.InstructorId).Distinct().ToList();
-        var instructors = await _context.Instructors
-            .Where(i => instructorIds.Contains(i.InstructorId)).ToListAsync();
-        var iUserIds = instructors.Select(i => i.UserId).ToList();
-        var iUsers = await _context.Users
-            .Where(u => iUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
-        var instructorNames = instructors.ToDictionary(
-            i => i.InstructorId,
-            i => iUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}");
+        var instructors = await _context.Instructors.ToListAsync();
+        var allUsers = await _context.Users.ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
+        var instructorNames = instructors
+            .Where(i => instructorIds.Contains(i.InstructorId))
+            .ToDictionary(
+                i => i.InstructorId,
+                i => allUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}");
 
         // Current trainee's active enrollments and waitlist entries
         var enrolledSessionIds = new HashSet<int>();
@@ -295,6 +293,7 @@ public class EnrollmentController : Controller
 
             // Flag first waiting trainee on the waitlist (do NOT auto-enroll)
             var firstWaiting = await _context.Waitlists
+                .Include(w => w.Trainee)
                 .Where(w => w.SessionId == session.SessionId && w.Status == "Waiting")
                 .OrderBy(w => w.Position)
                 .FirstOrDefaultAsync();
@@ -306,6 +305,12 @@ public class EnrollmentController : Controller
                     .FirstOrDefaultAsync(s => s.Status == "SpotAvailable");
                 if (spotAvailableWlStatus != null)
                     firstWaiting.StatusId = spotAvailableWlStatus.StatusId;
+
+                // Notify the waitlisted trainee that a spot has opened
+                await NotificationHelper.CreateAsync(_context, firstWaiting.Trainee.UserId,
+                    "Spot Available",
+                    $"A spot has opened in {enrollment.Session.Course.Title} on {session.SessionDate:MMM dd, yyyy}. Log in to enroll before it fills up.",
+                    "Enrollment", "Waitlist");
             }
 
             await _context.SaveChangesAsync();
@@ -503,8 +508,8 @@ public class EnrollmentController : Controller
             .Include(e => e.EnrollmentStatus)
             .Include(e => e.Session).ThenInclude(s => s.Course)
             .Include(e => e.Session).ThenInclude(s => s.Status)
-            .Include(e => e.Trainee)
-            .Where(e => !cancelledSessionIds.Contains(e.SessionId))
+            .Include(e => e.Trainee).ThenInclude(t => t.User)
+            .Where(e => cancelledCssStatus == null || e.Session.StatusId != cancelledCssStatus.StatusId)
             .AsQueryable();
 
         if (filterSessionId.HasValue)
@@ -518,17 +523,18 @@ public class EnrollmentController : Controller
 
         var enrollments = await query.OrderByDescending(e => e.EnrollmentDate).ToListAsync();
 
-        // Resolve trainee display names
-        var traineeUserIds = enrollments.Select(e => e.Trainee.UserId).Distinct().ToList();
-        var traineeUsers = await _context.Users
-            .Where(u => traineeUserIds.Contains(u.Id))
-            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
+        // Resolve trainee display names from already-loaded User navigation — no extra DB call
+        var traineeUsers = enrollments
+            .Select(e => e.Trainee)
+            .DistinctBy(t => t.TraineeId)
+            .ToDictionary(t => t.UserId, t => t.User?.UserName ?? $"Trainee {t.TraineeId}");
 
-        // Check which enrollments already have a payment record (and get their IDs)
+        // Check which enrollments already have a payment record — pull to memory to avoid CTE
         var enrollmentIds = enrollments.Select(e => e.EnrollmentId).ToList();
-        var paymentRecordMap = await _context.PaymentRecords
+        var allPaymentRecords = await _context.PaymentRecords.ToListAsync();
+        var paymentRecordMap = allPaymentRecords
             .Where(p => enrollmentIds.Contains(p.EnrollmentId))
-            .ToDictionaryAsync(p => p.EnrollmentId, p => p.PaymentRecordId);
+            .ToDictionary(p => p.EnrollmentId, p => p.PaymentRecordId);
         var paidEnrollmentIds = paymentRecordMap.Keys.ToHashSet();
 
         var items = enrollments.Select(e => new ManageEnrollmentItemViewModel
@@ -554,7 +560,7 @@ public class EnrollmentController : Controller
         var sessions = await _context.CourseSessions
             .Include(s => s.Course)
             .Include(s => s.Status)
-            .Where(s => !cancelledSessionIds.Contains(s.SessionId))
+            .Where(s => cancelledCssStatus == null || s.StatusId != cancelledCssStatus.StatusId)
             .OrderBy(s => s.SessionDate)
             .ToListAsync();
 
@@ -663,9 +669,9 @@ public class EnrollmentController : Controller
 
         if (session == null) return NotFound();
 
-        if (session.SessionDate.Date != DateTime.Today)
+        if (session.SessionDate.Date > DateTime.Today)
         {
-            TempData["Error"] = "Attendance can only be marked on the day of the session.";
+            TempData["Error"] = "Attendance can only be marked on or after the session date.";
             return RedirectToAction(nameof(Manage));
         }
 
@@ -762,9 +768,7 @@ public class EnrollmentController : Controller
         if (session == null) return NotFound();
         if (session.InstructorId != instructor.InstructorId) return Forbid();
 
-        var traineeUserIds = session.Enrollments.Select(e => e.Trainee.UserId).Distinct().ToList();
         var traineeUsers = await _context.Users
-            .Where(u => traineeUserIds.Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u.UserName ?? u.Id);
 
         var vm = new SessionRosterViewModel

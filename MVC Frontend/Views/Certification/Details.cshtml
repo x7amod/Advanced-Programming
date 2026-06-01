@@ -82,7 +82,7 @@
                             </td>
                             <td class="text-end">
                                 <form asp-action="RemoveCourse" method="post"
-                                      onsubmit="return confirm('Remove this course from the track?');">
+                                      data-confirm="Remove this course from the track?">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="reqCourseId" value="@rc.Id" />
                                     <input type="hidden" name="trackId" value="@Model.CertificationTrackId" />
@@ -173,7 +173,7 @@
                                 @if (s.IsEligible && status != "Issued")
                                 {
                                     <form asp-action="IssueCertificate" method="post" class="d-inline"
-                                          onsubmit="return confirm('Issue certificate for @s.TraineeName?');">
+                                          data-confirm="Issue certificate for @s.TraineeName?">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="traineeId" value="@s.TraineeId" />
                                         <input type="hidden" name="trackId" value="@Model.CertificationTrackId" />

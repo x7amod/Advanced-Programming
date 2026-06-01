@@ -25,6 +25,23 @@ public class PaymentController : Controller
     {
         var today = DateTime.Today;
 
+        // Auto-mark any Unpaid/Partial records past their due date as Overdue
+        var overdueStatus = await _context.PaymentStatuses.FirstOrDefaultAsync(s => s.Status == "Overdue");
+        if (overdueStatus != null)
+        {
+            var toMark = await _context.PaymentRecords
+                .Include(p => p.Status)
+                .Where(p => (p.Status.Status == "Unpaid" || p.Status.Status == "Partial")
+                            && p.DueDate < today)
+                .ToListAsync();
+            foreach (var r in toMark)
+            {
+                r.StatusId = overdueStatus.StatusId;
+                r.UpdatedAt = DateTime.Now;
+            }
+            if (toMark.Any()) await _context.SaveChangesAsync();
+        }
+
         var rows = await _context.PaymentRecords
             .Where(p => string.IsNullOrWhiteSpace(filterStatus) || p.Status.Status == filterStatus)
             .OrderByDescending(p => p.DueDate)

@@ -251,6 +251,23 @@ namespace MVC_Frontend.Controllers
                 return View(await PopulateDropdowns(vm));
             }
 
+            // Classroom capacity must accommodate the session's max capacity
+            var classroom = await _context.Classrooms.FindAsync(vm.ClassroomId);
+            if (classroom != null && vm.MaxCapacity > classroom.Capacity)
+            {
+                ModelState.AddModelError(nameof(vm.MaxCapacity),
+                    $"Max capacity ({vm.MaxCapacity}) cannot exceed the classroom's seating capacity ({classroom.Capacity}).");
+                return View(await PopulateDropdowns(vm));
+            }
+
+            // Instructor availability check — warn if outside defined availability
+            if (!await IsInstructorAvailable(vm.InstructorId, vm.SessionDate, startDt, endDt))
+            {
+                ModelState.AddModelError(string.Empty,
+                    "This instructor is not available on the selected day or time based on their availability schedule.");
+                return View(await PopulateDropdowns(vm));
+            }
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var coordinator = await _context.Coordinators.FirstOrDefaultAsync(c => c.UserId == userId);
             if (coordinator == null)
@@ -398,6 +415,23 @@ namespace MVC_Frontend.Controllers
                 return View(await PopulateDropdowns(vm));
             }
 
+            var editClassroom = await _context.Classrooms.FindAsync(vm.ClassroomId);
+            if (editClassroom != null && vm.MaxCapacity > editClassroom.Capacity)
+            {
+                ViewBag.SessionStatus = currentStatus;
+                ModelState.AddModelError(nameof(vm.MaxCapacity),
+                    $"Max capacity ({vm.MaxCapacity}) cannot exceed the classroom's seating capacity ({editClassroom.Capacity}).");
+                return View(await PopulateDropdowns(vm));
+            }
+
+            if (!await IsInstructorAvailable(vm.InstructorId, vm.SessionDate, startDt, endDt))
+            {
+                ViewBag.SessionStatus = currentStatus;
+                ModelState.AddModelError(string.Empty,
+                    "This instructor is not available on the selected day or time based on their availability schedule.");
+                return View(await PopulateDropdowns(vm));
+            }
+
             session.CourseId = vm.CourseId;
             session.InstructorId = vm.InstructorId;
             session.ClassroomId = vm.ClassroomId;
@@ -483,9 +517,9 @@ namespace MVC_Frontend.Controllers
             }
 
             var currentStatus = session.Status?.Status;
-            if (currentStatus != "Attending" && currentStatus != "Scheduled")
+            if (currentStatus != "Ongoing" && currentStatus != "Scheduled")
             {
-                TempData["Error"] = "Session must be in 'Attending' or 'Scheduled' status to be marked as completed.";
+                TempData["Error"] = "Session must be in 'Ongoing' or 'Scheduled' status to be marked as completed.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
@@ -559,11 +593,13 @@ namespace MVC_Frontend.Controllers
             var dropdownUsers = dropdownUsersAll
                 .Where(u => dropdownUserIds.Contains(u.Id))
                 .ToDictionary(u => u.Id, u => u.UserName ?? $"User {u.Id}");
+            // Only include instructors that have a valid linked Identity user
             vm.Instructors = dropdownInstructors
+                .Where(i => dropdownUsers.ContainsKey(i.UserId))
                 .Select(i => new SelectListItem
                 {
                     Value = i.InstructorId.ToString(),
-                    Text = dropdownUsers.TryGetValue(i.UserId, out var n) ? n : $"Instructor {i.InstructorId}"
+                    Text = dropdownUsers[i.UserId]
                 })
                 .OrderBy(x => x.Text)
                 .ToList();
@@ -650,6 +686,29 @@ namespace MVC_Frontend.Controllers
                 query = query.Where(s => s.SessionId != excludeId.Value);
 
             return await query.AnyAsync();
+        }
+
+        // Returns false only when the instructor has availability records AND none covers the requested slot.
+        // If no records are defined, the instructor is treated as always available.
+        private async Task<bool> IsInstructorAvailable(
+            int instructorId, DateTime sessionDate, DateTime start, DateTime end)
+        {
+            var availabilities = await _context.InstructorAvailabilities
+                .Where(a => a.InstructorId == instructorId)
+                .ToListAsync();
+
+            if (availabilities.Count == 0) return true;
+
+            var dow = (int)sessionDate.DayOfWeek;
+            var sessionStart = start.TimeOfDay;
+            var sessionEnd = end.TimeOfDay;
+
+            return availabilities.Any(a =>
+                a.DayOfWeek == dow &&
+                a.StartTime.TimeOfDay <= sessionStart &&
+                a.EndTime.TimeOfDay >= sessionEnd &&
+                a.EffectiveFrom.Date <= sessionDate.Date &&
+                (a.EffectiveTo == null || a.EffectiveTo.Value.Date >= sessionDate.Date));
         }
     }
 }

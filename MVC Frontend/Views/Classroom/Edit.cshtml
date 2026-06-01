@@ -1,0 +1,64 @@
+@model MVC_Frontend.Models.ClassroomFormViewModel
+@{
+    ViewData["Title"] = "Edit Classroom";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Edit Classroom</h1>
+    <p class="text-muted mb-0">Update room details.</p>
+</div>
+
+<div class="card shadow-sm border-0" style="max-width:600px;">
+    <div class="card-body p-4">
+        <form asp-action="Edit" asp-route-id="@Model.ClassroomId" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ClassroomId" />
+            <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-semibold"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="Building" class="form-label fw-semibold"></label>
+                    <input asp-for="Building" class="form-control" />
+                    <span asp-validation-for="Building" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Floor" class="form-label fw-semibold"></label>
+                    <input asp-for="Floor" class="form-control" />
+                    <span asp-validation-for="Floor" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Location" class="form-label fw-semibold"></label>
+                <input asp-for="Location" class="form-control" />
+                <span asp-validation-for="Location" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Capacity" class="form-label fw-semibold"></label>
+                <input asp-for="Capacity" type="number" class="form-control" min="1" max="1000" />
+                <span asp-validation-for="Capacity" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                    <label asp-for="IsActive" class="form-check-label">Active (available for scheduling)</label>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="Details" asp-route-id="@Model.ClassroomId" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
