@@ -141,11 +141,24 @@
                                     </div>
                                     @if (User.IsInRole("Trainee"))
                                     {
-                                        <a asp-controller="Enrollment" asp-action="Enroll"
-                                           asp-route-sessionId="@session.SessionId"
-                                           class="btn btn-sm @(seatsLeft > 0 ? "btn-outline-primary" : "btn-outline-warning")">
-                                            @(seatsLeft > 0 ? "Enroll" : "Waitlist")
-                                        </a>
+                                        if (seatsLeft > 0)
+                                        {
+                                            <form asp-controller="Enrollment" asp-action="Enroll"
+                                                  asp-route-sessionId="@session.SessionId"
+                                                  method="post" style="display:inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Enroll</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-controller="Enrollment" asp-action="Waitlist"
+                                                  asp-route-sessionId="@session.SessionId"
+                                                  method="post" style="display:inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-warning">Waitlist</button>
+                                            </form>
+                                        }
                                     }
                                     @if (User.IsInRole("Training Coordinator") || User.IsInRole("Instructor"))
                                     {
