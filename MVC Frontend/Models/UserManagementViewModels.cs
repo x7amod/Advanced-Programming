@@ -165,4 +165,45 @@ namespace MVC_Frontend.Models
         [Display(Name = "New Role")]
         public string NewRole { get; set; } = string.Empty;
     }
+
+    public class AvailabilityItemViewModel
+    {
+        public int AvailabilityId { get; set; }
+        public int InstructorId { get; set; }
+        public string DayName { get; set; } = string.Empty;
+        public string StartTime { get; set; } = string.Empty;
+        public string EndTime { get; set; } = string.Empty;
+        public DateTime EffectiveFrom { get; set; }
+        public DateTime? EffectiveTo { get; set; }
+        public bool IsRecurring { get; set; }
+    }
+
+    public class AddAvailabilityViewModel
+    {
+        public int InstructorId { get; set; }
+
+        [Required(ErrorMessage = "Day is required")]
+        [Display(Name = "Day of Week")]
+        public int DayOfWeek { get; set; }
+
+        [Required(ErrorMessage = "Start time is required")]
+        [Display(Name = "Start Time")]
+        public string StartTime { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "End time is required")]
+        [Display(Name = "End Time")]
+        public string EndTime { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Effective from date is required")]
+        [Display(Name = "Effective From")]
+        [DataType(DataType.Date)]
+        public DateTime EffectiveFrom { get; set; } = DateTime.Today;
+
+        [Display(Name = "Effective To (leave blank for no end)")]
+        [DataType(DataType.Date)]
+        public DateTime? EffectiveTo { get; set; }
+
+        [Display(Name = "Recurring weekly")]
+        public bool IsRecurring { get; set; } = true;
+    }
 }

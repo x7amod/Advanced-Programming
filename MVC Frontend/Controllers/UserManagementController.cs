@@ -426,6 +426,106 @@ namespace MVC_Frontend.Controllers
             return RedirectToAction(nameof(InstructorExpertise), new { id = instructorId });
         }
 
+        // ─── Instructor Availability ──────────────────────────────────
+
+        // GET: UserManagement/InstructorAvailability/5
+        public async Task<IActionResult> InstructorAvailability(int id)
+        {
+            var instructor = await _context.Instructors
+                .Include(i => i.User)
+                .FirstOrDefaultAsync(i => i.InstructorId == id);
+            if (instructor == null) return NotFound();
+
+            var slots = await _context.InstructorAvailabilities
+                .Where(a => a.InstructorId == id)
+                .OrderBy(a => a.DayOfWeek)
+                .ThenBy(a => a.StartTime)
+                .ToListAsync();
+
+            var days = new[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+
+            var items = slots.Select(a => new AvailabilityItemViewModel
+            {
+                AvailabilityId = a.AvailabilityId,
+                InstructorId   = a.InstructorId,
+                DayName        = days[a.DayOfWeek],
+                StartTime      = a.StartTime.ToString("hh:mm tt"),
+                EndTime        = a.EndTime.ToString("hh:mm tt"),
+                EffectiveFrom  = a.EffectiveFrom,
+                EffectiveTo    = a.EffectiveTo,
+                IsRecurring    = a.IsRecurring
+            }).ToList();
+
+            ViewBag.InstructorId   = id;
+            ViewBag.InstructorName = instructor.User?.UserName ?? $"Instructor {id}";
+            return View(items);
+        }
+
+        // POST: UserManagement/AddAvailability
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddAvailability(AddAvailabilityViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Please fill in all required fields correctly.";
+                return RedirectToAction(nameof(InstructorAvailability), new { id = vm.InstructorId });
+            }
+
+            if (!TimeSpan.TryParse(vm.StartTime, out var startTs) ||
+                !TimeSpan.TryParse(vm.EndTime, out var endTs))
+            {
+                TempData["Error"] = "Invalid time format.";
+                return RedirectToAction(nameof(InstructorAvailability), new { id = vm.InstructorId });
+            }
+
+            if (endTs <= startTs)
+            {
+                TempData["Error"] = "End time must be after start time.";
+                return RedirectToAction(nameof(InstructorAvailability), new { id = vm.InstructorId });
+            }
+
+            if (vm.EffectiveTo.HasValue && vm.EffectiveTo.Value < vm.EffectiveFrom)
+            {
+                TempData["Error"] = "Effective To date cannot be before Effective From.";
+                return RedirectToAction(nameof(InstructorAvailability), new { id = vm.InstructorId });
+            }
+
+            // Use 1900-01-01 as dummy date, store only the time component (matches seed convention)
+            var refDate = new DateTime(1900, 1, 1);
+            var slot = new Web_API.Models.InstructorAvailability
+            {
+                InstructorId  = vm.InstructorId,
+                DayOfWeek     = vm.DayOfWeek,
+                StartTime     = refDate + startTs,
+                EndTime       = refDate + endTs,
+                EffectiveFrom = vm.EffectiveFrom.Date,
+                EffectiveTo   = vm.EffectiveTo?.Date,
+                IsRecurring   = vm.IsRecurring
+            };
+
+            _context.InstructorAvailabilities.Add(slot);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Availability slot added.";
+            return RedirectToAction(nameof(InstructorAvailability), new { id = vm.InstructorId });
+        }
+
+        // POST: UserManagement/RemoveAvailability
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveAvailability(int availabilityId, int instructorId)
+        {
+            var slot = await _context.InstructorAvailabilities
+                .FirstOrDefaultAsync(a => a.AvailabilityId == availabilityId && a.InstructorId == instructorId);
+            if (slot != null)
+            {
+                _context.InstructorAvailabilities.Remove(slot);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Availability slot removed.";
+            }
+            return RedirectToAction(nameof(InstructorAvailability), new { id = instructorId });
+        }
+
         // ─── Change Role ─────────────────────────────────────────────
 
         // GET: UserManagement/ChangeRole?userId=...
