@@ -1,0 +1,147 @@
+@model MVC_Frontend.Models.CertificationLookupViewModel
+@{
+    ViewData["Title"] = "Verify Certificate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Certificate Verification</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Enter a Trainee ID and Certificate Number to verify a certification issued by this institute.
+                    No login is required.
+                </p>
+
+                <form asp-action="CertificationLookup" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="TraineeId" class="form-label fw-semibold"></label>
+                        <input asp-for="TraineeId" class="form-control" placeholder="e.g. 1001" />
+                        <span asp-validation-for="TraineeId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CertificateNumber" class="form-label fw-semibold"></label>
+                        <input asp-for="CertificateNumber" class="form-control" placeholder="e.g. CERT-2026-0001" />
+                        <span asp-validation-for="CertificateNumber" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Verify Certificate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="alert alert-danger">
+                <strong>Not found.</strong> @Model.ErrorMessage
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.Result != null)
+{
+    var r = Model.Result;
+    var isExpired = r.ExpiryDate.HasValue && r.ExpiryDate.Value < DateTime.Now;
+    var statusBadge = r.Status switch
+    {
+        "Issued"   => "bg-success",
+        "Eligible" => "bg-info text-dark",
+        _          => "bg-secondary"
+    };
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <strong>Certificate Verified</strong>
+                    <span class="badge @statusBadge">@r.Status</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title mb-3">@r.CertificationTrackName</h5>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Trainee</dt>
+                        <dd class="col-sm-8">@r.TraineeEmail</dd>
+
+                        <dt class="col-sm-4">Certificate #</dt>
+                        <dd class="col-sm-8"><code>@r.CertificateNumber</code></dd>
+
+                        <dt class="col-sm-4">Issued</dt>
+                        <dd class="col-sm-8">@(r.IssuedDate?.ToString("dd MMM yyyy") ?? "—")</dd>
+
+                        <dt class="col-sm-4">Expires</dt>
+                        <dd class="col-sm-8 @(isExpired ? "text-danger fw-bold" : "")">
+                            @if (r.ExpiryDate.HasValue)
+                            {
+                                @r.ExpiryDate.Value.ToString("dd MMM yyyy")
+                                if (isExpired) { <span> — Expired</span> }
+                            }
+                            else
+                            {
+                                <span class="text-muted">No expiry</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+
+                @if (r.CompletedCourses.Any())
+                {
+                    <div class="card-footer bg-transparent">
+                        <h6 class="mb-2">Completed Courses</h6>
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Course</th>
+                                    <th>Result</th>
+                                    <th>Completed</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var c in r.CompletedCourses)
+                                {
+                                    <tr>
+                                        <td><code>@c.CourseCode</code></td>
+                                        <td>@c.Title</td>
+                                        <td>
+                                            <span class="badge @(c.Result == "Pass" ? "bg-success" : "bg-danger")">
+                                                @c.Result
+                                            </span>
+                                        </td>
+                                        <td>@c.CompletionDate.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            @if (c.IsMandatory)
+                                            {
+                                                <span class="badge bg-primary">Mandatory</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Elective</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

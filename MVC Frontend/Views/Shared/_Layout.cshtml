@@ -185,6 +185,9 @@
                 <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
                     @NavIcon("book") Browse courses
                 </a>
+                <a class="tl-nav-item @(ctrl=="Public"?"active":"")" asp-controller="Public" asp-action="CertificationLookup">
+                    @NavIcon("award") Verify certificate
+                </a>
             </nav>
         }
 

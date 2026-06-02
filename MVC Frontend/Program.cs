@@ -1,11 +1,18 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MVC_Frontend.Hubs;
 using Web_API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+
+builder.Services.AddHttpClient("WebAPI", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]
+        ?? throw new InvalidOperationException("ApiBaseUrl not configured."));
+});
 
 // Register shared DbContext from Web API project
 builder.Services.AddDbContext<TrainingInstituteDBContext>(options =>
@@ -58,7 +65,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<MVC_Frontend.Hubs.EnrollmentHub>("/enrollmentHub");
+app.MapHub<EnrollmentHub>("/enrollmentHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
