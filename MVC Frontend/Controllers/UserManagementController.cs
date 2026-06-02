@@ -534,13 +534,27 @@ namespace MVC_Frontend.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var currentRole = roles.FirstOrDefault();
+            // Derive role from profile tables — same source the list view uses
+            string? profileRole = null;
+            if (await _context.Instructors.AnyAsync(i => i.UserId == userId))
+                profileRole = AppRoles.Instructor;
+            else if (await _context.Trainees.AnyAsync(t => t.UserId == userId))
+                profileRole = AppRoles.Trainee;
 
-            if (currentRole != AppRoles.Trainee && currentRole != AppRoles.Instructor)
+            if (profileRole == null)
             {
                 TempData["Error"] = "Role changes are only supported between Trainee and Instructor.";
                 return RedirectToAction(nameof(Index));
+            }
+
+            // Heal Identity role if it drifted out of sync with the profile table
+            var identityRoles = await _userManager.GetRolesAsync(user);
+            if (!identityRoles.Contains(profileRole))
+            {
+                foreach (var r in identityRoles)
+                    await _userManager.RemoveFromRoleAsync(user, r);
+                await _userManager.AddToRoleAsync(user, profileRole);
+                await _userManager.UpdateSecurityStampAsync(user);
             }
 
             return View(new ChangeRoleViewModel
@@ -548,7 +562,7 @@ namespace MVC_Frontend.Controllers
                 UserId = user.Id,
                 Username = user.Email ?? "—",
                 Email = user.Email ?? "",
-                CurrentRole = currentRole ?? ""
+                CurrentRole = profileRole
             });
         }
 
@@ -611,6 +625,7 @@ namespace MVC_Frontend.Controllers
                 if (currentRole != null)
                     await _userManager.RemoveFromRoleAsync(user, currentRole);
                 await _userManager.AddToRoleAsync(user, vm.NewRole);
+                await _userManager.UpdateSecurityStampAsync(user);
 
                 TempData["Info"] = "Role changed to Trainee. Please complete the trainee's details.";
                 return RedirectToAction(nameof(EditTrainee), new { id = trainee.TraineeId });
@@ -655,6 +670,7 @@ namespace MVC_Frontend.Controllers
                 if (currentRole != null)
                     await _userManager.RemoveFromRoleAsync(user, currentRole);
                 await _userManager.AddToRoleAsync(user, vm.NewRole);
+                await _userManager.UpdateSecurityStampAsync(user);
 
                 TempData["Info"] = "Role changed to Instructor. Please complete the instructor's details.";
                 return RedirectToAction(nameof(EditInstructor), new { id = instructor.InstructorId });
