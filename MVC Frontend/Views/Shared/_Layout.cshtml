@@ -77,11 +77,11 @@
                 </a>
                 <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
                    asp-controller="Session" asp-action="Index">
-                    @NavIcon("cal") My sessions
+                    @NavIcon("cal") My schedule
                 </a>
                 <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
                    asp-controller="Session" asp-action="Schedule">
-                    @NavIcon("bar") My schedule
+                    @NavIcon("bar") My calendar
                 </a>
                 <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MySessions"?"active":"")"
                    asp-controller="Enrollment" asp-action="MySessions">
@@ -158,6 +158,10 @@
                    asp-route-showInactive="true">
                     @NavIcon("clip") All courses
                 </a>
+                <a class="tl-nav-item @(ctrl=="UserManagement"?"active":"")"
+                   asp-controller="UserManagement" asp-action="Index">
+                    @NavIcon("user") Users
+                </a>
 
                 <div class="tl-nav-section">Certification</div>
                 <a class="tl-nav-item @(ctrl=="Certification"&&action!="Create"?"active":"")"
@@ -167,16 +171,6 @@
                 <a class="tl-nav-item @(ctrl=="Certification"&&action=="Create"?"active":"")"
                    asp-controller="Certification" asp-action="Create">
                     @NavIcon("plus") New track
-                </a>
-
-                <div class="tl-nav-section">Scheduling</div>
-                <a class="tl-nav-item @(ctrl=="Session"?"active":"")"
-                   asp-controller="Session" asp-action="Index">
-                    @NavIcon("cal") Sessions
-                </a>
-                <a class="tl-nav-item @(ctrl=="UserManagement"?"active":"")"
-                   asp-controller="UserManagement" asp-action="Index">
-                    @NavIcon("user") Users
                 </a>
             </nav>
         }
