@@ -9,193 +9,193 @@
     <link rel="stylesheet" href="~/MVC_Frontend.styles.css" asp-append-version="true" />
 </head>
 <body>
-@{
-    var ctrl   = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
-    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-}
+    @{
+        var ctrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    }
 
-<div class="tl-shell">
+    <div class="tl-shell">
 
-    <!-- ══════════════ SIDEBAR ══════════════ -->
-    <aside class="tl-sidebar">
+        <!-- ══════════════ SIDEBAR ══════════════ -->
+        <aside class="tl-sidebar">
 
-        <!-- Logo -->
-        <div class="tl-sidebar-logo">
-            <img src="~/assets/logo-mark.svg" alt="Logo" />
-            <span class="tl-sidebar-logo-name">Training Institute</span>
-        </div>
+            <!-- Logo -->
+            <div class="tl-sidebar-logo">
+                <img src="~/assets/logo-mark.svg" alt="Logo" />
+                <span class="tl-sidebar-logo-name">Training Institute</span>
+            </div>
 
-        @* ── Trainee nav ───────────────────── *@
-        @if (User.IsInRole("Trainee"))
-        {
-            <div class="tl-sidebar-role">Trainee</div>
-            <nav class="tl-nav">
-                <a class="tl-nav-item @(ctrl=="Home"?"active":"")" asp-controller="Home" asp-action="Index">
-                    @NavIcon("home") Dashboard
-                </a>
-                <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
-                    @NavIcon("book") Browse courses
-                </a>
-                <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
-                   asp-controller="Session" asp-action="Index">
-                    @NavIcon("cal") Available sessions
-                </a>
-                <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MyEnrollments"?"active":"")"
-                   asp-controller="Enrollment" asp-action="MyEnrollments">
-                    @NavIcon("clip") My enrollments
-                </a>
-                <a class="tl-nav-item @(ctrl=="Certification"&&action=="MyProgress"?"active":"")"
-                   asp-controller="Certification" asp-action="MyProgress">
-                    @NavIcon("cert") My progress
-                </a>
-                <a class="tl-nav-item @(ctrl=="Certification"&&action=="MyCertificates"?"active":"")"
-                   asp-controller="Certification" asp-action="MyCertificates">
-                    @NavIcon("award") My certificates
-                </a>
-
-                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="MyResults"?"active":"")"
-                   asp-controller="Assessment" asp-action="MyResults">
-                    @NavIcon("bar") My results
-                </a>
-                <a class="tl-nav-item @(ctrl=="Payment"&&action=="MyPayments"?"active":"")"
-                   asp-controller="Payment" asp-action="MyPayments">
-                    @NavIcon("clip") My payments
-                </a>
-            </nav>
-        }
-
-        @* ── Instructor nav ────────────────── *@
-        @if (User.IsInRole("Instructor"))
-        {
-            <div class="tl-sidebar-role">Instructor</div>
-            <nav class="tl-nav">
-                <a class="tl-nav-item @(ctrl=="Home"?"active":"")" asp-controller="Home" asp-action="Index">
-                    @NavIcon("home") Dashboard
-                </a>
-                <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
-                    @NavIcon("book") Browse courses
-                </a>
-                <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
-                   asp-controller="Session" asp-action="Index">
-                    @NavIcon("cal") My schedule
-                </a>
-                <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
-                   asp-controller="Session" asp-action="Schedule">
-                    @NavIcon("bar") My calendar
-                </a>
-                <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MySessions"?"active":"")"
-                   asp-controller="Enrollment" asp-action="MySessions">
-                    @NavIcon("clip") My sessions
-                </a>
-                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="MyAssessments"?"active":"")"
-                   asp-controller="Assessment" asp-action="MyAssessments">
-                    @NavIcon("bar") My assessments
-                </a>
-            </nav>
-        }
-
-        @* ── Training Coordinator nav ──────── *@
-        @if (User.IsInRole("Training Coordinator"))
-        {
-            <div class="tl-sidebar-role">Coordinator</div>
-            <nav class="tl-nav">
-                <a class="tl-nav-item @(ctrl=="Home"?"active":"")" asp-controller="Home" asp-action="Index">
-                    @NavIcon("home") Dashboard
-                </a>
-
-                <div class="tl-nav-section">Courses</div>
-                <a class="tl-nav-item @(ctrl=="Course"&&action!="Create"?"active":"")"
-                   asp-controller="Course" asp-action="Index">
-                    @NavIcon("book") Courses
-                </a>
-                <a class="tl-nav-item @(ctrl=="Course"&&action=="Create"?"active":"")"
-                   asp-controller="Course" asp-action="Create">
-                    @NavIcon("plus") Add course
-                </a>
-
-                <div class="tl-nav-section">Sessions</div>
-                <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
-                   asp-controller="Session" asp-action="Index">
-                    @NavIcon("cal") All sessions
-                </a>
-                <a class="tl-nav-item @(ctrl=="Session"&&action=="Create"?"active":"")"
-                   asp-controller="Session" asp-action="Create">
-                    @NavIcon("plus") Schedule session
-                </a>
-                <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
-                   asp-controller="Session" asp-action="Schedule">
-                    @NavIcon("bar") Calendar view
-                </a>
-
-                <div class="tl-nav-section">Enrollments &amp; Assessments</div>
-                <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="Manage"?"active":"")"
-                   asp-controller="Enrollment" asp-action="Manage">
-                    @NavIcon("clip") Manage enrollments
-                </a>
-                <a class="tl-nav-item @(ctrl=="Assessment"&&action=="All"?"active":"")"
-                   asp-controller="Assessment" asp-action="All">
-                    @NavIcon("bar") All assessments
-                </a>
-                <a class="tl-nav-item @(ctrl=="Payment"&&action=="Index"?"active":"")"
-                   asp-controller="Payment" asp-action="Index">
-                    @NavIcon("clip") Payments
-                </a>
-
-                <div class="tl-nav-section">Manage</div>
-                <a class="tl-nav-item @(ctrl=="Category"?"active":"")"
-                   asp-controller="Category" asp-action="Index">
-                    @NavIcon("tag") Categories
-                </a>
-                <a class="tl-nav-item @(ctrl=="SubjectArea"?"active":"")"
-                   asp-controller="SubjectArea" asp-action="Index">
-                    @NavIcon("bar") Subject areas
-                </a>
-                <a class="tl-nav-item @(ctrl=="Classroom"?"active":"")"
-                   asp-controller="Classroom" asp-action="Index">
-                    @NavIcon("rect") Classrooms
-                </a>
-                <a class="tl-nav-item" asp-controller="Course" asp-action="Index"
-                   asp-route-showInactive="true">
-                    @NavIcon("clip") All courses
-                </a>
-                <a class="tl-nav-item @(ctrl=="UserManagement"?"active":"")"
-                   asp-controller="UserManagement" asp-action="Index">
-                    @NavIcon("user") Users
-                </a>
-
-                <div class="tl-nav-section">Certification</div>
-                <a class="tl-nav-item @(ctrl=="Certification"&&action!="Create"?"active":"")"
-                   asp-controller="Certification" asp-action="Index">
-                    @NavIcon("award") Tracks
-                </a>
-                <a class="tl-nav-item @(ctrl=="Certification"&&action=="Create"?"active":"")"
-                   asp-controller="Certification" asp-action="Create">
-                    @NavIcon("plus") New track
-                </a>
-            </nav>
-        }
-
-        @* ── Public nav (not logged in) ────── *@
-        @if (User.Identity == null || !User.Identity.IsAuthenticated)
-        {
-            <nav class="tl-nav mt-2">
-                <a class="tl-nav-item @(ctrl=="Home"?"active":"")" asp-controller="Home" asp-action="Index">
-                    @NavIcon("home") Home
-                </a>
-                <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
-                    @NavIcon("book") Browse courses
-                </a>
-                <a class="tl-nav-item @(ctrl=="Public"?"active":"")" asp-controller="Public" asp-action="CertificationLookup">
-                    @NavIcon("award") Verify certificate
-                </a>
-            </nav>
-        }
-
-        <!-- Bottom: sign out -->
-        <div class="tl-sidebar-bottom">
-            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            @* ── Trainee nav ───────────────────── *@
+            @if (User.IsInRole("Trainee"))
             {
-                <!-- Abdullah wires this: asp-controller="Account" asp-action="Logout" -->
+                <div class="tl-sidebar-role">Trainee</div>
+                <nav class="tl-nav">
+                    <a class="tl-nav-item @(ctrl=="Home"?"active":"")" asp-controller="Home" asp-action="Index">
+                        @NavIcon("home") Dashboard
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
+                        @NavIcon("book") Browse courses
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
+                       asp-controller="Session" asp-action="Index">
+                        @NavIcon("cal") Available sessions
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MyEnrollments"?"active":"")"
+                       asp-controller="Enrollment" asp-action="MyEnrollments">
+                        @NavIcon("clip") My enrollments
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Certification"&&action=="MyProgress"?"active":"")"
+                       asp-controller="Certification" asp-action="MyProgress">
+                        @NavIcon("cert") My progress
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Certification"&&action=="MyCertificates"?"active":"")"
+                       asp-controller="Certification" asp-action="MyCertificates">
+                        @NavIcon("award") My certificates
+                    </a>
+
+                    <a class="tl-nav-item @(ctrl=="Assessment"&&action=="MyResults"?"active":"")"
+                       asp-controller="Assessment" asp-action="MyResults">
+                        @NavIcon("bar") My results
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Payment"&&action=="MyPayments"?"active":"")"
+                       asp-controller="Payment" asp-action="MyPayments">
+                        @NavIcon("clip") My payments
+                    </a>
+                </nav>
+            }
+
+            @* ── Instructor nav ────────────────── *@
+            @if (User.IsInRole("Instructor"))
+            {
+                <div class="tl-sidebar-role">Instructor</div>
+                <nav class="tl-nav">
+                    <a class="tl-nav-item @(ctrl=="Home"?"active":"")" asp-controller="Home" asp-action="Index">
+                        @NavIcon("home") Dashboard
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
+                        @NavIcon("book") Browse courses
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
+                       asp-controller="Session" asp-action="Index">
+                        @NavIcon("cal") My schedule
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
+                       asp-controller="Session" asp-action="Schedule">
+                        @NavIcon("bar") My calendar
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="MySessions"?"active":"")"
+                       asp-controller="Enrollment" asp-action="MySessions">
+                        @NavIcon("clip") My sessions
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Assessment"&&action=="MyAssessments"?"active":"")"
+                       asp-controller="Assessment" asp-action="MyAssessments">
+                        @NavIcon("bar") My assessments
+                    </a>
+                </nav>
+            }
+
+            @* ── Training Coordinator nav ──────── *@
+            @if (User.IsInRole("Training Coordinator"))
+            {
+                <div class="tl-sidebar-role">Coordinator</div>
+                <nav class="tl-nav">
+                    <a class="tl-nav-item @(ctrl=="Home"?"active":"")" asp-controller="Home" asp-action="Index">
+                        @NavIcon("home") Dashboard
+                    </a>
+
+                    <div class="tl-nav-section">Courses</div>
+                    <a class="tl-nav-item @(ctrl=="Course"&&action!="Create"?"active":"")"
+                       asp-controller="Course" asp-action="Index">
+                        @NavIcon("book") Courses
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Course"&&action=="Create"?"active":"")"
+                       asp-controller="Course" asp-action="Create">
+                        @NavIcon("plus") Add course
+                    </a>
+
+                    <div class="tl-nav-section">Sessions</div>
+                    <a class="tl-nav-item @(ctrl=="Session"&&action=="Index"?"active":"")"
+                       asp-controller="Session" asp-action="Index">
+                        @NavIcon("cal") All sessions
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Session"&&action=="Create"?"active":"")"
+                       asp-controller="Session" asp-action="Create">
+                        @NavIcon("plus") Schedule session
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Session"&&action=="Schedule"?"active":"")"
+                       asp-controller="Session" asp-action="Schedule">
+                        @NavIcon("bar") Calendar view
+                    </a>
+
+                    <div class="tl-nav-section">Enrollments &amp; Assessments</div>
+                    <a class="tl-nav-item @(ctrl=="Enrollment"&&action=="Manage"?"active":"")"
+                       asp-controller="Enrollment" asp-action="Manage">
+                        @NavIcon("clip") Manage enrollments
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Assessment"&&action=="All"?"active":"")"
+                       asp-controller="Assessment" asp-action="All">
+                        @NavIcon("bar") All assessments
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Payment"&&action=="Index"?"active":"")"
+                       asp-controller="Payment" asp-action="Index">
+                        @NavIcon("clip") Payments
+                    </a>
+
+                    <div class="tl-nav-section">Manage</div>
+                    <a class="tl-nav-item @(ctrl=="Category"?"active":"")"
+                       asp-controller="Category" asp-action="Index">
+                        @NavIcon("tag") Categories
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="SubjectArea"?"active":"")"
+                       asp-controller="SubjectArea" asp-action="Index">
+                        @NavIcon("bar") Subject areas
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Classroom"?"active":"")"
+                       asp-controller="Classroom" asp-action="Index">
+                        @NavIcon("rect") Classrooms
+                    </a>
+                    <a class="tl-nav-item" asp-controller="Course" asp-action="Index"
+                       asp-route-showInactive="true">
+                        @NavIcon("clip") All courses
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="UserManagement"?"active":"")"
+                       asp-controller="UserManagement" asp-action="Index">
+                        @NavIcon("user") Users
+                    </a>
+
+                    <div class="tl-nav-section">Certification</div>
+                    <a class="tl-nav-item @(ctrl=="Certification"&&action!="Create"?"active":"")"
+                       asp-controller="Certification" asp-action="Index">
+                        @NavIcon("award") Tracks
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Certification"&&action=="Create"?"active":"")"
+                       asp-controller="Certification" asp-action="Create">
+                        @NavIcon("plus") New track
+                    </a>
+                </nav>
+            }
+
+            @* ── Public nav (not logged in) ────── *@
+            @if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                <nav class="tl-nav mt-2">
+                    <a class="tl-nav-item @(ctrl=="Landing"?"active":"")" asp-controller="Landing" asp-action="Index">
+                        @NavIcon("home") Home
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Course"?"active":"")" asp-controller="Course" asp-action="Index">
+                        @NavIcon("book") Browse courses
+                    </a>
+                    <a class="tl-nav-item @(ctrl=="Public"?"active":"")" asp-controller="Public" asp-action="CertificationLookup">
+                        @NavIcon("award") Verify certificate
+                    </a>
+                </nav>
+            }
+
+            <!-- Bottom: sign out -->
+            <div class="tl-sidebar-bottom">
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <!-- Abdullah wires this: asp-controller="Account" asp-action="Logout" -->
                     <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0;">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="tl-signout" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
@@ -207,279 +207,286 @@
                             Sign out
                         </button>
                     </form>
-            }
-        </div>
-
-    </aside>
-
-    <!-- Sidebar overlay (mobile tap-to-close backdrop) -->
-    <div class="tl-sidebar-overlay" id="tl-sidebar-overlay"></div>
-
-    <!-- ══════════════ MAIN ══════════════ -->
-    <div class="tl-main">
-
-        <!-- ── Topbar ── -->
-        <header class="tl-topbar">
-
-            <!-- Hamburger (mobile only) -->
-            <button class="tl-hamburger" id="tl-hamburger" type="button" title="Open menu" aria-label="Open menu">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-
-            <!-- Page title -->
-            <div class="tl-topbar-title">@(ViewData["Title"] ?? "Training Institute")</div>
-
-            <!-- Search -->
-            <div class="tl-search">
-                <svg class="tl-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="6"/><path d="m20 20-3.5-3.5"/>
-                </svg>
-                <input class="tl-search-input" type="text" placeholder="Search courses, sessions…" />
+                }
             </div>
 
-            <!-- Right actions -->
-            <div class="tl-topbar-actions">
+        </aside>
 
-                <!-- Notification bell -->
-                @if (User.Identity != null && User.Identity.IsAuthenticated)
-                {
-                    <div class="dropdown" id="notif-wrapper">
-                        <button class="tl-icon-btn position-relative" type="button" id="notif-bell"
-                                title="Notifications" data-bs-toggle="dropdown"
-                                aria-expanded="false" data-bs-auto-close="outside">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M6 16h12l-1.4-2V11a4.6 4.6 0 0 0-9.2 0v3z"/><path d="M10 19a2 2 0 0 0 4 0"/>
-                            </svg>
-                            <span class="tl-notif-dot d-none" id="notif-dot"></span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 rounded-3"
-                             id="notif-dropdown" style="min-width:340px; max-width:380px;">
-                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom rounded-top-3"
-                                 style="background:#f8f9fa;">
-                                <span class="fw-semibold">Notifications</span>
-                                <a asp-controller="Notification" asp-action="Index"
-                                   class="small text-decoration-none text-primary">View all</a>
-                            </div>
-                            <div id="notif-list" style="max-height:360px; overflow-y:auto;">
-                                <div class="text-center text-muted py-4 small">Loading…</div>
-                            </div>
-                            <div class="border-top px-3 py-2 text-center rounded-bottom-3" style="background:#f8f9fa;">
-                                <a asp-controller="Notification" asp-action="Index"
-                                   class="small text-decoration-none text-muted">See all notifications</a>
+        <!-- Sidebar overlay (mobile tap-to-close backdrop) -->
+        <div class="tl-sidebar-overlay" id="tl-sidebar-overlay"></div>
+
+        <!-- ══════════════ MAIN ══════════════ -->
+        <div class="tl-main">
+
+            <!-- ── Topbar ── -->
+            <header class="tl-topbar">
+
+                <!-- Hamburger (mobile only) -->
+                <button class="tl-hamburger" id="tl-hamburger" type="button" title="Open menu" aria-label="Open menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                <!-- Page title -->
+                <div class="tl-topbar-title">@(ViewData["Title"] ?? "Training Institute")</div>
+
+                <!-- Search -->
+                <div class="tl-search">
+                    <svg class="tl-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="6" />
+                        <path d="m20 20-3.5-3.5" />
+                    </svg>
+                    <input class="tl-search-input" type="text" placeholder="Search courses, sessions…" />
+                </div>
+
+                <!-- Right actions -->
+                <div class="tl-topbar-actions">
+
+                    <!-- Notification bell -->
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <div class="dropdown" id="notif-wrapper">
+                            <button class="tl-icon-btn position-relative" type="button" id="notif-bell"
+                                    title="Notifications" data-bs-toggle="dropdown"
+                                    aria-expanded="false" data-bs-auto-close="outside">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 16h12l-1.4-2V11a4.6 4.6 0 0 0-9.2 0v3z" />
+                                    <path d="M10 19a2 2 0 0 0 4 0" />
+                                </svg>
+                                <span class="tl-notif-dot d-none" id="notif-dot"></span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 rounded-3"
+                                 id="notif-dropdown" style="min-width:340px; max-width:380px;">
+                                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom rounded-top-3"
+                                     style="background:#f8f9fa;">
+                                    <span class="fw-semibold">Notifications</span>
+                                    <a asp-controller="Notification" asp-action="Index"
+                                       class="small text-decoration-none text-primary">View all</a>
+                                </div>
+                                <div id="notif-list" style="max-height:360px; overflow-y:auto;">
+                                    <div class="text-center text-muted py-4 small">Loading…</div>
+                                </div>
+                                <div class="border-top px-3 py-2 text-center rounded-bottom-3" style="background:#f8f9fa;">
+                                    <a asp-controller="Notification" asp-action="Index"
+                                       class="small text-decoration-none text-muted">See all notifications</a>
+                                </div>
                             </div>
                         </div>
+                    }
+                    else
+                    {
+                        <button class="tl-icon-btn" type="button" title="Notifications">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 16h12l-1.4-2V11a4.6 4.6 0 0 0-9.2 0v3z" />
+                                <path d="M10 19a2 2 0 0 0 4 0" />
+                            </svg>
+                        </button>
+                    }
+
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        @* User profile chip — Abdullah wires the name *@
+                        var uName = User.Identity.Name ?? "User";
+                        var uInitials = uName.Split(' ').Take(2).Select(s => s.Length > 0 ? s[0].ToString().ToUpper() : "").Aggregate("", (a, b) => a + b);
+                        if (uInitials.Length == 0) uInitials = "U";
+                        var uRole = User.IsInRole("Training Coordinator") ? "Training Coordinator"
+                        : User.IsInRole("Instructor") ? "Instructor"
+                        : User.IsInRole("Trainee") ? "Trainee"
+                        : "";
+                        <!-- Abdullah wires this to profile page -->
+                        <button class="tl-user-btn" type="button">
+                            <div class="tl-avatar">@uInitials</div>
+                            <div class="tl-user-info">
+                                <span class="tl-user-name">@uName</span>
+                                <span class="tl-user-role">@uRole</span>
+                            </div>
+                        </button>
+                    }
+                    else
+                    {
+                        @* Auth buttons — Abdullah wires asp-controller="Account" *@
+                        <a class="tl-btn-ghost" asp-controller="Account" asp-action="Login">Login</a>
+                        <a class="tl-btn-primary" asp-controller="Account" asp-action="Register">Sign up</a>
+                    }
+                </div>
+
+            </header>
+
+            <!-- ── Content ── -->
+            <main class="tl-content" role="main">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 }
-                else
+                @if (TempData["Error"] != null)
                 {
-                    <button class="tl-icon-btn" type="button" title="Notifications">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 16h12l-1.4-2V11a4.6 4.6 0 0 0-9.2 0v3z"/><path d="M10 19a2 2 0 0 0 4 0"/>
-                        </svg>
-                    </button>
+                    <div class="alert alert-danger alert-dismissible fade show mb-4">
+                        @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 }
-
-                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                @if (TempData["Info"] != null)
                 {
-                    @* User profile chip — Abdullah wires the name *@
-                    var uName    = User.Identity.Name ?? "User";
-                    var uInitials = uName.Split(' ').Take(2).Select(s => s.Length > 0 ? s[0].ToString().ToUpper() : "").Aggregate("", (a, b) => a + b);
-                    if (uInitials.Length == 0) uInitials = "U";
-                    var uRole = User.IsInRole("Training Coordinator") ? "Training Coordinator"
-                              : User.IsInRole("Instructor")           ? "Instructor"
-                              : User.IsInRole("Trainee")              ? "Trainee"
-                              : "";
-                    <!-- Abdullah wires this to profile page -->
-                    <button class="tl-user-btn" type="button">
-                        <div class="tl-avatar">@uInitials</div>
-                        <div class="tl-user-info">
-                            <span class="tl-user-name">@uName</span>
-                            <span class="tl-user-role">@uRole</span>
-                        </div>
-                    </button>
+                    <div class="alert alert-info alert-dismissible fade show mb-4">
+                        @TempData["Info"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 }
-                else
-                {
-                    @* Auth buttons — Abdullah wires asp-controller="Account" *@
-                    <a class="tl-btn-ghost" asp-controller="Account" asp-action="Login">Login</a>
-                    <a class="tl-btn-primary" asp-controller="Account" asp-action="Register">Sign up</a>
-                }
-            </div>
+                @RenderBody()
+            </main>
 
-        </header>
-
-        <!-- ── Content ── -->
-        <main class="tl-content" role="main">
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show mb-4">
-                    @TempData["Success"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show mb-4">
-                    @TempData["Error"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-            @if (TempData["Info"] != null)
-            {
-                <div class="alert alert-info alert-dismissible fade show mb-4">
-                    @TempData["Info"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-            @RenderBody()
-        </main>
-
+        </div>
     </div>
-</div>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 
-<!-- Reusable confirmation modal — triggered by data-confirm="message" on any form or button -->
-<div class="modal fade" id="tl-confirm-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-body pt-4 pb-2 px-4 text-center">
-                <div class="mb-3" style="font-size:2rem;line-height:1;">⚠️</div>
-                <p class="fw-semibold mb-0" id="tl-confirm-msg">Are you sure?</p>
-            </div>
-            <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
-                <button type="button" class="btn btn-outline-secondary px-4"
-                        data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger px-4"
-                        id="tl-confirm-ok">Yes, proceed</button>
+    <!-- Reusable confirmation modal — triggered by data-confirm="message" on any form or button -->
+    <div class="modal fade" id="tl-confirm-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-body pt-4 pb-2 px-4 text-center">
+                    <div class="mb-3" style="font-size:2rem;line-height:1;">⚠️</div>
+                    <p class="fw-semibold mb-0" id="tl-confirm-msg">Are you sure?</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger px-4"
+                            id="tl-confirm-ok">
+                        Yes, proceed
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<script>
-(function () {
-    var modal, okBtn, pendingAction;
-    document.addEventListener('DOMContentLoaded', function () {
-        modal  = new bootstrap.Modal(document.getElementById('tl-confirm-modal'));
-        okBtn  = document.getElementById('tl-confirm-ok');
+    <script>
+        (function () {
+            var modal, okBtn, pendingAction;
+            document.addEventListener('DOMContentLoaded', function () {
+                modal  = new bootstrap.Modal(document.getElementById('tl-confirm-modal'));
+                okBtn  = document.getElementById('tl-confirm-ok');
 
-        function ask(msg, action) {
-            document.getElementById('tl-confirm-msg').textContent = msg;
-            pendingAction = action;
-            modal.show();
-        }
-
-        // Intercept form submit
-        document.addEventListener('submit', function (e) {
-            var msg = e.target.getAttribute('data-confirm');
-            if (!msg) return;
-            e.preventDefault();
-            ask(msg, function () {
-                e.target.removeAttribute('data-confirm');
-                e.target.requestSubmit();
-            });
-        }, true);
-
-        // Intercept button click (for buttons that carry data-confirm themselves)
-        document.addEventListener('click', function (e) {
-            var btn = e.target.closest('button[data-confirm]');
-            if (!btn) return;
-            var form = btn.closest('form');
-            if (!form) return;
-            e.preventDefault();
-            ask(btn.getAttribute('data-confirm'), function () {
-                btn.removeAttribute('data-confirm');
-                form.requestSubmit(btn);
-            });
-        }, true);
-
-        okBtn.addEventListener('click', function () {
-            modal.hide();
-            if (pendingAction) { pendingAction(); pendingAction = null; }
-        });
-    });
-})();
-</script>
-<script>
-(function () {
-    var btn     = document.getElementById('tl-hamburger');
-    var sidebar = document.querySelector('.tl-sidebar');
-    var overlay = document.getElementById('tl-sidebar-overlay');
-    if (!btn) return;
-    function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
-    function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
-    btn.addEventListener('click', function () { sidebar.classList.contains('open') ? close() : open(); });
-    overlay.addEventListener('click', close);
-})();
-
-// ── Notification bell ──────────────────────────────────────────────────────
-(function () {
-    var bell = document.getElementById('notif-bell');
-    if (!bell) return;
-
-    function escHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    function loadNotifications() {
-        fetch('/Notification/GetUnread', { credentials: 'same-origin' })
-            .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-            .then(function (data) {
-                var dot  = document.getElementById('notif-dot');
-                var list = document.getElementById('notif-list');
-                if (!dot || !list) return;
-
-                // Badge count
-                if (data.unreadCount > 0) {
-                    dot.classList.remove('d-none');
-                    dot.textContent = data.unreadCount > 99 ? '99+' : String(data.unreadCount);
-                } else {
-                    dot.classList.add('d-none');
-                    dot.textContent = '';
+                function ask(msg, action) {
+                    document.getElementById('tl-confirm-msg').textContent = msg;
+                    pendingAction = action;
+                    modal.show();
                 }
 
-                if (!data.recent || data.recent.length === 0) {
-                    list.innerHTML = '<div class="text-center text-muted py-4 small">No notifications yet.</div>';
-                    return;
-                }
+                // Intercept form submit
+                document.addEventListener('submit', function (e) {
+                    var msg = e.target.getAttribute('data-confirm');
+                    if (!msg) return;
+                    e.preventDefault();
+                    ask(msg, function () {
+                        e.target.removeAttribute('data-confirm');
+                        e.target.requestSubmit();
+                    });
+                }, true);
 
-                var icons = { Enrollment: '📋', Assessment: '📝', Certification: '🎓', Payment: '💳' };
-                var html = '';
-                data.recent.forEach(function (n) {
-                    var icon    = icons[n.type] || '🔔';
-                    var unread  = !n.isRead;
-                    var rowBg   = unread ? 'background:#eef2ff;' : 'background:#fff;';
-                    var dot2    = unread ? '<span style="width:8px;height:8px;border-radius:50%;background:#6366f1;flex-shrink:0;margin-top:6px;display:inline-block;"></span>' : '<span style="width:8px;flex-shrink:0;display:inline-block;"></span>';
-                    html += '<div class="d-flex align-items-start gap-2 px-3 py-2 border-bottom" style="' + rowBg + '">'
-                          +   dot2
-                          +   '<span style="font-size:1.2rem;line-height:1.4;">' + icon + '</span>'
-                          +   '<div class="flex-grow-1" style="min-width:0;">'
-                          +     '<div class="d-flex justify-content-between align-items-start gap-1">'
-                          +       '<span class="small ' + (unread ? 'fw-semibold' : 'text-muted') + '" style="line-height:1.3;">' + escHtml(n.title) + '</span>'
-                          +       '<span class="text-muted text-nowrap" style="font-size:11px;">' + escHtml(n.timeAgo) + '</span>'
-                          +     '</div>'
-                          +     '<p class="mb-0 text-muted" style="font-size:12px;line-height:1.4;margin-top:2px;">' + escHtml(n.message) + '</p>'
-                          +   '</div>'
-                          + '</div>';
+                // Intercept button click (for buttons that carry data-confirm themselves)
+                document.addEventListener('click', function (e) {
+                    var btn = e.target.closest('button[data-confirm]');
+                    if (!btn) return;
+                    var form = btn.closest('form');
+                    if (!form) return;
+                    e.preventDefault();
+                    ask(btn.getAttribute('data-confirm'), function () {
+                        btn.removeAttribute('data-confirm');
+                        form.requestSubmit(btn);
+                    });
+                }, true);
+
+                okBtn.addEventListener('click', function () {
+                    modal.hide();
+                    if (pendingAction) { pendingAction(); pendingAction = null; }
                 });
-                list.innerHTML = html;
-            })
-            .catch(function () {});
-    }
+            });
+        })();
+    </script>
+    <script>
+        (function () {
+            var btn     = document.getElementById('tl-hamburger');
+            var sidebar = document.querySelector('.tl-sidebar');
+            var overlay = document.getElementById('tl-sidebar-overlay');
+            if (!btn) return;
+            function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+            function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+            btn.addEventListener('click', function () { sidebar.classList.contains('open') ? close() : open(); });
+            overlay.addEventListener('click', close);
+        })();
 
-    // Load immediately, refresh every 60 s, and on every dropdown open
-    loadNotifications();
-    setInterval(loadNotifications, 60000);
-    bell.addEventListener('show.bs.dropdown', loadNotifications);
-})();
-</script>
+        // ── Notification bell ──────────────────────────────────────────────────────
+        (function () {
+            var bell = document.getElementById('notif-bell');
+            if (!bell) return;
+
+            function escHtml(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            function loadNotifications() {
+                fetch('/Notification/GetUnread', { credentials: 'same-origin' })
+                    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+                    .then(function (data) {
+                        var dot  = document.getElementById('notif-dot');
+                        var list = document.getElementById('notif-list');
+                        if (!dot || !list) return;
+
+                        // Badge count
+                        if (data.unreadCount > 0) {
+                            dot.classList.remove('d-none');
+                            dot.textContent = data.unreadCount > 99 ? '99+' : String(data.unreadCount);
+                        } else {
+                            dot.classList.add('d-none');
+                            dot.textContent = '';
+                        }
+
+                        if (!data.recent || data.recent.length === 0) {
+                            list.innerHTML = '<div class="text-center text-muted py-4 small">No notifications yet.</div>';
+                            return;
+                        }
+
+                        var icons = { Enrollment: '📋', Assessment: '📝', Certification: '🎓', Payment: '💳' };
+                        var html = '';
+                        data.recent.forEach(function (n) {
+                            var icon    = icons[n.type] || '🔔';
+                            var unread  = !n.isRead;
+                            var rowBg   = unread ? 'background:#eef2ff;' : 'background:#fff;';
+                            var dot2    = unread ? '<span style="width:8px;height:8px;border-radius:50%;background:#6366f1;flex-shrink:0;margin-top:6px;display:inline-block;"></span>' : '<span style="width:8px;flex-shrink:0;display:inline-block;"></span>';
+                            html += '<div class="d-flex align-items-start gap-2 px-3 py-2 border-bottom" style="' + rowBg + '">'
+                                  +   dot2
+                                  +   '<span style="font-size:1.2rem;line-height:1.4;">' + icon + '</span>'
+                                  +   '<div class="flex-grow-1" style="min-width:0;">'
+                                  +     '<div class="d-flex justify-content-between align-items-start gap-1">'
+                                  +       '<span class="small ' + (unread ? 'fw-semibold' : 'text-muted') + '" style="line-height:1.3;">' + escHtml(n.title) + '</span>'
+                                  +       '<span class="text-muted text-nowrap" style="font-size:11px;">' + escHtml(n.timeAgo) + '</span>'
+                                  +     '</div>'
+                                  +     '<p class="mb-0 text-muted" style="font-size:12px;line-height:1.4;margin-top:2px;">' + escHtml(n.message) + '</p>'
+                                  +   '</div>'
+                                  + '</div>';
+                        });
+                        list.innerHTML = html;
+                    })
+                    .catch(function () {});
+            }
+
+            // Load immediately, refresh every 60 s, and on every dropdown open
+            loadNotifications();
+            setInterval(loadNotifications, 60000);
+            bell.addEventListener('show.bs.dropdown', loadNotifications);
+        })();
+    </script>
 </body>
 </html>
 
@@ -489,18 +496,18 @@
     {
         var paths = name switch
         {
-            "home"  => "<path d='M3 12 12 4l9 8'/><path d='M5 10v9h14v-9'/>",
-            "book"  => "<path d='M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z'/><path d='M4 5v11'/>",
-            "cal"   => "<rect x='4' y='5' width='16' height='15' rx='2'/><path d='M8 3v4M16 3v4M4 10h16'/>",
-            "clip"  => "<rect x='6' y='4' width='12' height='17' rx='2'/><path d='M9 4h6v3H9z'/><path d='M9 12l2 2 4-4'/>",
-            "bar"   => "<path d='M4 20V10M10 20V4M16 20v-7M22 20H2'/>",
-            "plus"  => "<path d='M12 5v14M5 12h14'/>",
-            "tag"   => "<path d='M4 4h7l9 9-7 7-9-9V4z'/><circle cx='8.5' cy='8.5' r='1.5'/>",
-            "user"  => "<circle cx='12' cy='8' r='4'/><path d='M4 21a8 8 0 0 1 16 0'/>",
-            "cert"  => "<path d='M12 2l3 6.5 7 1-5 4.9 1.2 7L12 18l-6.2 3.4 1.2-7L2 9.5l7-1z'/>",
+            "home" => "<path d='M3 12 12 4l9 8'/><path d='M5 10v9h14v-9'/>",
+            "book" => "<path d='M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z'/><path d='M4 5v11'/>",
+            "cal" => "<rect x='4' y='5' width='16' height='15' rx='2'/><path d='M8 3v4M16 3v4M4 10h16'/>",
+            "clip" => "<rect x='6' y='4' width='12' height='17' rx='2'/><path d='M9 4h6v3H9z'/><path d='M9 12l2 2 4-4'/>",
+            "bar" => "<path d='M4 20V10M10 20V4M16 20v-7M22 20H2'/>",
+            "plus" => "<path d='M12 5v14M5 12h14'/>",
+            "tag" => "<path d='M4 4h7l9 9-7 7-9-9V4z'/><circle cx='8.5' cy='8.5' r='1.5'/>",
+            "user" => "<circle cx='12' cy='8' r='4'/><path d='M4 21a8 8 0 0 1 16 0'/>",
+            "cert" => "<path d='M12 2l3 6.5 7 1-5 4.9 1.2 7L12 18l-6.2 3.4 1.2-7L2 9.5l7-1z'/>",
             "award" => "<circle cx='12' cy='9' r='6'/><path d='m9.2 14.8-1.7 5.2 4.5-2.7 4.5 2.7-1.7-5.2'/>",
-            "rect"  => "<rect x='3' y='5' width='18' height='15' rx='2'/><path d='M3 10h18'/>",
-            _       => "<circle cx='12' cy='12' r='4'/>"
+            "rect" => "<rect x='3' y='5' width='18' height='15' rx='2'/><path d='M3 10h18'/>",
+            _ => "<circle cx='12' cy='12' r='4'/>"
         };
         return new Microsoft.AspNetCore.Html.HtmlString(
             $"<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'>{paths}</svg>"
