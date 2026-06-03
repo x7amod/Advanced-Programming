@@ -43,13 +43,13 @@ namespace Web_API.Controllers
             if (cert == null)
                 return NotFound(new { message = "No certificate found matching the provided details." });
 
-            var requiredCourseIds = cert.CertificationTrack.CertificationRequiredCourses
-                .Select(rc => rc.CourseId)
-                .ToHashSet();
-
             var completions = await _context.TraineeCourseCompletions
                 .Include(c => c.Course)
-                .Where(c => c.TraineeId == traineeId && requiredCourseIds.Contains(c.CourseId))
+                .Where(c => c.TraineeId == traineeId &&
+                            _context.CertificationRequiredCourses
+                                .Where(rc => rc.CertificationTrackId == cert.CertificationTrackId)
+                                .Select(rc => rc.CourseId)
+                                .Contains(c.CourseId))
                 .OrderBy(c => c.CompletionDate)
                 .ToListAsync();
 
