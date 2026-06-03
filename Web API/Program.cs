@@ -48,16 +48,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Allow CORS for Reporting App
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] {
+        "https://localhost:7148",
+        "http://localhost:5113"
+    };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReportingApp", policy =>
     {
-        policy.WithOrigins("https://localhost:7001", "http://localhost:5001")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
